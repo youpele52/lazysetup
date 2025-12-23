@@ -231,3 +231,172 @@ func GoBack(state *models.State) func(*gocui.Gui, *gocui.View) error {
 func Quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
+
+func NextPanel(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if state.CurrentPage == models.PageMultiPanel {
+			state.ActivePanel = (state.ActivePanel + 1) % 3
+		}
+		return nil
+	}
+}
+
+func PrevPanel(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if state.CurrentPage == models.PageMultiPanel {
+			state.ActivePanel = (state.ActivePanel + 2) % 3
+		}
+		return nil
+	}
+}
+
+func SwitchToPanel(state *models.State, panel models.Panel) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if state.CurrentPage == models.PageMultiPanel {
+			state.ActivePanel = panel
+		}
+		return nil
+	}
+}
+
+func MultiPanelCursorUp(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if state.CurrentPage == models.PageMultiPanel {
+			switch state.ActivePanel {
+			case models.PanelInstallation:
+				if state.SelectedIndex > 0 {
+					state.SelectedIndex--
+				}
+			case models.PanelTools:
+				if state.ToolsIndex > 0 {
+					state.ToolsIndex--
+				}
+			}
+		}
+		return nil
+	}
+}
+
+func MultiPanelCursorDown(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if state.CurrentPage == models.PageMultiPanel {
+			switch state.ActivePanel {
+			case models.PanelInstallation:
+				if state.SelectedIndex < len(state.InstallMethods)-1 {
+					state.SelectedIndex++
+				}
+			case models.PanelTools:
+				if state.ToolsIndex < len(state.Tools)-1 {
+					state.ToolsIndex++
+				}
+			}
+		}
+		return nil
+	}
+}
+
+func MultiPanelToggleTool(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if state.CurrentPage == models.PageMultiPanel && state.ActivePanel == models.PanelTools {
+			tool := state.Tools[state.ToolsIndex]
+			state.SelectedTools[tool] = !state.SelectedTools[tool]
+		}
+		return nil
+	}
+}
+
+func MultiPanelSelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if state.CurrentPage == models.PageMultiPanel && state.ActivePanel == models.PanelInstallation {
+			state.SelectedMethod = state.InstallMethods[state.SelectedIndex]
+			state.CheckStatus, state.Error = checkInstallation(state.SelectedMethod)
+
+			// Only proceed if check passed (no error)
+			if state.Error == "" {
+				state.Tools = tools.Tools
+				state.SelectedTools = make(map[string]bool)
+				state.ToolsIndex = 0
+				state.ActivePanel = models.PanelTools
+			}
+		}
+		return nil
+	}
+}
+
+func MultiPanelStartInstallation(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if state.CurrentPage == models.PageMultiPanel && state.ActivePanel == models.PanelTools {
+			state.InstallResults = []models.InstallResult{}
+			state.InstallingIndex = 0
+			state.InstallOutput = ""
+			state.InstallationDone = false
+			state.SpinnerFrame = 0
+			state.InstallStartTime = time.Now().Unix()
+			state.ToolStartTimes = make(map[string]int64)
+
+			go func() {
+				spinnerTicker := time.NewTicker(100 * time.Millisecond)
+				defer spinnerTicker.Stop()
+
+				spinnerDone := make(chan bool)
+
+				go func() {
+					for {
+						select {
+						case <-spinnerDone:
+							return
+						case <-spinnerTicker.C:
+							if !state.InstallationDone {
+								state.SpinnerFrame = (state.SpinnerFrame + 1) % 10
+							}
+						}
+					}
+				}()
+
+				var wg sync.WaitGroup
+				var mu sync.Mutex
+				resultsChan := make(chan models.InstallResult, len(state.Tools))
+
+				for _, tool := range state.Tools {
+					if state.SelectedTools[tool] {
+						wg.Add(1)
+						go func(toolName string) {
+							defer wg.Done()
+							state.ToolStartTimes[toolName] = time.Now().Unix()
+							status, errMsg, output := installToolWithRetry(state.SelectedMethod, toolName)
+
+							mu.Lock()
+							state.InstallOutput += "Tool: " + toolName + "\n" + output + "\n"
+							mu.Unlock()
+
+							duration := time.Now().Unix() - state.ToolStartTimes[toolName]
+							result := models.InstallResult{
+								Tool:     toolName,
+								Success:  status == "success",
+								Error:    errMsg,
+								Duration: duration,
+								Retries:  0,
+							}
+							resultsChan <- result
+						}(tool)
+					}
+				}
+
+				go func() {
+					wg.Wait()
+					close(resultsChan)
+				}()
+
+				for result := range resultsChan {
+					state.InstallResults = append(state.InstallResults, result)
+					state.InstallingIndex++
+				}
+
+				state.InstallationDone = true
+				spinnerDone <- true
+				time.Sleep(1 * time.Second)
+			}()
+		}
+		return nil
+	}
+}

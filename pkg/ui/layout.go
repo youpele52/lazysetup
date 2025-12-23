@@ -24,6 +24,8 @@ func Layout(state *models.State) func(*gocui.Gui) error {
 			return layoutInstallingPage(g, state, maxX, maxY)
 		case models.PageResults:
 			return layoutResultsPage(g, state, maxX, maxY)
+		case models.PageMultiPanel:
+			return layoutMultiPanel(g, state, maxX, maxY)
 		default:
 			return layoutMenuPage(g, state, maxX, maxY)
 		}
@@ -182,7 +184,7 @@ func layoutInstallingPage(g *gocui.Gui, state *models.State, maxX, maxY int) err
 
 	if v, err := g.View("installing"); err == nil {
 		v.Clear()
-		message := BuildInstallationProgressMessage(state.CurrentTool, state.InstallingIndex, len(state.Tools), state.InstallationDone, state.SpinnerFrame, state.InstallOutput)
+		message := BuildInstallationProgressMessage(state.SelectedMethod, state.CurrentTool, state.InstallingIndex, len(state.Tools), state.InstallationDone, state.SpinnerFrame, state.InstallOutput)
 		fmt.Fprint(v, message)
 	}
 
@@ -220,6 +222,128 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 		v.Clear()
 		message := BuildInstallationResultsMessage(state.InstallResults)
 		fmt.Fprint(v, message)
+	}
+
+	return nil
+}
+
+func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
+	// Delete old views
+	for _, viewName := range []string{constants.ViewMenu, constants.ViewResult, "tools", "installing", "results"} {
+		g.DeleteView(viewName)
+	}
+
+	leftPanelWidth := maxX / 3
+	panelHeight := maxY - 3
+
+	// Panel 1: Installation Methods (top-left)
+	installationHeight := panelHeight / 2
+	if v, err := g.SetView("panel_installation", 0, 0, leftPanelWidth, installationHeight); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Title = "[1] Installation"
+		v.FgColor = colors.TextPrimary
+		v.Wrap = true
+		if state.ActivePanel == models.PanelInstallation {
+			v.SelBgColor = colors.HighlightBg
+			v.SelFgColor = colors.HighlightFg
+		}
+	}
+
+	if v, err := g.View("panel_installation"); err == nil {
+		v.Clear()
+		for i, method := range state.InstallMethods {
+			isSelected := i == state.SelectedIndex && state.ActivePanel == models.PanelInstallation
+			isConfirmed := state.SelectedMethod == method
+
+			if isSelected {
+				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, constants.RadioSelected, method, colors.ANSIReset)
+			} else if isConfirmed {
+				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, constants.RadioSelected, method, colors.ANSIReset)
+			} else {
+				fmt.Fprintf(v, "%s %s\n", constants.RadioUnselected, method)
+			}
+		}
+		if state.ActivePanel == models.PanelInstallation {
+			v.SetCursor(0, state.SelectedIndex)
+		}
+	}
+
+	// Panel 2: Tools Selection (bottom-left)
+	if v, err := g.SetView("panel_tools", 0, installationHeight+1, leftPanelWidth, panelHeight); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Title = "[2] Select Tools"
+		v.FgColor = colors.TextPrimary
+		v.Wrap = true
+		if state.ActivePanel == models.PanelTools {
+			v.SelBgColor = colors.HighlightBg
+			v.SelFgColor = colors.HighlightFg
+		}
+	}
+
+	if v, err := g.View("panel_tools"); err == nil {
+		v.Clear()
+		for i, tool := range state.Tools {
+			selected := state.SelectedTools[tool]
+			var marker string
+			if selected {
+				marker = constants.CheckboxSelected
+			} else {
+				marker = constants.CheckboxUnselected
+			}
+			if i == state.ToolsIndex && state.ActivePanel == models.PanelTools {
+				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+			} else {
+				fmt.Fprintf(v, "%s %s\n", marker, tool)
+			}
+		}
+		if state.ActivePanel == models.PanelTools {
+			v.SetCursor(0, state.ToolsIndex)
+		}
+	}
+
+	// Panel 0: Progress/Results (right - full height, read-only)
+	if v, err := g.SetView("panel_progress", leftPanelWidth+1, 0, maxX-1, panelHeight); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Title = "[0] Progress"
+		v.FgColor = colors.TextPrimary
+		v.Wrap = true
+		v.Highlight = false
+	}
+
+	if v, err := g.View("panel_progress"); err == nil {
+		v.Clear()
+		if state.InstallStartTime > 0 && !state.InstallationDone {
+			// Show installation progress
+			message := BuildInstallationProgressMessage(state.SelectedMethod, state.CurrentTool, state.InstallingIndex, len(state.Tools), state.InstallationDone, state.SpinnerFrame, state.InstallOutput)
+			fmt.Fprint(v, message)
+		} else if state.InstallationDone {
+			// Show results
+			message := BuildInstallationResultsMessage(state.InstallResults)
+			fmt.Fprint(v, message)
+		} else {
+			// Show logo by default
+			fmt.Fprint(v, constants.Logo)
+		}
+	}
+
+	// Status bar at bottom
+	if v, err := g.SetView("status_bar", 0, panelHeight+1, maxX-1, maxY); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.FgColor = colors.TextPrimary
+		v.Wrap = false
+	}
+
+	if v, err := g.View("status_bar"); err == nil {
+		v.Clear()
+		fmt.Fprintf(v, "Tab/Numbers: Switch panels | ↑↓: Navigate | Space: Toggle | Enter: Confirm | Esc: Back | Ctrl+C: Quit")
 	}
 
 	return nil

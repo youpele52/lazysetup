@@ -23,3 +23,13 @@ const (
 	ResultsError        = "  Error: %s\n"
 	ResultsTotal        = "Total: %d Success, %d Failed\n"
 )
+
+const Logo = ` _                          _               
+| | __ _ _____   _ ___  ___| |_ _   _ _ __  
+| |/ _` + "`" + `_  / | | / __|/ _ \ __| | | | '_ \ 
+| | (_| |/ /| |_| \__ \  __/ |_| |_| | |_) |
+|_|\__,_/___|\__, |___/\___|\__|\__,_| .__/ 
+             |___/                   |_|    
+
+Copyright 2025 Youpele Michael
+`

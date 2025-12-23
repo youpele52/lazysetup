@@ -38,9 +38,11 @@ func (mb *MessageBuilder) Build() string {
 	return strings.Join(mb.lines, "\n")
 }
 
-func BuildInstallationProgressMessage(currentTool string, installingIndex, totalTools int, installationDone bool, spinnerFrame int, installOutput string) string {
+func BuildInstallationProgressMessage(selectedMethod, currentTool string, installingIndex, totalTools int, installationDone bool, spinnerFrame int, installOutput string) string {
 	mb := NewMessageBuilder()
 
+	mb.AddLine(fmt.Sprintf("Installation Method: %s", selectedMethod))
+	mb.AddBlankLine()
 	mb.AddLine(fmt.Sprintf("Current Tool: %s", currentTool))
 	mb.AddLine(fmt.Sprintf("Progress: %d/%d", installingIndex, totalTools))
 	mb.AddBlankLine()
