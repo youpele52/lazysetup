@@ -5,9 +5,18 @@ import "github.com/youpele52/lazysetup/pkg/config"
 type Page string
 
 const (
-	PageMenu      Page = "menu"
-	PageSelection Page = "selection"
+	PageMenu       Page = "menu"
+	PageSelection  Page = "selection"
+	PageTools      Page = "tools"
+	PageInstalling Page = "installing"
+	PageResults    Page = "results"
 )
+
+type InstallResult struct {
+	Tool    string
+	Success bool
+	Error   string
+}
 
 type State struct {
 	InstallMethods []string
@@ -16,6 +25,16 @@ type State struct {
 	CheckStatus    string
 	Error          string
 	CurrentPage    Page
+
+	Tools            []string
+	SelectedTools    map[string]bool
+	ToolsIndex       int
+	InstallResults   []InstallResult
+	InstallOutput    string
+	CurrentTool      string
+	InstallingIndex  int
+	InstallationDone bool
+	SpinnerFrame     int
 }
 
 func NewState() *State {
@@ -24,6 +43,9 @@ func NewState() *State {
 		SelectedIndex:  0,
 		SelectedMethod: "",
 		CurrentPage:    PageMenu,
+		SelectedTools:  make(map[string]bool),
+		ToolsIndex:     0,
+		InstallResults: []InstallResult{},
 	}
 }
 
@@ -33,4 +55,7 @@ func (s *State) Reset() {
 	s.CheckStatus = ""
 	s.Error = ""
 	s.CurrentPage = PageMenu
+	s.SelectedTools = make(map[string]bool)
+	s.ToolsIndex = 0
+	s.InstallResults = []InstallResult{}
 }
