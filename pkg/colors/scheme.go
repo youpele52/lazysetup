@@ -17,4 +17,15 @@ const (
 	// Accent colors
 	AccentPrimary = gocui.ColorMagenta
 	AccentText    = gocui.ColorCyan
+
+	// Status colors
+	SuccessColor = gocui.ColorGreen
+	FailureColor = gocui.ColorRed
+)
+
+// ANSI color codes for inline text coloring
+const (
+	ANSIGreen = "\033[32m"
+	ANSIRed   = "\033[31m"
+	ANSIReset = "\033[0m"
 )

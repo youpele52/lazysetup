@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/youpele52/lazysetup/pkg/colors"
 	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/models"
 )
@@ -68,12 +69,15 @@ func BuildInstallationResultsMessage(results []models.InstallResult) string {
 
 	for _, result := range results {
 		if result.Success {
-			mb.AddLine(fmt.Sprintf("✓ %s - Success (%ds)", result.Tool, result.Duration))
+			successLine := fmt.Sprintf("%s✓ %s - Success (%ds)%s", colors.ANSIGreen, result.Tool, result.Duration, colors.ANSIReset)
+			mb.AddLine(successLine)
 			successCount++
 		} else {
-			mb.AddLine(fmt.Sprintf("✗ %s - Failed (%ds)", result.Tool, result.Duration))
+			failedLine := fmt.Sprintf("%s✗ %s - Failed (%ds)%s", colors.ANSIRed, result.Tool, result.Duration, colors.ANSIReset)
+			mb.AddLine(failedLine)
 			if result.Error != "" {
-				mb.AddLine(fmt.Sprintf("  Error: %s", result.Error))
+				errorLine := fmt.Sprintf("%s  Error: %s%s", colors.ANSIRed, result.Error, colors.ANSIReset)
+				mb.AddLine(errorLine)
 			}
 			failureCount++
 		}
