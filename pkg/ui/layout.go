@@ -90,7 +90,7 @@ func layoutSelectionPage(g *gocui.Gui, state *models.State, maxX, maxY int) erro
 			return err
 		}
 		v.Title = constants.TitleSelection
-		v.FgColor = colors.AccentText
+		v.FgColor = colors.TextPrimary
 		v.Wrap = true
 
 		if err := g.SetCurrentView(constants.ViewResult); err != nil {
@@ -172,7 +172,7 @@ func layoutInstallingPage(g *gocui.Gui, state *models.State, maxX, maxY int) err
 			return err
 		}
 		v.Title = "Installing"
-		v.FgColor = colors.AccentText
+		v.FgColor = colors.TextPrimary
 		v.Wrap = true
 
 		if err := g.SetCurrentView("installing"); err != nil {
@@ -182,16 +182,8 @@ func layoutInstallingPage(g *gocui.Gui, state *models.State, maxX, maxY int) err
 
 	if v, err := g.View("installing"); err == nil {
 		v.Clear()
-		fmt.Fprintf(v, "Current Tool: %s\n", state.CurrentTool)
-		fmt.Fprintf(v, "Progress: %d/%d\n\n", state.InstallingIndex, len(state.Tools))
-		fmt.Fprintf(v, "====================\n")
-
-		if !state.InstallationDone {
-			spinner := getSpinner(state.SpinnerFrame)
-			fmt.Fprintf(v, "%s Installing...\n", spinner)
-		}
-
-		fmt.Fprintf(v, "%s", state.InstallOutput)
+		message := BuildInstallationProgressMessage(state.CurrentTool, state.InstallingIndex, len(state.Tools), state.InstallationDone, state.SpinnerFrame, state.InstallOutput)
+		fmt.Fprint(v, message)
 	}
 
 	return nil
@@ -215,8 +207,8 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "Installation Results"
-		v.FgColor = colors.AccentText
+		v.Title = constants.ResultsSummaryTitle
+		v.FgColor = colors.TextPrimary
 		v.Wrap = true
 
 		if err := g.SetCurrentView("results"); err != nil {
@@ -226,27 +218,8 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 
 	if v, err := g.View("results"); err == nil {
 		v.Clear()
-		fmt.Fprintf(v, "Installation Summary\n")
-		fmt.Fprintf(v, "====================\n\n")
-
-		successCount := 0
-		failureCount := 0
-
-		for _, result := range state.InstallResults {
-			if result.Success {
-				fmt.Fprintf(v, "✓ %s - Success (%ds)\n", result.Tool, result.Duration)
-				successCount++
-			} else {
-				fmt.Fprintf(v, "✗ %s - Failed (%ds)\n", result.Tool, result.Duration)
-				if result.Error != "" {
-					fmt.Fprintf(v, "  Error: %s\n", result.Error)
-				}
-				failureCount++
-			}
-		}
-
-		fmt.Fprintf(v, "\n====================\n")
-		fmt.Fprintf(v, "Total: %d Success, %d Failed\n", successCount, failureCount)
+		message := BuildInstallationResultsMessage(state.InstallResults)
+		fmt.Fprint(v, message)
 	}
 
 	return nil
