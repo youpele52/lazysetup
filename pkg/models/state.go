@@ -55,7 +55,7 @@ func NewState() *State {
 	return &State{
 		InstallMethods: config.InstallMethods,
 		SelectedIndex:  0,
-		SelectedMethod: "",
+		SelectedMethod: "Homebrew",
 		CurrentPage:    PageMultiPanel,
 		ActivePanel:    PanelInstallation,
 		SelectedTools:  make(map[string]bool),

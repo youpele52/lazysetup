@@ -9,6 +9,7 @@ const (
 
 	MessageSelected       = "You have selected %s for the installation\n"
 	ErrorNoInstallCommand = "No install command found"
+	ErrorNoToolsSelected  = "Please select at least one tool for installation"
 
 	RadioSelected   = "●"
 	RadioUnselected = "○"

@@ -326,6 +326,19 @@ func MultiPanelSelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) e
 func MultiPanelStartInstallation(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
 		if state.CurrentPage == models.PageMultiPanel && state.ActivePanel == models.PanelTools {
+			// Check if at least one tool is selected
+			selectedCount := 0
+			for _, selected := range state.SelectedTools {
+				if selected {
+					selectedCount++
+				}
+			}
+
+			if selectedCount == 0 {
+				state.Error = constants.ErrorNoToolsSelected
+				return nil
+			}
+
 			state.InstallResults = []models.InstallResult{}
 			state.InstallingIndex = 0
 			state.InstallOutput = ""
