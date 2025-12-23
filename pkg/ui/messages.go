@@ -9,6 +9,8 @@ import (
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
+// MessageBuilder provides a fluent interface for building multi-line UI messages
+// It allows chaining method calls to construct formatted messages with lines, separators, and spacing
 type MessageBuilder struct {
 	lines []string
 }
@@ -60,6 +62,8 @@ func BuildInstallationProgressMessage(selectedMethod, currentTool string, instal
 	return mb.Build()
 }
 
+// BuildInstallationResultsMessage creates a formatted summary of installation results
+// Shows success/failure for each tool with color coding, error details, and totals
 func BuildInstallationResultsMessage(results []models.InstallResult) string {
 	mb := NewMessageBuilder()
 

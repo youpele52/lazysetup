@@ -8,6 +8,9 @@ import (
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
+// SetupKeybindings configures all keyboard shortcuts for the application
+// Bindings: Ctrl+C (quit), Tab (next panel), 0/1/2 (jump to panel),
+// Arrow keys (navigate), Space (toggle), Enter (confirm/execute), Esc (back/abort)
 func SetupKeybindings(g *gocui.Gui, state *models.State) {
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, handlers.Quit); err != nil {
 		log.Panicln(err)
