@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"math/rand"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jesseduffield/gocui"
@@ -80,6 +82,8 @@ func StartInstallation(state *models.State) func(*gocui.Gui, *gocui.View) error 
 		state.InstallOutput = ""
 		state.InstallationDone = false
 		state.SpinnerFrame = 0
+		state.InstallStartTime = time.Now().Unix()
+		state.ToolStartTimes = make(map[string]int64)
 
 		go func() {
 			spinnerTicker := time.NewTicker(100 * time.Millisecond)
@@ -100,22 +104,45 @@ func StartInstallation(state *models.State) func(*gocui.Gui, *gocui.View) error 
 				}
 			}()
 
+			var wg sync.WaitGroup
+			var mu sync.Mutex
+			resultsChan := make(chan models.InstallResult, len(state.Tools))
+
 			for _, tool := range state.Tools {
 				if state.SelectedTools[tool] {
-					state.CurrentTool = tool
-					state.InstallOutput = "Installing " + tool + "...\n\n"
-					status, errMsg, output := installToolWithOutput(state.SelectedMethod, tool)
-					state.InstallOutput += output
+					wg.Add(1)
+					go func(toolName string) {
+						defer wg.Done()
+						state.ToolStartTimes[toolName] = time.Now().Unix()
+						status, errMsg, output := installToolWithRetry(state.SelectedMethod, toolName)
 
-					result := models.InstallResult{
-						Tool:    tool,
-						Success: status == "success",
-						Error:   errMsg,
-					}
-					state.InstallResults = append(state.InstallResults, result)
-					state.InstallingIndex++
+						mu.Lock()
+						state.InstallOutput += "Tool: " + toolName + "\n" + output + "\n"
+						mu.Unlock()
+
+						duration := time.Now().Unix() - state.ToolStartTimes[toolName]
+						result := models.InstallResult{
+							Tool:     toolName,
+							Success:  status == "success",
+							Error:    errMsg,
+							Duration: duration,
+							Retries:  0,
+						}
+						resultsChan <- result
+					}(tool)
 				}
 			}
+
+			go func() {
+				wg.Wait()
+				close(resultsChan)
+			}()
+
+			for result := range resultsChan {
+				state.InstallResults = append(state.InstallResults, result)
+				state.InstallingIndex++
+			}
+
 			state.InstallationDone = true
 			spinnerDone <- true
 			time.Sleep(1 * time.Second)
@@ -124,6 +151,31 @@ func StartInstallation(state *models.State) func(*gocui.Gui, *gocui.View) error 
 
 		return nil
 	}
+}
+
+func installToolWithRetry(method, tool string) (string, string, string) {
+	maxRetries := 2
+	var lastErr string
+	var lastOutput string
+	retryCount := 0
+
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		if attempt > 0 {
+			randomDelay := time.Duration(rand.Intn(40)) * time.Second
+			time.Sleep(randomDelay)
+			retryCount++
+		}
+
+		status, errMsg, output := installToolWithOutput(method, tool)
+		lastOutput = output
+		lastErr = errMsg
+
+		if status == "success" {
+			return "success", "", output
+		}
+	}
+
+	return "failed", lastErr, lastOutput
 }
 
 func installToolWithOutput(method, tool string) (string, string, string) {
