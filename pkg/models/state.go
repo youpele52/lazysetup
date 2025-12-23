@@ -13,9 +13,11 @@ const (
 )
 
 type InstallResult struct {
-	Tool    string
-	Success bool
-	Error   string
+	Tool     string
+	Success  bool
+	Error    string
+	Duration int64
+	Retries  int
 }
 
 type State struct {
@@ -35,6 +37,8 @@ type State struct {
 	InstallingIndex  int
 	InstallationDone bool
 	SpinnerFrame     int
+	InstallStartTime int64
+	ToolStartTimes   map[string]int64
 }
 
 func NewState() *State {
@@ -46,6 +50,7 @@ func NewState() *State {
 		SelectedTools:  make(map[string]bool),
 		ToolsIndex:     0,
 		InstallResults: []InstallResult{},
+		ToolStartTimes: make(map[string]int64),
 	}
 }
 

@@ -234,10 +234,10 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 
 		for _, result := range state.InstallResults {
 			if result.Success {
-				fmt.Fprintf(v, "✓ %s - Success\n", result.Tool)
+				fmt.Fprintf(v, "✓ %s - Success (%ds)\n", result.Tool, result.Duration)
 				successCount++
 			} else {
-				fmt.Fprintf(v, "✗ %s - Failed\n", result.Tool)
+				fmt.Fprintf(v, "✗ %s - Failed (%ds)\n", result.Tool, result.Duration)
 				if result.Error != "" {
 					fmt.Fprintf(v, "  Error: %s\n", result.Error)
 				}
