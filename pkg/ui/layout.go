@@ -123,23 +123,23 @@ func layoutToolsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	startY := maxY/2 - contentHeight/2
 	endY := startY + contentHeight
 
-	if v, err := g.SetView("tools", maxX/4, startY, 3*maxX/4, endY); err != nil {
+	if v, err := g.SetView(constants.ViewTools, maxX/4, startY, 3*maxX/4, endY); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "Select Tools"
+		v.Title = constants.TitleToolSelection
 		v.Highlight = true
 		v.SelBgColor = colors.HighlightBg
 		v.SelFgColor = colors.HighlightFg
 		v.FgColor = colors.TextPrimary
 		v.Wrap = true
 
-		if err := g.SetCurrentView("tools"); err != nil {
+		if err := g.SetCurrentView(constants.ViewTools); err != nil {
 			return err
 		}
 	}
 
-	if v, err := g.View("tools"); err == nil {
+	if v, err := g.View(constants.ViewTools); err == nil {
 		v.Clear()
 		for _, tool := range state.Tools {
 			selected := state.SelectedTools[tool]
@@ -158,7 +158,7 @@ func layoutToolsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 }
 
 func layoutInstallingPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
-	if err := g.DeleteView("tools"); err != nil && err != gocui.ErrUnknownView {
+	if err := g.DeleteView(constants.ViewTools); err != nil && err != gocui.ErrUnknownView {
 		return err
 	}
 
@@ -169,20 +169,20 @@ func layoutInstallingPage(g *gocui.Gui, state *models.State, maxX, maxY int) err
 	startY := maxY/2 - contentHeight/2
 	endY := startY + contentHeight
 
-	if v, err := g.SetView("installing", maxX/4, startY, 3*maxX/4, endY); err != nil {
+	if v, err := g.SetView(constants.ViewInstalling, maxX/4, startY, 3*maxX/4, endY); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "Installing"
+		v.Title = constants.TitleInstalling
 		v.FgColor = colors.TextPrimary
 		v.Wrap = true
 
-		if err := g.SetCurrentView("installing"); err != nil {
+		if err := g.SetCurrentView(constants.ViewInstalling); err != nil {
 			return err
 		}
 	}
 
-	if v, err := g.View("installing"); err == nil {
+	if v, err := g.View(constants.ViewInstalling); err == nil {
 		v.Clear()
 		message := BuildInstallationProgressMessage(state.SelectedMethod, state.CurrentTool, state.InstallingIndex, len(state.Tools), state.InstallationDone, state.SpinnerFrame, state.InstallOutput)
 		fmt.Fprint(v, message)
@@ -192,7 +192,7 @@ func layoutInstallingPage(g *gocui.Gui, state *models.State, maxX, maxY int) err
 }
 
 func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
-	if err := g.DeleteView("installing"); err != nil && err != gocui.ErrUnknownView {
+	if err := g.DeleteView(constants.ViewInstalling); err != nil && err != gocui.ErrUnknownView {
 		return err
 	}
 
@@ -205,7 +205,7 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 	startY := maxY/2 - contentHeight/2
 	endY := startY + contentHeight
 
-	if v, err := g.SetView("results", maxX/4, startY, 3*maxX/4, endY); err != nil {
+	if v, err := g.SetView(constants.ViewResults, maxX/4, startY, 3*maxX/4, endY); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -213,12 +213,12 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 		v.FgColor = colors.TextPrimary
 		v.Wrap = true
 
-		if err := g.SetCurrentView("results"); err != nil {
+		if err := g.SetCurrentView(constants.ViewResults); err != nil {
 			return err
 		}
 	}
 
-	if v, err := g.View("results"); err == nil {
+	if v, err := g.View(constants.ViewResults); err == nil {
 		v.Clear()
 		message := BuildInstallationResultsMessage(state.InstallResults)
 		fmt.Fprint(v, message)
@@ -229,7 +229,7 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 
 func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	// Delete old views
-	for _, viewName := range []string{constants.ViewMenu, constants.ViewResult, "tools", "installing", "results"} {
+	for _, viewName := range []string{constants.ViewMenu, constants.ViewResult, constants.ViewTools, "installing", "results"} {
 		g.DeleteView(viewName)
 	}
 
@@ -238,11 +238,11 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 
 	// Panel 1: Installation Methods (top-left)
 	installationHeight := panelHeight / 2
-	if v, err := g.SetView("panel_installation", 0, 0, leftPanelWidth, installationHeight); err != nil {
+	if v, err := g.SetView(constants.PanelInstallation, 0, 0, leftPanelWidth, installationHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "[1] Installation"
+		v.Title = "[1]" + " " + constants.TitleInstallation
 		v.FgColor = colors.TextPrimary
 		v.Wrap = true
 		if state.ActivePanel == models.PanelInstallation {
@@ -251,7 +251,7 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		}
 	}
 
-	if v, err := g.View("panel_installation"); err == nil {
+	if v, err := g.View(constants.PanelInstallation); err == nil {
 		v.Clear()
 		for i, method := range state.InstallMethods {
 			isSelected := i == state.SelectedIndex && state.ActivePanel == models.PanelInstallation
@@ -271,11 +271,11 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	}
 
 	// Panel 2: Tools Selection (bottom-left)
-	if v, err := g.SetView("panel_tools", 0, installationHeight+1, leftPanelWidth, panelHeight); err != nil {
+	if v, err := g.SetView(constants.PanelTools, 0, installationHeight+1, leftPanelWidth, panelHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "[2] Select Tools"
+		v.Title = "[2]" + " " + constants.TitleToolSelection
 		v.FgColor = colors.TextPrimary
 		v.Wrap = true
 		if state.ActivePanel == models.PanelTools {
@@ -284,7 +284,7 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		}
 	}
 
-	if v, err := g.View("panel_tools"); err == nil {
+	if v, err := g.View(constants.PanelTools); err == nil {
 		v.Clear()
 		for i, tool := range state.Tools {
 			selected := state.SelectedTools[tool]
@@ -305,22 +305,22 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		}
 	}
 
-	// Panel 0: Progress/Results (right - full height, read-only)
-	if v, err := g.SetView("panel_progress", leftPanelWidth+1, 0, maxX-1, panelHeight); err != nil {
+	// Panel 0: Status/Results (right - full height, read-only)
+	if v, err := g.SetView(constants.PanelProgress, leftPanelWidth+1, 0, maxX-1, panelHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "[0] Progress"
+		v.Title = "[0]" + " " + constants.PanelStatus
 		v.FgColor = colors.TextPrimary
 		v.Wrap = true
 		v.Highlight = false
 	}
 
-	if v, err := g.View("panel_progress"); err == nil {
+	if v, err := g.View(constants.PanelProgress); err == nil {
 		v.Clear()
 		if state.InstallStartTime > 0 && !state.InstallationDone {
 			// Show installation progress
-			message := BuildInstallationProgressMessage(state.SelectedMethod, state.CurrentTool, state.InstallingIndex, len(state.Tools), state.InstallationDone, state.SpinnerFrame, state.InstallOutput)
+			message := BuildInstallationProgressMessage(state.SelectedMethod, state.CurrentTool, state.InstallingIndex, len(state.SelectedTools), state.InstallationDone, state.SpinnerFrame, state.InstallOutput)
 			fmt.Fprint(v, message)
 		} else if state.InstallationDone {
 			// Show results

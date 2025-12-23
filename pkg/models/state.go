@@ -1,6 +1,9 @@
 package models
 
-import "github.com/youpele52/lazysetup/pkg/config"
+import (
+	"github.com/youpele52/lazysetup/pkg/config"
+	"github.com/youpele52/lazysetup/pkg/tools"
+)
 
 type Page string
 
@@ -49,20 +52,23 @@ type State struct {
 	SpinnerFrame     int
 	InstallStartTime int64
 	ToolStartTimes   map[string]int64
+
+	LastEscapeTime    int64
+	AbortInstallation bool
 }
 
 func NewState() *State {
 	return &State{
 		InstallMethods: config.InstallMethods,
 		SelectedIndex:  0,
-		SelectedMethod: "Homebrew",
+		SelectedMethod: config.InstallMethods[0],
 		CurrentPage:    PageMultiPanel,
 		ActivePanel:    PanelInstallation,
 		SelectedTools:  make(map[string]bool),
 		ToolsIndex:     0,
 		InstallResults: []InstallResult{},
 		ToolStartTimes: make(map[string]int64),
-		Tools:          []string{"git", "docker", "lazygit", "lazydocker"},
+		Tools:          tools.Tools,
 	}
 }
 

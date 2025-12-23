@@ -8,3 +8,4 @@ var InstallMethods = []string{
 	"Scoop",
 	"Chocolatey",
 }
+
