@@ -227,5 +227,6 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 
 func getSpinner(frame int) string {
 	spins := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-	return spins[frame%len(spins)]
+	spinner := spins[frame%len(spins)]
+	return fmt.Sprintf("%s%s%s", colors.ANSIMagenta, spinner, colors.ANSIReset)
 }
