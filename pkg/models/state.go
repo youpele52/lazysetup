@@ -10,6 +10,15 @@ const (
 	PageTools      Page = "tools"
 	PageInstalling Page = "installing"
 	PageResults    Page = "results"
+	PageMultiPanel Page = "multipanel"
+)
+
+type Panel int
+
+const (
+	PanelInstallation Panel = 0
+	PanelTools        Panel = 1
+	PanelProgress     Panel = 2
 )
 
 type InstallResult struct {
@@ -27,6 +36,7 @@ type State struct {
 	CheckStatus    string
 	Error          string
 	CurrentPage    Page
+	ActivePanel    Panel
 
 	Tools            []string
 	SelectedTools    map[string]bool
@@ -46,11 +56,13 @@ func NewState() *State {
 		InstallMethods: config.InstallMethods,
 		SelectedIndex:  0,
 		SelectedMethod: "",
-		CurrentPage:    PageMenu,
+		CurrentPage:    PageMultiPanel,
+		ActivePanel:    PanelInstallation,
 		SelectedTools:  make(map[string]bool),
 		ToolsIndex:     0,
 		InstallResults: []InstallResult{},
 		ToolStartTimes: make(map[string]int64),
+		Tools:          []string{"git", "docker", "lazygit", "lazydocker"},
 	}
 }
 
