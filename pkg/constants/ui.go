@@ -15,4 +15,11 @@ const (
 
 	CheckboxSelected   = "☑"
 	CheckboxUnselected = "☐"
+
+	ResultsSummaryTitle = "Installation Summary"
+	ResultsSeparator    = "===================="
+	ResultsSuccess      = "✓ %s - Success (%ds)\n"
+	ResultsFailed       = "✗ %s - Failed (%ds)\n"
+	ResultsError        = "  Error: %s\n"
+	ResultsTotal        = "Total: %d Success, %d Failed\n"
 )
