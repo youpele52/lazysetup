@@ -9,6 +9,9 @@ import (
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
+// Layout returns a gocui layout function that renders the appropriate UI based on current page
+// It dispatches to specific layout functions (menu, selection, tools, installing, results, multipanel)
+// based on state.CurrentPage value
 func Layout(state *models.State) func(*gocui.Gui) error {
 	return func(g *gocui.Gui) error {
 		maxX, maxY := g.Size()
@@ -227,6 +230,11 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 	return nil
 }
 
+// layoutMultiPanel renders the three-panel layout used in PageMultiPanel
+// Panel 0 (right): Installation method selection
+// Panel 1 (left, bottom): Tool selection with checkboxes
+// Panel 2 (right, full height): Status/results display
+// Bottom status bar shows keybinding hints
 func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	// Delete old views
 	for _, viewName := range []string{constants.ViewMenu, constants.ViewResult, constants.ViewTools, "installing", "results"} {
@@ -318,13 +326,22 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 
 	if v, err := g.View(constants.PanelProgress); err == nil {
 		v.Clear()
-		if state.InstallStartTime > 0 && !state.InstallationDone {
+		installationDone := state.GetInstallationDone()
+		installStartTime := state.GetInstallStartTime()
+		if installStartTime > 0 && !installationDone {
 			// Show installation progress
-			message := BuildInstallationProgressMessage(state.SelectedMethod, state.CurrentTool, state.InstallingIndex, len(state.SelectedTools), state.InstallationDone, state.SpinnerFrame, state.InstallOutput)
+			spinnerFrame := state.GetSpinnerFrame()
+			installOutput := state.GetInstallOutput()
+			selectedMethod := state.GetSelectedMethod()
+			currentTool := state.GetCurrentTool()
+			installingIndex := state.GetInstallingIndex()
+			selectedTools := state.GetSelectedTools()
+			message := BuildInstallationProgressMessage(selectedMethod, currentTool, installingIndex, len(selectedTools), installationDone, spinnerFrame, installOutput)
 			fmt.Fprint(v, message)
-		} else if state.InstallationDone {
+		} else if installationDone {
 			// Show results
-			message := BuildInstallationResultsMessage(state.InstallResults)
+			results := state.GetInstallResults()
+			message := BuildInstallationResultsMessage(results)
 			fmt.Fprint(v, message)
 		} else {
 			// Show logo by default
@@ -349,6 +366,9 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	return nil
 }
 
+// getSpinner returns the current spinner character from the animation frame
+// Frames cycle through 10 characters: ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏
+// The spinner is wrapped in magenta ANSI color codes
 func getSpinner(frame int) string {
 	spins := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 	spinner := spins[frame%len(spins)]
