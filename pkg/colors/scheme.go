@@ -25,7 +25,8 @@ const (
 
 // ANSI color codes for inline text coloring
 const (
-	ANSIGreen = "\033[32m"
-	ANSIRed   = "\033[31m"
-	ANSIReset = "\033[0m"
+	ANSIGreen   = "\033[32m"
+	ANSIRed     = "\033[31m"
+	ANSIMagenta = "\033[35m"
+	ANSIReset   = "\033[0m"
 )
