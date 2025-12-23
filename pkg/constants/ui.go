@@ -1,11 +1,24 @@
 package constants
 
 const (
-	ViewMenu   = "menu"
-	ViewResult = "result"
+	ViewMenu       = "menu"
+	ViewResult     = "result"
+	ViewResults    = "results"
+	ViewTools      = "tools"
+	ViewInstalling = "installing"
 
-	TitleInstallation = "Installation"
-	TitleSelection    = "Details"
+	PanelTools        = "panel_tools"
+	PanelInstallation = "panel_installation"
+	PanelProgress     = "panel_progress"
+	PanelStatus       = "Status"
+
+	TitleInstallation  = "Installation"
+	TitleInstalling    = "Installing"
+	TitleToolSelection = "Select Tools"
+	TitleSelection     = "Details"
+
+	TextInstalling = "installing"
+	TextTools      = "tools"
 
 	MessageSelected       = "You have selected %s for the installation\n"
 	ErrorNoInstallCommand = "No install command found"
