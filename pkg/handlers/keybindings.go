@@ -223,7 +223,25 @@ func checkInstallation(method string) (string, string) {
 
 func GoBack(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		state.Reset()
+		now := time.Now().Unix()
+
+		// Check if this is a double escape (within 500ms)
+		if state.LastEscapeTime > 0 && (now*1000-state.LastEscapeTime*1000) < 500 {
+			// Double escape: reset everything and abort installation
+			state.AbortInstallation = true
+			state.Reset()
+			state.LastEscapeTime = 0
+		} else {
+			// First escape: mark the time
+			state.LastEscapeTime = now
+			// Reset the timestamp after 600ms if escape is not pressed again
+			go func() {
+				time.Sleep(600 * time.Millisecond)
+				if state.LastEscapeTime == now {
+					state.LastEscapeTime = 0
+				}
+			}()
+		}
 		return nil
 	}
 }
@@ -372,9 +390,20 @@ func MultiPanelStartInstallation(state *models.State) func(*gocui.Gui, *gocui.Vi
 
 				for _, tool := range state.Tools {
 					if state.SelectedTools[tool] {
+						// Check if abort was requested
+						if state.AbortInstallation {
+							break
+						}
+
 						wg.Add(1)
 						go func(toolName string) {
 							defer wg.Done()
+
+							// Check abort flag before starting installation
+							if state.AbortInstallation {
+								return
+							}
+
 							state.ToolStartTimes[toolName] = time.Now().Unix()
 							status, errMsg, output := installToolWithRetry(state.SelectedMethod, toolName)
 

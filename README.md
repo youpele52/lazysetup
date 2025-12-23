@@ -4,10 +4,10 @@ A modern, interactive terminal UI for installing development tools across multip
 
 ## Features
 
-- **Multi-Panel Interface**: Intuitive side-by-side layout for installation method selection, tool selection, and progress monitoring
+- **Multi-Panel Interface**: Intuitive side-by-side layout for installation method selection, tool selection, and status monitoring
 - **Multiple Package Managers**: Support for Homebrew, APT, YUM, Curl, Scoop, and Chocolatey
 - **Tool Selection**: Multi-select interface for choosing which tools to install (git, docker, lazygit, lazydocker)
-- **Real-Time Progress**: Live installation progress with spinner animation and output display
+- **Real-Time Status**: Live installation status with spinner animation and output display
 - **Parallel Installation**: Install multiple tools simultaneously for faster setup
 - **Retry Logic**: Automatic retry mechanism with random delays for failed installations
 - **Installation Duration**: Track how long each tool takes to install
@@ -54,7 +54,7 @@ go build -o lazysetup
 
 1. **Panel 0 (Installation)**: Select your package manager (Homebrew is default)
 2. **Panel 1 (Tools)**: Select which tools to install (git, docker, lazygit, lazydocker)
-3. **Panel 2 (Progress)**: Watch real-time installation progress and results
+3. **Panel 2 (Status)**: Watch real-time installation status and results
 
 ## Supported Tools
 

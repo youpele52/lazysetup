@@ -44,7 +44,7 @@ func BuildInstallationProgressMessage(selectedMethod, currentTool string, instal
 	mb.AddLine(fmt.Sprintf("Installation Method: %s", selectedMethod))
 	mb.AddBlankLine()
 	mb.AddLine(fmt.Sprintf("Current Tool: %s", currentTool))
-	mb.AddLine(fmt.Sprintf("Progress: %d/%d", installingIndex, totalTools))
+	mb.AddLine(fmt.Sprintf("Status: %d/%d", installingIndex, totalTools))
 	mb.AddBlankLine()
 	mb.AddSeparator()
 
