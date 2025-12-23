@@ -1,5 +1,9 @@
 package commands
 
+// InstallCommands maps installation methods to tools and their installation commands
+// Outer key: package manager (Homebrew, Curl, APT, YUM, Scoop, Chocolatey)
+// Inner key: tool name (git, docker, lazygit, lazydocker)
+// Value: shell command to install the tool
 var InstallCommands = map[string]map[string]string{
 	"Homebrew": {
 		"git":        "brew install git",
@@ -8,10 +12,10 @@ var InstallCommands = map[string]map[string]string{
 		"lazydocker": "brew install lazydocker",
 	},
 	"Curl": {
-		"git":        "curl https://git-scm.com/download/linux -o git-installer.sh && bash git-installer.sh",
-		"docker":     "curl https://get.docker.com -o get-docker.sh && bash get-docker.sh",
-		"lazygit":    "curl https://raw.githubusercontent.com/jesseduffield/lazygit/master/pkg/installer/install.sh | bash",
-		"lazydocker": "curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install.sh | bash",
+		"git":        "curl -fsSL https://git-scm.com/download/linux -o /tmp/git-installer.sh && chmod +x /tmp/git-installer.sh && /tmp/git-installer.sh",
+		"docker":     "curl -fsSL https://get.docker.com -o /tmp/get-docker.sh && chmod +x /tmp/get-docker.sh && sh /tmp/get-docker.sh",
+		"lazygit":    "curl -fsSL https://raw.githubusercontent.com/jesseduffield/lazygit/master/pkg/installer/install.sh -o /tmp/lazygit-install.sh && chmod +x /tmp/lazygit-install.sh && /tmp/lazygit-install.sh",
+		"lazydocker": "curl -fsSL https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install.sh -o /tmp/lazydocker-install.sh && chmod +x /tmp/lazydocker-install.sh && /tmp/lazydocker-install.sh",
 	},
 	"APT": {
 		"git":        "apt-get install -y git",
@@ -39,6 +43,8 @@ var InstallCommands = map[string]map[string]string{
 	},
 }
 
+// GetInstallCommand retrieves the installation command for a specific tool using a specific method
+// Returns empty string if method or tool is not found in the commands map
 func GetInstallCommand(method, tool string) string {
 	if methodCmds, ok := InstallCommands[method]; ok {
 		if cmd, ok := methodCmds[tool]; ok {
