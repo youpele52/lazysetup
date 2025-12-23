@@ -2,8 +2,8 @@ package config
 
 var InstallMethods = []string{
 	"Homebrew",
-	"Curl",
 	"APT",
+	"Curl",
 	"YUM",
 	"Scoop",
 	"Chocolatey",
