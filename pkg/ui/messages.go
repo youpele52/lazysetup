@@ -40,27 +40,27 @@ func (mb *MessageBuilder) Build() string {
 	return strings.Join(mb.lines, "\n")
 }
 
-func BuildInstallationProgressMessage(selectedMethod, currentTool string, installingIndex, totalTools int, installationDone bool, spinnerFrame int, installOutput string, action models.ActionType) string {
+func BuildInstallationProgressMessage(params ProgressMessageParams) string {
 	mb := NewMessageBuilder()
 
 	// Get action-specific text
-	actionText := getActionText(action)
-	actionVerb := getActionVerb(action)
+	actionText := getActionText(params.Action)
+	actionVerb := getActionVerb(params.Action)
 
-	mb.AddLine(fmt.Sprintf("%s Method: %s", actionText, selectedMethod))
+	mb.AddLine(fmt.Sprintf("%s Method: %s", actionText, params.SelectedMethod))
 	mb.AddBlankLine()
-	mb.AddLine(fmt.Sprintf("Current Tool: %s", currentTool))
-	mb.AddLine(fmt.Sprintf("Status: %d/%d", installingIndex, totalTools))
+	mb.AddLine(fmt.Sprintf("Current Tool: %s", params.CurrentTool))
+	mb.AddLine(fmt.Sprintf("Status: %d/%d", params.InstallingIndex, params.TotalTools))
 	mb.AddBlankLine()
 	mb.AddSeparator()
 
-	if !installationDone {
-		spinner := getSpinner(spinnerFrame)
+	if !params.InstallationDone {
+		spinner := getSpinner(params.SpinnerFrame)
 		mb.AddLine(fmt.Sprintf("%s %s...", spinner, actionVerb))
 	}
 
-	if installOutput != "" {
-		mb.AddLine(installOutput)
+	if params.InstallOutput != "" {
+		mb.AddLine(params.InstallOutput)
 	}
 
 	return mb.Build()

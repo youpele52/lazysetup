@@ -36,7 +36,17 @@ func layoutInstallingPage(g *gocui.Gui, state *models.State, maxX, maxY int) err
 
 	if v, err := g.View(constants.ViewInstalling); err == nil {
 		v.Clear()
-		message := BuildInstallationProgressMessage(state.SelectedMethod, state.CurrentTool, state.InstallingIndex, len(state.Tools), state.InstallationDone, state.SpinnerFrame, state.InstallOutput, state.SelectedAction)
+		params := ProgressMessageParams{
+			SelectedMethod:   state.SelectedMethod,
+			CurrentTool:      state.CurrentTool,
+			InstallingIndex:  state.InstallingIndex,
+			TotalTools:       len(state.Tools),
+			InstallationDone: state.InstallationDone,
+			SpinnerFrame:     state.SpinnerFrame,
+			InstallOutput:    state.InstallOutput,
+			Action:           state.SelectedAction,
+		}
+		message := BuildInstallationProgressMessage(params)
 		fmt.Fprint(v, message)
 	}
 
