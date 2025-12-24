@@ -55,22 +55,20 @@ jobs:
       
       - name: Organize artifacts
         run: |
-          mkdir -p release
-          find binaries -type f -name "lazysetup-*" -exec mv {} release/ \;
-          ls -la release/
+          echo "=== Binaries directory structure ==="
+          ls -laR binaries/
+          echo "=== Moving files ==="
+          mv binaries/* . 2>/dev/null || true
+          ls -la lazysetup-* 2>/dev/null || echo "No binaries in root"
       
       - name: Generate checksums
         run: |
-          cd release
           sha256sum lazysetup-* > SHA256SUMS
           cat SHA256SUMS
-          cd ..
       
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          files: release/*
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "lazysetup-*,SHA256SUMS"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
