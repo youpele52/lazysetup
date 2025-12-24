@@ -8,10 +8,10 @@
 - Team onboarding is repetitive
 
 ## Core Features
-- **Multi-tool installation**: Git, Docker, Node, lazygit, etc.
+- **Multi-tool management**: Install, update, and delete tools (Git, Docker, Node, lazygit, etc.)
 - **Multiple install methods**: Homebrew, curl, APT, etc.
 - **AI error resolution**: OpenAI, Anthropic, OpenRouter
-- **TUI interface**: Interactive progress and selection
+- **TUI interface**: Interactive progress and selection with multi-panel layout
 - **Team config sharing**: YAML-based setup files
 
 ## Installation Methods
@@ -24,9 +24,46 @@
 ```bash
 lazysetup init              # Interactive setup
 lazysetup install git docker # Install specific tools
+lazysetup update            # Update installed tools
+lazysetup delete            # Delete/uninstall tools
 lazysetup config ai.provider openai  # Set AI provider
-lazysetup update            # Update all tools
 lazysetup backup            # Backup configuration
+```
+
+## Tool Management Operations
+
+### Install Panel
+- Select installation method (Homebrew, APT, Curl, etc.)
+- Choose tools to install from available list
+- Monitor installation progress with spinner animation
+- View installation results and error messages
+
+### Update Panel
+- Display currently installed tools with versions
+- Select tools to update
+- Check for available updates
+- Monitor update progress
+- Show update results and changelog
+
+### Delete Panel
+- Display installed tools with version info
+- Select tools to uninstall
+- Confirm deletion with safety checks
+- Monitor uninstall progress
+- Show deletion results and cleanup status
+
+### Multi-Panel Layout
+```
+┌─────────────────────────────────────────────────┐
+│ [1]-Installation  [2]-Update  [3]-Delete        │
+├──────────────┬──────────────┬──────────────────┤
+│ Methods      │ Tools        │ Progress/Results │
+│              │              │                  │
+│ ○ Homebrew   │ ☑ git        │ Installing...    │
+│ ○ APT        │ ☑ docker     │ ✓ git (5s)       │
+│ ○ Curl       │ ☐ node       │ ✗ docker (err)   │
+│              │ ☐ lazygit    │                  │
+└──────────────┴──────────────┴──────────────────┘
 ```
 
 ## AI Integration
@@ -81,6 +118,48 @@ ai:
   fallback_providers: ["anthropic", "openrouter"]  # try others if primary fails
 ```
 
+## Implementation Details
+
+### Tool Management Commands
+```go
+// Install command
+installToolWithRetry(state, method, tool) → (status, error, output)
+
+// Update command (new)
+updateToolWithRetry(state, method, tool) → (status, error, output)
+getInstalledToolVersion(tool) → (version, error)
+checkToolUpdates(tool) → (hasUpdate, newVersion, error)
+
+// Delete command (new)
+deleteToolWithRetry(state, tool) → (status, error, output)
+verifyToolInstalled(tool) → (installed, version, error)
+```
+
+### UI Pages/Panels
+```
+Current:
+- PageMenu: Installation method selection
+- PageSelection: Tool selection
+- PageTools: Tool list display
+- PageInstalling: Installation progress
+- PageResults: Installation results
+- PageMultiPanel: 3-panel layout (Installation/Tools/Progress)
+
+New:
+- PageUpdate: Update management (similar to Install)
+- PageDelete: Delete/uninstall management
+- PageUpdateProgress: Update progress tracking
+- PageDeleteProgress: Delete progress tracking
+```
+
+### State Extensions
+```go
+// Add to State struct:
+CurrentOperation string  // "install", "update", "delete"
+InstalledTools map[string]string  // tool → version
+AvailableUpdates map[string]string  // tool → newVersion
+```
+
 ## Development Workflow
 
 ```
@@ -93,14 +172,16 @@ ai:
 ├── cmd/
 │   └── root.go        # CLI commands
 ├── pkg/
-│   ├── installer/     # Tool install logic
-│   ├── ui/           # TUI components
+│   ├── installer/     # Tool install/update/delete logic
+│   ├── ui/           # TUI components & pages
 │   ├── config/        # Configuration management
 │   └── ai/           # AI integration
 └── internal/         # Internal packages
 
 3. TUI Implementation
 ├── InstallManager → gocui → UserInterface
+├── UpdateManager → gocui → UserInterface (new)
+├── DeleteManager → gocui → UserInterface (new)
 ├── ErrorHandler → AI → SuggestionDisplay
 └── ConfigLoader → UserPreferences
 
@@ -117,9 +198,30 @@ ai:
 ```
 
 ## Roadmap
-**Phase 1**: Go project + basic installer + TUI
-**Phase 2**: Multi-platform + AI integration  
-**Phase 3**: Team configs + caching
+**Phase 1**: Go project + basic installer + TUI ✓ (Current)
+- [x] Multi-tool installation support
+- [x] Multiple install methods
+- [x] TUI with multi-panel layout
+- [ ] Update tool functionality
+- [ ] Delete/uninstall tool functionality
+
+**Phase 2**: Update & Delete Operations
+- [ ] Implement update command handlers
+- [ ] Implement delete command handlers
+- [ ] Add version tracking for installed tools
+- [ ] Create Update and Delete UI pages
+- [ ] Add update progress tracking
+- [ ] Add delete confirmation dialogs
+
+**Phase 3**: Multi-platform + AI integration  
+- [ ] Cross-platform compatibility testing
+- [ ] AI error resolution integration
+- [ ] Solution caching
+
+**Phase 4**: Team configs + caching
+- [ ] Team configuration sharing
+- [ ] Solution caching system
+- [ ] Advanced error handling
 
 ## Why This Wins
 - **AI troubleshooting** eliminates manual searches
