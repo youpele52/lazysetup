@@ -22,7 +22,7 @@ The safest way to install lazysetup with automatic checksum verification:
 
 ```bash
 # Latest stable release
-curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/install.sh | bash
+curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/install.sh | bash
 
 # Or specific version
 curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/install.sh | bash
@@ -37,7 +37,7 @@ curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/insta
 
 **Verify installation:**
 ```bash
-curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/verify.sh | bash
+curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/verify.sh | bash
 ```
 
 ### Option 2: Go Install
