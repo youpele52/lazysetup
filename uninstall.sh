@@ -25,8 +25,9 @@ echo -e "${YELLOW}→${NC} Found lazysetup at: $LAZYSETUP_PATH"
 echo ""
 
 # Confirm uninstall
-read -p "Are you sure you want to uninstall lazysetup? (y/N) " -n 1 -r
-echo
+PROMPT="Are you sure you want to uninstall lazysetup? (y/N) "
+read -p "$PROMPT" -n 1 -r
+echo ""
 
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
   echo -e "${YELLOW}→${NC} Uninstall cancelled"
