@@ -257,3 +257,10 @@ func (s *State) SetLastEscapeTime(time int64) {
 	defer s.mu.Unlock()
 	s.LastEscapeTime = time
 }
+
+// GetSelectedAction safely gets the selected action type
+func (s *State) GetSelectedAction() ActionType {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.SelectedAction
+}

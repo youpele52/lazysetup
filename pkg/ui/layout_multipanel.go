@@ -196,7 +196,8 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 			currentTool := state.GetCurrentTool()
 			installingIndex := state.GetInstallingIndex()
 			selectedTools := state.GetSelectedTools()
-			message := BuildInstallationProgressMessage(selectedMethod, currentTool, installingIndex, len(selectedTools), installationDone, spinnerFrame, installOutput)
+			selectedAction := state.GetSelectedAction()
+			message := BuildInstallationProgressMessage(selectedMethod, currentTool, installingIndex, len(selectedTools), installationDone, spinnerFrame, installOutput, selectedAction)
 			fmt.Fprint(v, message)
 		} else if installationDone {
 			// Show results

@@ -40,10 +40,14 @@ func (mb *MessageBuilder) Build() string {
 	return strings.Join(mb.lines, "\n")
 }
 
-func BuildInstallationProgressMessage(selectedMethod, currentTool string, installingIndex, totalTools int, installationDone bool, spinnerFrame int, installOutput string) string {
+func BuildInstallationProgressMessage(selectedMethod, currentTool string, installingIndex, totalTools int, installationDone bool, spinnerFrame int, installOutput string, action models.ActionType) string {
 	mb := NewMessageBuilder()
 
-	mb.AddLine(fmt.Sprintf("Installation Method: %s", selectedMethod))
+	// Get action-specific text
+	actionText := getActionText(action)
+	actionVerb := getActionVerb(action)
+
+	mb.AddLine(fmt.Sprintf("%s Method: %s", actionText, selectedMethod))
 	mb.AddBlankLine()
 	mb.AddLine(fmt.Sprintf("Current Tool: %s", currentTool))
 	mb.AddLine(fmt.Sprintf("Status: %d/%d", installingIndex, totalTools))
@@ -52,7 +56,7 @@ func BuildInstallationProgressMessage(selectedMethod, currentTool string, instal
 
 	if !installationDone {
 		spinner := getSpinner(spinnerFrame)
-		mb.AddLine(fmt.Sprintf("%s Installing...", spinner))
+		mb.AddLine(fmt.Sprintf("%s %s...", spinner, actionVerb))
 	}
 
 	if installOutput != "" {
@@ -60,6 +64,34 @@ func BuildInstallationProgressMessage(selectedMethod, currentTool string, instal
 	}
 
 	return mb.Build()
+}
+
+// getActionText returns the display text for the action type header
+func getActionText(action models.ActionType) string {
+	switch action {
+	case models.ActionInstall:
+		return "Installation"
+	case models.ActionUpdate:
+		return "Update"
+	case models.ActionDelete:
+		return "Uninstall"
+	default:
+		return "Action"
+	}
+}
+
+// getActionVerb returns the verb form for the action type
+func getActionVerb(action models.ActionType) string {
+	switch action {
+	case models.ActionInstall:
+		return "Installing"
+	case models.ActionUpdate:
+		return "Updating"
+	case models.ActionDelete:
+		return "Uninstalling"
+	default:
+		return "Processing"
+	}
 }
 
 // BuildInstallationResultsMessage creates a formatted summary of installation results
