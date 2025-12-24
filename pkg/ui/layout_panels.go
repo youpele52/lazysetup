@@ -9,8 +9,41 @@ import (
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
+// PanelParams groups common parameters for panel rendering
+type PanelParams struct {
+	Gui            *gocui.Gui
+	State          *models.State
+	ActivePanel    models.Panel
+	LeftPanelWidth int
+}
+
+// PackageManagerParams groups parameters for renderPackageManagerPanel
+type PackageManagerParams struct {
+	PanelParams
+	Height int
+}
+
+// ActionPanelParams groups parameters for renderActionPanel
+type ActionPanelParams struct {
+	PanelParams
+	PackageManagerY int
+	ActionHeight    int
+}
+
+// ToolsPanelParams groups parameters for renderToolsPanel
+type ToolsPanelParams struct {
+	PanelParams
+	ToolsStartY int
+	PanelHeight int
+}
+
 // renderPackageManagerPanel renders the Package Manager selection panel
-func renderPackageManagerPanel(g *gocui.Gui, state *models.State, activePanel models.Panel, leftPanelWidth, packageManagerHeight int) error {
+func renderPackageManagerPanel(params PackageManagerParams) error {
+	g := params.Gui
+	state := params.State
+	activePanel := params.ActivePanel
+	leftPanelWidth := params.LeftPanelWidth
+	packageManagerHeight := params.Height
 	if v, err := g.SetView(constants.PanelPackageManager, 0, 0, leftPanelWidth, packageManagerHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
@@ -56,7 +89,13 @@ func renderPackageManagerPanel(g *gocui.Gui, state *models.State, activePanel mo
 }
 
 // renderActionPanel renders the Action selection panel
-func renderActionPanel(g *gocui.Gui, state *models.State, activePanel models.Panel, leftPanelWidth, packageManagerHeight, actionHeight int) error {
+func renderActionPanel(params ActionPanelParams) error {
+	g := params.Gui
+	state := params.State
+	activePanel := params.ActivePanel
+	leftPanelWidth := params.LeftPanelWidth
+	packageManagerHeight := params.PackageManagerY
+	actionHeight := params.ActionHeight
 	actions := []string{"Install", "Update", "Uninstall"}
 	if v, err := g.SetView(constants.PanelAction, 0, packageManagerHeight+1, leftPanelWidth, packageManagerHeight+actionHeight+1); err != nil {
 		if err != gocui.ErrUnknownView {
@@ -103,7 +142,13 @@ func renderActionPanel(g *gocui.Gui, state *models.State, activePanel models.Pan
 }
 
 // renderToolsPanel renders the Tools selection panel
-func renderToolsPanel(g *gocui.Gui, state *models.State, activePanel models.Panel, leftPanelWidth, toolsStartY, panelHeight int) error {
+func renderToolsPanel(params ToolsPanelParams) error {
+	g := params.Gui
+	state := params.State
+	activePanel := params.ActivePanel
+	leftPanelWidth := params.LeftPanelWidth
+	toolsStartY := params.ToolsStartY
+	panelHeight := params.PanelHeight
 	if v, err := g.SetView(constants.PanelTools, 0, toolsStartY, leftPanelWidth, panelHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err

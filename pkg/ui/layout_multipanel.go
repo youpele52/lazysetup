@@ -35,13 +35,39 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	toolsStartY := packageManagerHeight + actionHeight + 2
 
 	// Render left-side panels
-	if err := renderPackageManagerPanel(g, state, activePanel, leftPanelWidth, packageManagerHeight); err != nil {
+	if err := renderPackageManagerPanel(PackageManagerParams{
+		PanelParams: PanelParams{
+			Gui:            g,
+			State:          state,
+			ActivePanel:    activePanel,
+			LeftPanelWidth: leftPanelWidth,
+		},
+		Height: packageManagerHeight,
+	}); err != nil {
 		return err
 	}
-	if err := renderActionPanel(g, state, activePanel, leftPanelWidth, packageManagerHeight, actionHeight); err != nil {
+	if err := renderActionPanel(ActionPanelParams{
+		PanelParams: PanelParams{
+			Gui:            g,
+			State:          state,
+			ActivePanel:    activePanel,
+			LeftPanelWidth: leftPanelWidth,
+		},
+		PackageManagerY: packageManagerHeight,
+		ActionHeight:    actionHeight,
+	}); err != nil {
 		return err
 	}
-	if err := renderToolsPanel(g, state, activePanel, leftPanelWidth, toolsStartY, panelHeight); err != nil {
+	if err := renderToolsPanel(ToolsPanelParams{
+		PanelParams: PanelParams{
+			Gui:            g,
+			State:          state,
+			ActivePanel:    activePanel,
+			LeftPanelWidth: leftPanelWidth,
+		},
+		ToolsStartY: toolsStartY,
+		PanelHeight: panelHeight,
+	}); err != nil {
 		return err
 	}
 
@@ -66,14 +92,17 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		installStartTime := state.GetInstallStartTime()
 		if installStartTime > 0 && !installationDone {
 			// Show installation progress
-			spinnerFrame := state.GetSpinnerFrame()
-			installOutput := state.GetInstallOutput()
-			selectedMethod := state.GetSelectedMethod()
-			currentTool := state.GetCurrentTool()
-			installingIndex := state.GetInstallingIndex()
-			selectedTools := state.GetSelectedTools()
-			selectedAction := state.GetSelectedAction()
-			message := BuildInstallationProgressMessage(selectedMethod, currentTool, installingIndex, len(selectedTools), installationDone, spinnerFrame, installOutput, selectedAction)
+			params := ProgressMessageParams{
+				SelectedMethod:   state.GetSelectedMethod(),
+				CurrentTool:      state.GetCurrentTool(),
+				InstallingIndex:  state.GetInstallingIndex(),
+				TotalTools:       len(state.GetSelectedTools()),
+				InstallationDone: installationDone,
+				SpinnerFrame:     state.GetSpinnerFrame(),
+				InstallOutput:    state.GetInstallOutput(),
+				Action:           state.GetSelectedAction(),
+			}
+			message := BuildInstallationProgressMessage(params)
 			fmt.Fprint(v, message)
 		} else if installationDone {
 			// Show results
