@@ -68,12 +68,19 @@ jobs:
             exit 1
           fi
       
+      - name: Debug - List files
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Files in current directory:"
+          ls -la
+          echo "Looking for lazysetup binaries:"
+          find . -name "lazysetup-*" -type f
+      
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            lazysetup-*
-            SHA256SUMS
+          files: lazysetup-*,SHA256SUMS
           draft: false
           prerelease: false
         env:
