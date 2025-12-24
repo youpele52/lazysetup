@@ -69,9 +69,13 @@ jobs:
           sha256sum lazysetup-* > SHA256SUMS
           cat SHA256SUMS
       
+      - name: Copy install scripts
+        run: |
+          cp install.sh uninstall.sh verify.sh .
+      
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "lazysetup-*,SHA256SUMS"
+          artifacts: "lazysetup-*,SHA256SUMS,install.sh,uninstall.sh,verify.sh"
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
