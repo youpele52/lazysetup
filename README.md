@@ -16,9 +16,9 @@ A modern, interactive terminal UI for installing development tools across multip
 
 ## Installation
 
-### Quick Install (Curl) - Recommended
+### Option 1: Curl (Recommended) - Safest & Easiest
 
-The safest and easiest way to install lazysetup:
+The safest way to install lazysetup with automatic checksum verification:
 
 ```bash
 # Latest stable release
@@ -28,9 +28,9 @@ curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/insta
 curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/install.sh | bash
 ```
 
-**What it does:**
-- ✅ Detects your OS and architecture automatically
-- ✅ Downloads the latest pre-built binary
+**Features:**
+- ✅ Auto-detects OS and architecture
+- ✅ Downloads pre-built binary
 - ✅ Verifies checksum for security
 - ✅ Installs to `/usr/local/bin`
 - ✅ Requests sudo only if needed
@@ -40,25 +40,21 @@ curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/insta
 curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/verify.sh | bash
 ```
 
-### Uninstall
+### Option 2: Go Install
 
-To remove lazysetup:
+If you have Go 1.16+ installed:
 
 ```bash
-# Interactive uninstall (prompts for confirmation)
-curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/uninstall.sh | bash
+# Latest version
+go install github.com/youpele52/lazysetup@latest
+
+# Specific version
+go install github.com/youpele52/lazysetup@v0.0.1
 ```
 
-Or manually:
-```bash
-# Find where it's installed
-which lazysetup
+Binary will be installed to `$GOPATH/bin/lazysetup` (usually `~/go/bin/lazysetup`)
 
-# Remove it
-sudo rm /usr/local/bin/lazysetup
-```
-
-### From Source
+### Option 3: Build from Source
 
 ```bash
 git clone https://github.com/youpele52/lazysetup.git
@@ -67,10 +63,35 @@ go build -o lazysetup
 ./lazysetup
 ```
 
+### Uninstall
+
+**If installed via Curl:**
+```bash
+# Interactive uninstall (prompts for confirmation)
+curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/uninstall.sh | bash
+```
+
+**Or manually:**
+```bash
+# Find installation location
+which lazysetup
+
+# Remove it
+sudo rm /usr/local/bin/lazysetup
+```
+
+**If installed via Go:**
+```bash
+# Remove from GOPATH
+rm ~/go/bin/lazysetup
+```
+
 ### Requirements
 
-- Go 1.16 or higher (for building from source)
-- A supported package manager (Homebrew, APT, YUM, Curl, Scoop, or Chocolatey)
+- **Curl method**: curl, sha256sum/shasum (for verification)
+- **Go method**: Go 1.16 or higher
+- **Source method**: Go 1.16 or higher
+- **Runtime**: A supported package manager (Homebrew, APT, YUM, Curl, Scoop, or Chocolatey)
 
 ## Usage
 
