@@ -9,6 +9,27 @@ import (
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
+// Action text constants
+const (
+	actionTextInstall   = "Installation"
+	actionTextUpdate    = "Update"
+	actionTextUninstall = "Uninstall"
+	actionTextDefault   = "Action"
+
+	actionVerbInstall   = "Installing"
+	actionVerbUpdate    = "Updating"
+	actionVerbUninstall = "Uninstalling"
+	actionVerbDefault   = "Processing"
+
+	actionNameInstall   = "install"
+	actionNameUpdate    = "update"
+	actionNameUninstall = "uninstall"
+	actionNameDefault   = "action"
+
+	resultSuccessful = "successful"
+	resultFailed     = "failed"
+)
+
 // MessageBuilder provides a fluent interface for building multi-line UI messages
 // It allows chaining method calls to construct formatted messages with lines, separators, and spacing
 type MessageBuilder struct {
@@ -70,13 +91,13 @@ func BuildInstallationProgressMessage(params ProgressMessageParams) string {
 func getActionText(action models.ActionType) string {
 	switch action {
 	case models.ActionInstall:
-		return "Installation"
+		return actionTextInstall
 	case models.ActionUpdate:
-		return "Update"
+		return actionTextUpdate
 	case models.ActionUninstall:
-		return "Uninstall"
+		return actionTextUninstall
 	default:
-		return "Action"
+		return actionTextDefault
 	}
 }
 
@@ -84,13 +105,13 @@ func getActionText(action models.ActionType) string {
 func getActionVerb(action models.ActionType) string {
 	switch action {
 	case models.ActionInstall:
-		return "Installing"
+		return actionVerbInstall
 	case models.ActionUpdate:
-		return "Updating"
+		return actionVerbUpdate
 	case models.ActionUninstall:
-		return "Uninstalling"
+		return actionVerbUninstall
 	default:
-		return "Processing"
+		return actionVerbDefault
 	}
 }
 
@@ -111,18 +132,18 @@ func BuildInstallationResultsMessage(results []models.InstallResult, action mode
 
 	for _, result := range results {
 		if result.Success {
-			successLine := fmt.Sprintf("%s✓ %s - %s (%ds)%s", colors.ANSIGreen, result.Tool, successVerb, result.Duration, colors.ANSIReset)
+			successLine := fmt.Sprintf("%s✓ %s - %s successful (%ds)%s", colors.ANSIGreen, result.Tool, successVerb, result.Duration, colors.ANSIReset)
 			mb.AddLine(successLine)
 			successCount++
 		} else {
-			failedLine := fmt.Sprintf("%s✗ %s - %s (%ds)%s", colors.ANSIRed, result.Tool, failVerb, result.Duration, colors.ANSIReset)
+			failedLine := fmt.Sprintf("%s✗ %s - %s failed (%ds)%s", colors.ANSIRed, result.Tool, failVerb, result.Duration, colors.ANSIReset)
 			mb.AddLine(failedLine)
 			if result.Error != "" {
 				// Display error message, split by newlines for readability
 				errorLines := strings.Split(result.Error, "\n")
 				for _, errLine := range errorLines {
 					if strings.TrimSpace(errLine) != "" {
-						displayLine := fmt.Sprintf("%s  Error: %s%s", colors.ANSIRed, strings.TrimSpace(errLine), colors.ANSIReset)
+						displayLine := fmt.Sprintf("%s  %s%s", colors.ANSIRed, strings.TrimSpace(errLine), colors.ANSIReset)
 						mb.AddLine(displayLine)
 						break // Only show first line to avoid cluttering UI
 					}
@@ -139,30 +160,30 @@ func BuildInstallationResultsMessage(results []models.InstallResult, action mode
 	return mb.Build()
 }
 
-// getSuccessVerb returns the past tense success verb for the action type
+// getSuccessVerb returns the action verb for success messages
 func getSuccessVerb(action models.ActionType) string {
 	switch action {
 	case models.ActionInstall:
-		return "Successfully installed"
+		return actionNameInstall
 	case models.ActionUpdate:
-		return "Successfully updated"
+		return actionNameUpdate
 	case models.ActionUninstall:
-		return "Successfully uninstalled"
+		return actionNameUninstall
 	default:
-		return "Success"
+		return actionNameDefault
 	}
 }
 
-// getFailVerb returns the failure verb for the action type
+// getFailVerb returns the action verb for failure messages
 func getFailVerb(action models.ActionType) string {
 	switch action {
 	case models.ActionInstall:
-		return "Failed to install"
+		return actionNameInstall
 	case models.ActionUpdate:
-		return "Failed to update"
+		return actionNameUpdate
 	case models.ActionUninstall:
-		return "Failed to uninstall"
+		return actionNameUninstall
 	default:
-		return "Failed"
+		return actionNameDefault
 	}
 }
