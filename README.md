@@ -66,12 +66,13 @@ go build -o lazysetup
 ### Uninstall
 
 **If installed via Curl:**
+
+Interactive uninstall (prompts for confirmation):
 ```bash
-# Interactive uninstall (prompts for confirmation)
-curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/uninstall.sh | bash
+curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/uninstall.sh | bash
 ```
 
-**Or manually:**
+Or manually:
 ```bash
 # Find installation location
 which lazysetup
@@ -84,6 +85,12 @@ sudo rm /usr/local/bin/lazysetup
 ```bash
 # Remove from GOPATH
 rm ~/go/bin/lazysetup
+```
+
+**If built from source:**
+```bash
+# Remove the binary you built
+rm ./lazysetup
 ```
 
 ### Requirements
