@@ -16,6 +16,48 @@ A modern, interactive terminal UI for installing development tools across multip
 
 ## Installation
 
+### Quick Install (Curl) - Recommended
+
+The safest and easiest way to install lazysetup:
+
+```bash
+# Latest stable release
+curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/install.sh | bash
+
+# Or specific version
+curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/install.sh | bash
+```
+
+**What it does:**
+- ✅ Detects your OS and architecture automatically
+- ✅ Downloads the latest pre-built binary
+- ✅ Verifies checksum for security
+- ✅ Installs to `/usr/local/bin`
+- ✅ Requests sudo only if needed
+
+**Verify installation:**
+```bash
+curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/verify.sh | bash
+```
+
+### Uninstall
+
+To remove lazysetup:
+
+```bash
+# Interactive uninstall (prompts for confirmation)
+curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/uninstall.sh | bash
+```
+
+Or manually:
+```bash
+# Find where it's installed
+which lazysetup
+
+# Remove it
+sudo rm /usr/local/bin/lazysetup
+```
+
 ### From Source
 
 ```bash
@@ -27,7 +69,7 @@ go build -o lazysetup
 
 ### Requirements
 
-- Go 1.16 or higher
+- Go 1.16 or higher (for building from source)
 - A supported package manager (Homebrew, APT, YUM, Curl, Scoop, or Chocolatey)
 
 ## Usage
