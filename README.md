@@ -69,7 +69,7 @@ go build -o lazysetup
 
 Interactive uninstall (prompts for confirmation):
 ```bash
-curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/uninstall.sh | bash
+curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/uninstall.sh -o /tmp/uninstall.sh && bash /tmp/uninstall.sh
 ```
 
 Or manually:
