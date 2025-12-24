@@ -9,10 +9,15 @@ import (
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
-// layoutMultiPanel renders the three-panel layout used in PageMultiPanel
-// Panel 0 (right): Installation method selection
-// Panel 1 (left, bottom): Tool selection with checkboxes
-// Panel 2 (right, full height): Status/results display
+// layoutMultiPanel renders the four-panel layout used in PageMultiPanel
+// Left side (stacked vertically):
+//   - Panel 1: Package Manager selection (top)
+//   - Panel 2: Action selection (middle) - Install/Update/Delete
+//   - Panel 3: Tools selection (bottom)
+//
+// Right side (full height):
+//   - Panel 0: Status/results display (read-only)
+//
 // Bottom status bar shows keybinding hints
 func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	// Delete old views
@@ -22,11 +27,15 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 
 	leftPanelWidth := maxX / 3
 	panelHeight := maxY - 3
-
-	// Panel 1: Installation Methods (top-left)
-	installationHeight := panelHeight / 2
 	activePanel := state.GetActivePanel()
-	if v, err := g.SetView(constants.PanelInstallation, 0, 0, leftPanelWidth, installationHeight); err != nil {
+
+	// Calculate heights for left panels (3 panels stacked)
+	packageManagerHeight := panelHeight / 3
+	actionHeight := panelHeight / 4
+	toolsStartY := packageManagerHeight + actionHeight + 2
+
+	// Panel 1: Package Manager (top-left)
+	if v, err := g.SetView(constants.PanelPackageManager, 0, 0, leftPanelWidth, packageManagerHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -35,12 +44,13 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		v.SelFgColor = colors.HighlightFg
 	}
 
-	// Update title every frame based on active panel
-	if v, err := g.View(constants.PanelInstallation); err == nil {
-		v.Title = "[1]-" + constants.TitleInstallation
-	}
-
-	if v, err := g.View(constants.PanelInstallation); err == nil {
+	if v, err := g.View(constants.PanelPackageManager); err == nil {
+		v.Title = "[1]-" + constants.TitlePackageManager
+		if activePanel == models.PanelPackageManager {
+			v.FgColor = colors.ActiveBorderColor
+		} else {
+			v.FgColor = colors.TextPrimary
+		}
 		v.Clear()
 		for i, method := range state.InstallMethods {
 			marker := constants.RadioUnselected
@@ -48,17 +58,13 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 				marker = constants.RadioSelected
 			}
 
-			if activePanel == models.PanelInstallation {
-				// Active panel: green text by default
+			if activePanel == models.PanelPackageManager {
 				if i == state.SelectedIndex {
-					// Cursor position: magenta text (will have magenta background from highlight)
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, method, colors.ANSIReset)
 				} else {
-					// Unselected item: green text
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, method, colors.ANSIReset)
 				}
 			} else {
-				// Inactive panel
 				if i == state.SelectedIndex {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, method, colors.ANSIReset)
 				} else {
@@ -66,23 +72,72 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 				}
 			}
 		}
-		if activePanel == models.PanelInstallation {
+		if activePanel == models.PanelPackageManager {
 			v.SetCursor(0, state.SelectedIndex)
 		}
 	}
 
-	// Panel 2: Tools Selection (bottom-left)
-	if v, err := g.SetView(constants.PanelTools, 0, installationHeight+1, leftPanelWidth, panelHeight); err != nil {
+	// Panel 2: Action (middle-left)
+	actions := []string{"Install", "Update", "Delete"}
+	if v, err := g.SetView(constants.PanelAction, 0, packageManagerHeight+1, leftPanelWidth, packageManagerHeight+actionHeight+1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "[2]-" + constants.TitleToolSelection
+		v.Wrap = true
+		v.SelBgColor = colors.HighlightBg
+		v.SelFgColor = colors.HighlightFg
+	}
+
+	if v, err := g.View(constants.PanelAction); err == nil {
+		v.Title = "[2]-" + constants.TitleAction
+		if activePanel == models.PanelAction {
+			v.FgColor = colors.ActiveBorderColor
+		} else {
+			v.FgColor = colors.TextPrimary
+		}
+		v.Clear()
+		for i, action := range actions {
+			marker := constants.RadioUnselected
+			if i == state.ActionIndex {
+				marker = constants.RadioSelected
+			}
+
+			if activePanel == models.PanelAction {
+				if i == state.ActionIndex {
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, action, colors.ANSIReset)
+				} else {
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, action, colors.ANSIReset)
+				}
+			} else {
+				if i == state.ActionIndex {
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, action, colors.ANSIReset)
+				} else {
+					fmt.Fprintf(v, "%s %s\n", marker, action)
+				}
+			}
+		}
+		if activePanel == models.PanelAction {
+			v.SetCursor(0, state.ActionIndex)
+		}
+	}
+
+	// Panel 3: Tools Selection (bottom-left)
+	if v, err := g.SetView(constants.PanelTools, 0, toolsStartY, leftPanelWidth, panelHeight); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
 		v.Wrap = true
 		v.SelBgColor = colors.HighlightBg
 		v.SelFgColor = colors.HighlightFg
 	}
 
 	if v, err := g.View(constants.PanelTools); err == nil {
+		v.Title = "[3]-" + constants.TitleTools
+		if activePanel == models.PanelTools {
+			v.FgColor = colors.ActiveBorderColor
+		} else {
+			v.FgColor = colors.TextPrimary
+		}
 		v.Clear()
 		for i, tool := range state.Tools {
 			selected := state.SelectedTools[tool]
@@ -94,19 +149,14 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 			}
 
 			if activePanel == models.PanelTools {
-				// Active panel: green text by default
 				if i == state.ToolsIndex {
-					// Cursor position: magenta text (will have magenta background from highlight)
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
 				} else if selected {
-					// Selected item: magenta text
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
 				} else {
-					// Unselected item: green text
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, tool, colors.ANSIReset)
 				}
 			} else {
-				// Inactive panel
 				if selected {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
 				} else {
@@ -124,21 +174,17 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "[0]-" + constants.PanelStatus
 		v.Wrap = true
 		v.Highlight = false
 	}
 
-	// Update border color every frame based on active panel
 	if v, err := g.View(constants.PanelProgress); err == nil {
-		if activePanel == models.PanelProgress {
+		v.Title = "[0]-" + constants.TitleStatus
+		if activePanel == models.PanelStatus {
 			v.FgColor = colors.ActiveBorderColor
 		} else {
 			v.FgColor = colors.TextPrimary
 		}
-	}
-
-	if v, err := g.View(constants.PanelProgress); err == nil {
 		v.Clear()
 		installationDone := state.GetInstallationDone()
 		installStartTime := state.GetInstallStartTime()
