@@ -82,8 +82,15 @@ func BuildInstallationResultsMessage(results []models.InstallResult) string {
 			failedLine := fmt.Sprintf("%s✗ %s - Failed (%ds)%s", colors.ANSIRed, result.Tool, result.Duration, colors.ANSIReset)
 			mb.AddLine(failedLine)
 			if result.Error != "" {
-				errorLine := fmt.Sprintf("%s  Error: %s%s", colors.ANSIRed, result.Error, colors.ANSIReset)
-				mb.AddLine(errorLine)
+				// Display error message, split by newlines for readability
+				errorLines := strings.Split(result.Error, "\n")
+				for _, errLine := range errorLines {
+					if strings.TrimSpace(errLine) != "" {
+						displayLine := fmt.Sprintf("%s  Error: %s%s", colors.ANSIRed, strings.TrimSpace(errLine), colors.ANSIReset)
+						mb.AddLine(displayLine)
+						break // Only show first line to avoid cluttering UI
+					}
+				}
 			}
 			failureCount++
 		}
