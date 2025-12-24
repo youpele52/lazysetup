@@ -205,13 +205,16 @@ AvailableUpdates map[string]string  // tool → newVersion
 - [x] Update tool functionality
 - [x] Delete/uninstall tool functionality
 
-**Phase 2**: Update & Delete Operations
+**Phase 2**: Update & Delete Operations + AI Troubleshooting
 - [x] Implement update command handlers
 - [x] Implement delete command handlers
 - [ ] Add version tracking for installed tools
 - [x] Create Update and Delete UI pages (integrated into Action panel)
 - [ ] Add update progress tracking
 - [ ] Add delete confirmation dialogs
+- [ ] **AI Error Resolution**: Capture installation/update errors and pass to AI for diagnosis
+- [ ] **AI Solution Recommendations**: Display AI-generated solutions for failed operations
+- [ ] **Error Context Logging**: Log full error context (OS, architecture, tool, command output)
 
 **Phase 3**: Multi-platform + AI integration  
 - [ ] Cross-platform compatibility testing
