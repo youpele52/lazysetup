@@ -55,28 +55,21 @@ jobs:
       
       - name: Organize artifacts
         run: |
-          find binaries -type f -name "lazysetup-*" -exec mv {} . \;
-          ls -la lazysetup-* 2>/dev/null || echo "No binaries found"
+          mkdir -p release
+          find binaries -type f -name "lazysetup-*" -exec mv {} release/ \;
+          ls -la release/
       
       - name: Generate checksums
         run: |
-          if ls lazysetup-* 1> /dev/null 2>&1; then
-            sha256sum lazysetup-* > SHA256SUMS
-            cat SHA256SUMS
-          else
-            echo "Error: No binaries found"
-            exit 1
-          fi
+          cd release
+          sha256sum lazysetup-* > SHA256SUMS
+          cat SHA256SUMS
+          cd ..
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            lazysetup-v*-darwin-amd64
-            lazysetup-v*-darwin-arm64
-            lazysetup-v*-linux-amd64
-            lazysetup-v*-linux-arm64
-            SHA256SUMS
+          files: release/*
           draft: false
           prerelease: false
         env:
