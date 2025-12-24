@@ -21,15 +21,16 @@ A modern, interactive terminal UI for installing development tools across multip
 The safest way to install lazysetup with automatic checksum verification:
 
 ```bash
-# Latest stable release
-curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/install.sh | bash
+# Latest stable release (recommended)
+curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/install.sh | bash
 
-# Or specific version
-curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/install.sh | bash
+# Specific version
+curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/install.sh | bash -s v0.1.0
 ```
 
 **Features:**
 - ✅ Auto-detects OS and architecture
+- ✅ Fetches latest release automatically
 - ✅ Downloads pre-built binary
 - ✅ Verifies checksum for security
 - ✅ Installs to `/usr/local/bin`
@@ -37,7 +38,7 @@ curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/insta
 
 **Verify installation:**
 ```bash
-curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/verify.sh | bash
+curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/verify.sh | bash
 ```
 
 ### Option 2: Go Install
@@ -49,7 +50,7 @@ If you have Go 1.16+ installed:
 go install github.com/youpele52/lazysetup@latest
 
 # Specific version
-go install github.com/youpele52/lazysetup@v0.0.1
+go install github.com/youpele52/lazysetup@v0.1.0
 ```
 
 Binary will be installed to `$GOPATH/bin/lazysetup` (usually `~/go/bin/lazysetup`)
@@ -69,7 +70,7 @@ go build -o lazysetup
 
 Interactive uninstall (prompts for confirmation):
 ```bash
-curl -fsSL https://github.com/youpele52/lazysetup/releases/download/v0.0.1/uninstall.sh -o /tmp/uninstall.sh && bash /tmp/uninstall.sh
+curl -fsSL https://github.com/youpele52/lazysetup/releases/latest/download/uninstall.sh -o /tmp/uninstall.sh && bash /tmp/uninstall.sh
 ```
 
 Or manually:
