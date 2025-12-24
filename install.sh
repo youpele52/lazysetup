@@ -191,10 +191,10 @@ main() {
   echo -e "${GREEN}✓ Installation complete!${NC}"
   echo ""
   echo "Run lazysetup with:"
-  echo "  ${GREEN}lazysetup${NC}"
+  echo -e "  ${GREEN}lazysetup${NC}"
   echo ""
   echo "For help:"
-  echo "  ${GREEN}lazysetup --help${NC}"
+  echo -e "  ${GREEN}lazysetup --help${NC}"
 }
 
 main "$@"
