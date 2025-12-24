@@ -69,9 +69,10 @@ jobs:
           sha256sum lazysetup-* > SHA256SUMS
           cat SHA256SUMS
       
-      - name: Copy install scripts
+      - name: List available files
         run: |
-          cp install.sh uninstall.sh verify.sh .
+          echo "=== All files in current directory ==="
+          ls -la
       
       - name: Create Release
         uses: ncipollo/release-action@v1
