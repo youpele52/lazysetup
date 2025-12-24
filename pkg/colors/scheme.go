@@ -12,7 +12,7 @@ const (
 
 	// Highlight colors
 	HighlightBg = gocui.ColorMagenta
-	HighlightFg = gocui.ColorBlack
+	HighlightFg = gocui.ColorGreen
 
 	// Accent colors
 	AccentPrimary = gocui.ColorMagenta
@@ -21,6 +21,9 @@ const (
 	// Status colors
 	SuccessColor = gocui.ColorGreen
 	FailureColor = gocui.ColorRed
+
+	// Active panel border color
+	ActiveBorderColor = gocui.ColorGreen
 )
 
 // ANSI color codes for inline text coloring

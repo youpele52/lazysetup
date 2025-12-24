@@ -304,6 +304,20 @@ func (s *State) SetCurrentPage(page Page) {
 	s.CurrentPage = page
 }
 
+// GetActivePanel safely gets the active panel
+func (s *State) GetActivePanel() Panel {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.ActivePanel
+}
+
+// SetActivePanel safely sets the active panel
+func (s *State) SetActivePanel(panel Panel) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.ActivePanel = panel
+}
+
 // ClearInstallOutput safely clears the installation output
 func (s *State) ClearInstallOutput() {
 	s.mu.Lock()

@@ -144,7 +144,7 @@ func layoutToolsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 
 	if v, err := g.View(constants.ViewTools); err == nil {
 		v.Clear()
-		for _, tool := range state.Tools {
+		for i, tool := range state.Tools {
 			selected := state.SelectedTools[tool]
 			var marker string
 			if selected {
@@ -152,7 +152,17 @@ func layoutToolsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 			} else {
 				marker = constants.CheckboxUnselected
 			}
-			fmt.Fprintf(v, "%s %s\n", marker, tool)
+			// Active panel: green text by default
+			if i == state.ToolsIndex {
+				// Cursor position: magenta text (will have magenta background from highlight)
+				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+			} else if selected {
+				// Selected item: magenta text
+				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+			} else {
+				// Unselected item: green text
+				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, tool, colors.ANSIReset)
+			}
 		}
 		v.SetCursor(0, state.ToolsIndex)
 	}
@@ -246,34 +256,52 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 
 	// Panel 1: Installation Methods (top-left)
 	installationHeight := panelHeight / 2
+	activePanel := state.GetActivePanel()
 	if v, err := g.SetView(constants.PanelInstallation, 0, 0, leftPanelWidth, installationHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "[1]" + " " + constants.TitleInstallation
-		v.FgColor = colors.TextPrimary
 		v.Wrap = true
-		if state.ActivePanel == models.PanelInstallation {
-			v.SelBgColor = colors.HighlightBg
-			v.SelFgColor = colors.HighlightFg
+		v.SelBgColor = colors.HighlightBg
+		v.SelFgColor = colors.HighlightFg
+	}
+
+	// Update title every frame based on active panel
+	if v, err := g.View(constants.PanelInstallation); err == nil {
+		if activePanel == models.PanelInstallation {
+			v.Title = fmt.Sprintf("\033[32m[1] %s\033[0m", constants.TitleInstallation)
+		} else {
+			v.Title = "[1] " + constants.TitleInstallation
 		}
 	}
 
 	if v, err := g.View(constants.PanelInstallation); err == nil {
 		v.Clear()
 		for i, method := range state.InstallMethods {
-			isSelected := i == state.SelectedIndex && state.ActivePanel == models.PanelInstallation
-			isConfirmed := state.SelectedMethod == method
+			marker := constants.RadioUnselected
+			if i == state.SelectedIndex {
+				marker = constants.RadioSelected
+			}
 
-			if isSelected {
-				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, constants.RadioSelected, method, colors.ANSIReset)
-			} else if isConfirmed {
-				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, constants.RadioSelected, method, colors.ANSIReset)
+			if activePanel == models.PanelInstallation {
+				// Active panel: green text by default
+				if i == state.SelectedIndex {
+					// Cursor position: magenta text (will have magenta background from highlight)
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, method, colors.ANSIReset)
+				} else {
+					// Unselected item: green text
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, method, colors.ANSIReset)
+				}
 			} else {
-				fmt.Fprintf(v, "%s %s\n", constants.RadioUnselected, method)
+				// Inactive panel
+				if i == state.SelectedIndex {
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, method, colors.ANSIReset)
+				} else {
+					fmt.Fprintf(v, "%s %s\n", marker, method)
+				}
 			}
 		}
-		if state.ActivePanel == models.PanelInstallation {
+		if activePanel == models.PanelInstallation {
 			v.SetCursor(0, state.SelectedIndex)
 		}
 	}
@@ -283,13 +311,10 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "[2]" + " " + constants.TitleToolSelection
-		v.FgColor = colors.TextPrimary
+		v.Title = "[2] " + constants.TitleToolSelection
 		v.Wrap = true
-		if state.ActivePanel == models.PanelTools {
-			v.SelBgColor = colors.HighlightBg
-			v.SelFgColor = colors.HighlightFg
-		}
+		v.SelBgColor = colors.HighlightBg
+		v.SelFgColor = colors.HighlightFg
 	}
 
 	if v, err := g.View(constants.PanelTools); err == nil {
@@ -302,13 +327,29 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 			} else {
 				marker = constants.CheckboxUnselected
 			}
-			if i == state.ToolsIndex && state.ActivePanel == models.PanelTools {
-				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+
+			if activePanel == models.PanelTools {
+				// Active panel: green text by default
+				if i == state.ToolsIndex {
+					// Cursor position: magenta text (will have magenta background from highlight)
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+				} else if selected {
+					// Selected item: magenta text
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+				} else {
+					// Unselected item: green text
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, tool, colors.ANSIReset)
+				}
 			} else {
-				fmt.Fprintf(v, "%s %s\n", marker, tool)
+				// Inactive panel
+				if selected {
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+				} else {
+					fmt.Fprintf(v, "%s %s\n", marker, tool)
+				}
 			}
 		}
-		if state.ActivePanel == models.PanelTools {
+		if activePanel == models.PanelTools {
 			v.SetCursor(0, state.ToolsIndex)
 		}
 	}
@@ -318,10 +359,18 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "[0]" + " " + constants.PanelStatus
-		v.FgColor = colors.TextPrimary
+		v.Title = "[0] " + constants.PanelStatus
 		v.Wrap = true
 		v.Highlight = false
+	}
+
+	// Update border color every frame based on active panel
+	if v, err := g.View(constants.PanelProgress); err == nil {
+		if activePanel == models.PanelProgress {
+			v.FgColor = colors.ActiveBorderColor
+		} else {
+			v.FgColor = colors.TextPrimary
+		}
 	}
 
 	if v, err := g.View(constants.PanelProgress); err == nil {
