@@ -24,6 +24,14 @@ const (
 	ErrorNoInstallCommand = "No install command found"
 	ErrorNoToolsSelected  = "Please select at least one tool for installation"
 
+	// Installation status constants
+	StatusSuccess              = "success"
+	StatusFailed               = "failed"
+	StatusAlreadyInstalled     = "Already installed"
+	StatusNotInstalled         = "Not installed"
+	ErrorInstallationTimedOut  = "Installation timed out after 15 minutes"
+	ErrorInstallationCancelled = "Installation was cancelled"
+
 	RadioSelected   = "●"
 	RadioUnselected = "○"
 
