@@ -26,9 +26,19 @@ const (
 type Panel int
 
 const (
-	PanelInstallation Panel = 0
-	PanelTools        Panel = 1
-	PanelProgress     Panel = 2
+	PanelPackageManager Panel = 0
+	PanelStatus         Panel = 1
+	PanelAction         Panel = 2
+	PanelTools          Panel = 3
+)
+
+// ActionType represents the type of action to perform on tools
+type ActionType int
+
+const (
+	ActionInstall ActionType = 0
+	ActionUpdate  ActionType = 1
+	ActionDelete  ActionType = 2
 )
 
 // InstallResult captures the outcome of a single tool installation
@@ -46,13 +56,15 @@ type InstallResult struct {
 type State struct {
 	mu sync.RWMutex
 
-	InstallMethods []string // Available installation methods (Homebrew, APT, etc.)
-	SelectedIndex  int      // Currently selected method index in menu
-	SelectedMethod string   // Confirmed method to use for installation
-	CheckStatus    string   // Status of method availability check
-	Error          string   // Current error message to display
-	CurrentPage    Page     // Current page being rendered
-	ActivePanel    Panel    // Active panel in multi-panel layout (0-2)
+	InstallMethods []string   // Available installation methods (Homebrew, APT, etc.)
+	SelectedIndex  int        // Currently selected method index in menu
+	SelectedMethod string     // Confirmed method to use for installation
+	CheckStatus    string     // Status of method availability check
+	Error          string     // Current error message to display
+	CurrentPage    Page       // Current page being rendered
+	ActivePanel    Panel      // Active panel in multi-panel layout (0-3)
+	SelectedAction ActionType // Currently selected action (Install, Update, Delete)
+	ActionIndex    int        // Currently selected action index in action panel
 
 	Tools            []string         // Available tools to install
 	SelectedTools    map[string]bool  // Tools user selected for installation
@@ -79,7 +91,9 @@ func NewState() *State {
 		SelectedIndex:  0,
 		SelectedMethod: config.InstallMethods[0],
 		CurrentPage:    PageMultiPanel,
-		ActivePanel:    PanelInstallation,
+		ActivePanel:    PanelPackageManager,
+		SelectedAction: ActionInstall,
+		ActionIndex:    0,
 		SelectedTools:  make(map[string]bool),
 		ToolsIndex:     0,
 		InstallResults: []InstallResult{},
@@ -98,8 +112,10 @@ func (s *State) Reset() {
 	s.SelectedIndex = 0
 	s.CheckStatus = ""
 	s.Error = ""
-	s.CurrentPage = PageMenu
+	s.CurrentPage = PageMultiPanel
 	s.SelectedTools = make(map[string]bool)
 	s.ToolsIndex = 0
+	s.ActionIndex = 0
+	s.SelectedAction = ActionInstall
 	s.InstallResults = []InstallResult{}
 }

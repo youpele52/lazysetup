@@ -202,14 +202,14 @@ AvailableUpdates map[string]string  // tool → newVersion
 - [x] Multi-tool installation support
 - [x] Multiple install methods
 - [x] TUI with multi-panel layout
-- [ ] Update tool functionality
-- [ ] Delete/uninstall tool functionality
+- [x] Update tool functionality
+- [x] Delete/uninstall tool functionality
 
 **Phase 2**: Update & Delete Operations
-- [ ] Implement update command handlers
-- [ ] Implement delete command handlers
+- [x] Implement update command handlers
+- [x] Implement delete command handlers
 - [ ] Add version tracking for installed tools
-- [ ] Create Update and Delete UI pages
+- [x] Create Update and Delete UI pages (integrated into Action panel)
 - [ ] Add update progress tracking
 - [ ] Add delete confirmation dialogs
 

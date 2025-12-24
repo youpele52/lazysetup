@@ -22,7 +22,7 @@ func layoutMenuPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "[1]-" + constants.TitleInstallation
+		v.Title = "[1]-" + constants.TitlePackageManager
 		v.Highlight = true
 		v.SelBgColor = colors.HighlightBg
 		v.SelFgColor = colors.HighlightFg
