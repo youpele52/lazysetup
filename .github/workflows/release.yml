@@ -53,19 +53,22 @@ jobs:
           pattern: binaries-*
           merge-multiple: true
       
+      - name: Move artifacts to root
+        run: |
+          mv binaries/binaries-*/* . 2>/dev/null || true
+          ls -la lazysetup-* || echo "No binaries found"
+      
       - name: Generate checksums
         run: |
-          cd binaries
           sha256sum lazysetup-* > SHA256SUMS
           cat SHA256SUMS
-          cd ..
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            binaries/lazysetup-*
-            binaries/SHA256SUMS
+            lazysetup-*
+            SHA256SUMS
           draft: false
           prerelease: false
         env:
