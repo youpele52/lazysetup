@@ -279,28 +279,38 @@ func Quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
+// NextPanel switches to the next panel (Tab key)
 func NextPanel(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.CurrentPage == models.PageMultiPanel {
-			state.ActivePanel = (state.ActivePanel + 1) % 3
+		currentPage := state.GetCurrentPage()
+		if currentPage == models.PageMultiPanel {
+			activePanel := state.GetActivePanel()
+			newPanel := models.Panel((int(activePanel) + 1) % 3)
+			state.SetActivePanel(newPanel)
 		}
 		return nil
 	}
 }
 
+// PrevPanel switches to the previous panel (Shift+Tab)
 func PrevPanel(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.CurrentPage == models.PageMultiPanel {
-			state.ActivePanel = (state.ActivePanel + 2) % 3
+		currentPage := state.GetCurrentPage()
+		if currentPage == models.PageMultiPanel {
+			activePanel := state.GetActivePanel()
+			newPanel := models.Panel((int(activePanel) + 2) % 3)
+			state.SetActivePanel(newPanel)
 		}
 		return nil
 	}
 }
 
+// SwitchToPanel switches to a specific panel (0, 1, 2 keys)
 func SwitchToPanel(state *models.State, panel models.Panel) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.CurrentPage == models.PageMultiPanel {
-			state.ActivePanel = panel
+		currentPage := state.GetCurrentPage()
+		if currentPage == models.PageMultiPanel {
+			state.SetActivePanel(panel)
 		}
 		return nil
 	}
@@ -308,8 +318,10 @@ func SwitchToPanel(state *models.State, panel models.Panel) func(*gocui.Gui, *go
 
 func MultiPanelCursorUp(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.CurrentPage == models.PageMultiPanel {
-			switch state.ActivePanel {
+		currentPage := state.GetCurrentPage()
+		if currentPage == models.PageMultiPanel {
+			activePanel := state.GetActivePanel()
+			switch activePanel {
 			case models.PanelInstallation:
 				if state.SelectedIndex > 0 {
 					state.SelectedIndex--
@@ -326,8 +338,10 @@ func MultiPanelCursorUp(state *models.State) func(*gocui.Gui, *gocui.View) error
 
 func MultiPanelCursorDown(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.CurrentPage == models.PageMultiPanel {
-			switch state.ActivePanel {
+		currentPage := state.GetCurrentPage()
+		if currentPage == models.PageMultiPanel {
+			activePanel := state.GetActivePanel()
+			switch activePanel {
 			case models.PanelInstallation:
 				if state.SelectedIndex < len(state.InstallMethods)-1 {
 					state.SelectedIndex++
@@ -344,7 +358,7 @@ func MultiPanelCursorDown(state *models.State) func(*gocui.Gui, *gocui.View) err
 
 func MultiPanelToggleTool(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.CurrentPage == models.PageMultiPanel && state.ActivePanel == models.PanelTools {
+		if state.GetCurrentPage() == models.PageMultiPanel && state.GetActivePanel() == models.PanelTools {
 			tool := state.Tools[state.ToolsIndex]
 			state.SelectedTools[tool] = !state.SelectedTools[tool]
 		}
@@ -354,7 +368,7 @@ func MultiPanelToggleTool(state *models.State) func(*gocui.Gui, *gocui.View) err
 
 func MultiPanelSelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.CurrentPage == models.PageMultiPanel && state.ActivePanel == models.PanelInstallation {
+		if state.GetCurrentPage() == models.PageMultiPanel && state.GetActivePanel() == models.PanelInstallation {
 			state.SelectedMethod = state.InstallMethods[state.SelectedIndex]
 			state.CheckStatus, state.Error = checkInstallation(state.SelectedMethod)
 
@@ -363,7 +377,7 @@ func MultiPanelSelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) e
 				state.Tools = tools.Tools
 				state.SelectedTools = make(map[string]bool)
 				state.ToolsIndex = 0
-				state.ActivePanel = models.PanelTools
+				state.SetActivePanel(models.PanelTools)
 			}
 		}
 		return nil
@@ -374,7 +388,7 @@ func MultiPanelSelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) e
 // Validates tool selection, launches goroutines, collects results, and handles abort requests
 func MultiPanelStartInstallation(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.GetCurrentPage() == models.PageMultiPanel && state.ActivePanel == models.PanelTools {
+		if state.GetCurrentPage() == models.PageMultiPanel && state.GetActivePanel() == models.PanelTools {
 			// Check if at least one tool is selected
 			selectedTools := state.GetSelectedTools()
 			selectedCount := 0
