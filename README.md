@@ -42,19 +42,20 @@ go build -o lazysetup
 
 | Key | Action |
 |-----|--------|
-| `Tab` | Cycle through panels |
-| `0`, `1`, `2` | Jump to specific panels (Installation, Tools, Progress) |
+| `Tab` / `Shift+Tab` | Cycle through panels (left/right) |
+| `0`, `1`, `2`, `3` | Jump to specific panels (Status, Package Manager, Action, Tools) |
 | `↑` `↓` | Navigate within active panel |
 | `Space` | Toggle tool selection |
-| `Enter` | Confirm selection or start installation |
-| `Esc` | Go back |
-| `Ctrl+C` | Quit |
+| `Enter` | Confirm selection or proceed to next panel |
+| `Esc` (double-tap) | Cancel and return to main menu |
+| `Ctrl+C` | Quit application |
 
 ### Workflow
 
-1. **Panel 0 (Installation)**: Select your package manager (Homebrew is default)
-2. **Panel 1 (Tools)**: Select which tools to install (git, docker, lazygit, lazydocker)
-3. **Panel 2 (Status)**: Watch real-time installation status and results
+1. **Panel 1 (Package Manager)**: Select your package manager (Homebrew, APT, YUM, Curl, Scoop, Chocolatey)
+2. **Panel 2 (Action)**: Choose action - Install, Update, or Uninstall
+3. **Panel 3 (Tools)**: Select which tools to install/update/uninstall (git, docker, lazygit, lazydocker)
+4. **Panel 0 (Status)**: Watch real-time progress with spinner animation and results
 
 ## Supported Tools
 
@@ -78,30 +79,51 @@ go build -o lazysetup
 lazysetup/
 ├── main.go                 # Application entry point
 ├── pkg/
-│   ├── commands/          # Installation command definitions
+│   ├── commands/          # Installation command definitions (install, update, uninstall)
 │   ├── config/            # Configuration (install methods, etc.)
 │   ├── constants/         # UI constants and messages
 │   ├── colors/            # Color scheme definitions
-│   ├── errors/            # Error handling
+│   ├── executor/          # Command execution with timeout and cancellation
 │   ├── handlers/          # Event handlers and keybindings
+│   │   ├── handlers_navigation.go    # Panel navigation and cursor movement
+│   │   ├── handlers_actions.go       # Action selection and execution
+│   │   ├── handlers_execution.go     # Tool execution and command runners
+│   │   └── handlers_legacy.go        # Legacy single-page installation handler
 │   ├── models/            # State management
+│   │   ├── state.go                  # Application state struct
+│   │   ├── state_methods.go          # UI state getters/setters
+│   │   └── state_installation.go     # Installation-related state methods
 │   ├── tools/             # Tool definitions
 │   └── ui/                # UI layout and rendering
+│       ├── layout_multipanel.go      # Main 4-panel layout orchestration
+│       ├── layout_panels.go          # Individual panel rendering functions
+│       ├── messages.go               # Message builder for consistent formatting
+│       └── keybindings.go            # Centralized keybinding setup
 └── go.mod                 # Go module definition
 ```
 
 ## Key Components
 
 ### UI Package
-- `layout.go`: Multi-panel layout management
-- `messages.go`: Message builder for consistent formatting
+- `layout_multipanel.go`: 4-panel layout management (Status, Package Manager, Action, Tools)
+- `layout_panels.go`: Individual panel rendering (Package Manager, Action, Tools)
+- `messages.go`: Dynamic message builder with action-specific success/failure messages
 - `keybindings.go`: Centralized keybinding setup
 
 ### Handlers Package
-- `keybindings.go`: Event handlers for user input and installation logic
+- `handlers_navigation.go`: Panel navigation and cursor movement
+- `handlers_actions.go`: Action selection and execution initialization
+- `handlers_execution.go`: Concurrent tool execution and command runners
+- `handlers_legacy.go`: Legacy single-page installation handler
 
 ### Models Package
-- `state.go`: Application state management
+- `state.go`: Application state struct with ActionType enum
+- `state_methods.go`: UI state getters/setters with mutex protection
+- `state_installation.go`: Installation-related state methods
+
+### Commands Package
+- Installation, update, and uninstall command definitions for each package manager
+- Support for Homebrew, APT, YUM, Curl, Scoop, and Chocolatey
 
 ## Terminal Theme Recommendation
 
@@ -155,10 +177,10 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 - Check your internet connection
 - Some installations may take time; the spinner indicates progress
 
-## Future Enhancements
+### Double-tap Esc not working
+- Ensure you press Esc twice within 500ms to cancel and return to main menu
+- Single Esc press marks the time; second press within 500ms triggers abort
 
-- [ ] Configuration file support
-- [ ] Installation history
-- [ ] Custom tool definitions
-- [ ] Progress persistence
-- [ ] Rollback functionality
+## Roadmap
+
+For planned features, enhancements, and development roadmap, see [PLAN.md](PLAN.md).
