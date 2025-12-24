@@ -38,7 +38,7 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 
 	if v, err := g.View(constants.ViewResults); err == nil {
 		v.Clear()
-		message := BuildInstallationResultsMessage(state.InstallResults)
+		message := BuildInstallationResultsMessage(state.InstallResults, state.SelectedAction)
 		fmt.Fprint(v, message)
 	}
 
