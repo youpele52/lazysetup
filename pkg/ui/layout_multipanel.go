@@ -78,7 +78,7 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	}
 
 	// Panel 2: Action (middle-left)
-	actions := []string{"Install", "Update", "Delete"}
+	actions := []string{"Install", "Update", "Uninstall"}
 	if v, err := g.SetView(constants.PanelAction, 0, packageManagerHeight+1, leftPanelWidth, packageManagerHeight+actionHeight+1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
@@ -202,7 +202,8 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		} else if installationDone {
 			// Show results
 			results := state.GetInstallResults()
-			message := BuildInstallationResultsMessage(results)
+			selectedAction := state.GetSelectedAction()
+			message := BuildInstallationResultsMessage(results, selectedAction)
 			fmt.Fprint(v, message)
 		} else {
 			// Show logo by default

@@ -94,8 +94,8 @@ var UpdateCommands = map[string]map[string]string{
 	},
 }
 
-// DeleteCommands maps package managers to tools and their uninstall commands
-var DeleteCommands = map[string]map[string]string{
+// UninstallCommands maps package managers to tools and their uninstall commands
+var UninstallCommands = map[string]map[string]string{
 	"Homebrew": {
 		"git":        "brew uninstall git",
 		"docker":     "brew uninstall docker",
@@ -145,10 +145,10 @@ func GetUpdateCommand(method, tool string) string {
 	return ""
 }
 
-// GetDeleteCommand retrieves the uninstall/delete command for a specific tool using a specific method
+// GetUninstallCommand retrieves the uninstall command for a specific tool using a specific method
 // Returns empty string if method or tool is not found in the commands map
-func GetDeleteCommand(method, tool string) string {
-	if methodCmds, ok := DeleteCommands[method]; ok {
+func GetUninstallCommand(method, tool string) string {
+	if methodCmds, ok := UninstallCommands[method]; ok {
 		if cmd, ok := methodCmds[tool]; ok {
 			return cmd
 		}

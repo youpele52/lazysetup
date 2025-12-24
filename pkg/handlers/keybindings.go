@@ -372,8 +372,8 @@ func MultiPanelExecuteAction(state *models.State) func(*gocui.Gui, *gocui.View) 
 			return executeInstallAction(state)
 		case models.ActionUpdate:
 			return executeUpdateAction(state)
-		case models.ActionDelete:
-			return executeDeleteAction(state)
+		case models.ActionUninstall:
+			return executeUninstallAction(state)
 		}
 
 		return nil
@@ -406,8 +406,8 @@ func executeUpdateAction(state *models.State) error {
 	return nil
 }
 
-// executeDeleteAction runs uninstall/delete for selected tools
-func executeDeleteAction(state *models.State) error {
+// executeUninstallAction runs uninstall for selected tools
+func executeUninstallAction(state *models.State) error {
 	state.ClearInstallResults()
 	state.ClearToolStartTimes()
 	state.ClearInstallOutput()
@@ -415,7 +415,7 @@ func executeDeleteAction(state *models.State) error {
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
 
-	go runToolAction(state, "delete")
+	go runToolAction(state, "uninstall")
 	return nil
 }
 
@@ -466,8 +466,8 @@ func runToolAction(state *models.State, action string) {
 					status, errMsg, output = installToolWithRetry(state, state.SelectedMethod, toolName)
 				case "update":
 					status, errMsg, output = updateToolWithOutput(state, state.SelectedMethod, toolName)
-				case "delete":
-					status, errMsg, output = deleteToolWithOutput(state, state.SelectedMethod, toolName)
+				case "uninstall":
+					status, errMsg, output = uninstallToolWithOutput(state, state.SelectedMethod, toolName)
 				}
 
 				mu.Lock()
@@ -533,11 +533,11 @@ func updateToolWithOutput(state *models.State, method, tool string) (string, str
 	return constants.StatusSuccess, "", result.Output
 }
 
-// deleteToolWithOutput executes uninstall/delete command for a tool
-func deleteToolWithOutput(state *models.State, method, tool string) (string, string, string) {
-	cmd := commands.GetDeleteCommand(method, tool)
+// uninstallToolWithOutput executes uninstall command for a tool
+func uninstallToolWithOutput(state *models.State, method, tool string) (string, string, string) {
+	cmd := commands.GetUninstallCommand(method, tool)
 	if cmd == "" {
-		return constants.StatusFailed, "No delete command found for " + tool, ""
+		return constants.StatusFailed, "No uninstall command found for " + tool, ""
 	}
 
 	ctx := state.GetCancelContext()
