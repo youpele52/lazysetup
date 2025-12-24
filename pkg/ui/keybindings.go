@@ -20,15 +20,15 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '0', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelInstallation)); err != nil {
+	if err := g.SetKeybinding("", '0', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelProgress)); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '1', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelTools)); err != nil {
+	if err := g.SetKeybinding("", '1', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelInstallation)); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '2', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelProgress)); err != nil {
+	if err := g.SetKeybinding("", '2', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelTools)); err != nil {
 		log.Panicln(err)
 	}
 
@@ -45,10 +45,10 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 	}
 
 	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
-		if state.CurrentPage == models.PageMultiPanel {
-			if state.ActivePanel == models.PanelInstallation {
+		if state.GetCurrentPage() == models.PageMultiPanel {
+			if state.GetActivePanel() == models.PanelInstallation {
 				return handlers.MultiPanelSelectMethod(state)(g, v)
-			} else if state.ActivePanel == models.PanelTools {
+			} else if state.GetActivePanel() == models.PanelTools {
 				return handlers.MultiPanelStartInstallation(state)(g, v)
 			}
 		}
