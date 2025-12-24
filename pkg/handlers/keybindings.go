@@ -188,6 +188,7 @@ func installToolWithRetry(state *models.State, method, tool string) (string, str
 // installToolWithOutput executes installation command with cancellation support
 // Uses state's cancel context to allow aborting running installations
 // Returns: (status, errorMsg, output) where status is "success" or "failed"
+// errorMsg contains the actual error from command output when possible
 func installToolWithOutput(state *models.State, method, tool string) (string, string, string) {
 	cmd := commands.GetInstallCommand(method, tool)
 	if cmd == "" {
@@ -204,7 +205,17 @@ func installToolWithOutput(state *models.State, method, tool string) (string, st
 		return "failed", "Installation was cancelled", result.Output
 	}
 	if result.ExitCode != 0 {
-		return "failed", result.GetErrorMessage(), result.Output
+		// Use actual command output as error message if available, otherwise use generic message
+		errMsg := result.GetErrorMessage()
+		if result.Output != "" {
+			// Trim the output to first 200 chars to avoid cluttering the UI
+			trimmedOutput := result.Output
+			if len(trimmedOutput) > 200 {
+				trimmedOutput = trimmedOutput[:200] + "..."
+			}
+			errMsg = trimmedOutput
+		}
+		return "failed", errMsg, result.Output
 	}
 
 	return "success", "", result.Output
