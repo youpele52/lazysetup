@@ -26,7 +26,7 @@ echo ""
 
 # Confirm uninstall
 read -p "Are you sure you want to uninstall lazysetup? (y/N) " -n 1 -r
-echo ""
+echo
 
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
   echo -e "${YELLOW}→${NC} Uninstall cancelled"
