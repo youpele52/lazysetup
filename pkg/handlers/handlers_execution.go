@@ -52,13 +52,18 @@ func runToolAction(state *models.State, action string) {
 				state.SetToolStartTime(toolName, startTime)
 
 				var status, errMsg, output string
+				params := ToolActionParams{
+					State:  state,
+					Method: state.SelectedMethod,
+					Tool:   toolName,
+				}
 				switch action {
 				case "install":
 					status, errMsg, output = installToolWithRetry(state, state.SelectedMethod, toolName)
 				case "update":
-					status, errMsg, output = updateToolWithOutput(state, state.SelectedMethod, toolName)
+					status, errMsg, output = updateToolWithOutput(params)
 				case "uninstall":
-					status, errMsg, output = uninstallToolWithOutput(state, state.SelectedMethod, toolName)
+					status, errMsg, output = uninstallToolWithOutput(params)
 				}
 
 				mu.Lock()
@@ -94,13 +99,13 @@ func runToolAction(state *models.State, action string) {
 }
 
 // updateToolWithOutput executes update command for a tool
-func updateToolWithOutput(state *models.State, method, tool string) (string, string, string) {
-	cmd := commands.GetUpdateCommand(method, tool)
+func updateToolWithOutput(params ToolActionParams) (string, string, string) {
+	cmd := commands.GetUpdateCommand(params.Method, params.Tool)
 	if cmd == "" {
-		return constants.StatusFailed, "No update command found for " + tool, ""
+		return constants.StatusFailed, "No update command found for " + params.Tool, ""
 	}
 
-	ctx := state.GetCancelContext()
+	ctx := params.State.GetCancelContext()
 	result := executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
 
 	if result.TimedOut {
@@ -125,13 +130,13 @@ func updateToolWithOutput(state *models.State, method, tool string) (string, str
 }
 
 // uninstallToolWithOutput executes uninstall command for a tool
-func uninstallToolWithOutput(state *models.State, method, tool string) (string, string, string) {
-	cmd := commands.GetUninstallCommand(method, tool)
+func uninstallToolWithOutput(params ToolActionParams) (string, string, string) {
+	cmd := commands.GetUninstallCommand(params.Method, params.Tool)
 	if cmd == "" {
-		return constants.StatusFailed, "No uninstall command found for " + tool, ""
+		return constants.StatusFailed, "No uninstall command found for " + params.Tool, ""
 	}
 
-	ctx := state.GetCancelContext()
+	ctx := params.State.GetCancelContext()
 	result := executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
 
 	if result.TimedOut {
