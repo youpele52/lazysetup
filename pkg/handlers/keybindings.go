@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"github.com/jesseduffield/gocui"
@@ -35,7 +34,7 @@ func SelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
 		state.SelectedMethod = state.InstallMethods[state.SelectedIndex]
 		state.CheckStatus, state.Error = checkInstallation(state.SelectedMethod)
-		if state.Error == "" && state.CheckStatus == "Already installed" {
+		if state.Error == "" && state.CheckStatus == constants.StatusAlreadyInstalled {
 			state.Tools = tools.Tools
 			state.SelectedTools = make(map[string]bool)
 			state.ToolsIndex = 0
@@ -73,94 +72,9 @@ func ToggleTool(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	}
 }
 
-// StartInstallation initiates parallel installation of selected tools
-// It launches goroutines for each tool, collects results in a channel,
-// and updates the UI in real-time with spinner animation
-// NOTE: This function is for old single-page layout, use MultiPanelStartInstallation for multi-panel mode
-func StartInstallation(state *models.State) func(*gocui.Gui, *gocui.View) error {
-	return func(g *gocui.Gui, v *gocui.View) error {
-		// Initialize installation state using thread-safe methods
-		state.ClearInstallResults()
-		state.ClearToolStartTimes()
-		state.ClearInstallOutput()
-		state.SetCurrentPage(models.PageInstalling)
-		state.SetInstallingIndex(0)
-		state.SetInstallationDone(false)
-		state.SetInstallStartTime(time.Now().Unix())
-		state.SetCurrentTool("")
-
-		go func() {
-			spinnerTicker := time.NewTicker(100 * time.Millisecond)
-			defer spinnerTicker.Stop()
-
-			spinnerDone := make(chan bool)
-
-			go func() {
-				for {
-					select {
-					case <-spinnerDone:
-						return
-					case <-spinnerTicker.C:
-						if !state.GetInstallationDone() {
-							state.IncrementSpinnerFrame()
-						}
-					}
-				}
-			}()
-
-			var wg sync.WaitGroup
-			var mu sync.Mutex
-			resultsChan := make(chan models.InstallResult, len(state.Tools))
-
-			for _, tool := range state.Tools {
-				if state.SelectedTools[tool] {
-					wg.Add(1)
-					go func(toolName string) {
-						defer wg.Done()
-						startTime := time.Now().Unix()
-						state.SetToolStartTime(toolName, startTime)
-						status, errMsg, output := installToolWithRetry(state, state.SelectedMethod, toolName)
-
-						mu.Lock()
-						state.AppendInstallOutput("Tool: " + toolName + "\n" + output + "\n")
-						mu.Unlock()
-
-						duration := time.Now().Unix() - state.GetToolStartTime(toolName)
-						result := models.InstallResult{
-							Tool:     toolName,
-							Success:  status == "success",
-							Error:    errMsg,
-							Duration: duration,
-							Retries:  0,
-						}
-						resultsChan <- result
-					}(tool)
-				}
-			}
-
-			go func() {
-				wg.Wait()
-				close(resultsChan)
-			}()
-
-			for result := range resultsChan {
-				state.AddInstallResult(result)
-				state.IncrementInstallingIndex()
-			}
-
-			state.SetInstallationDone(true)
-			spinnerDone <- true
-			time.Sleep(1 * time.Second)
-			state.CurrentPage = models.PageResults
-		}()
-
-		return nil
-	}
-}
-
 // installToolWithRetry attempts to install a tool with automatic retry logic
 // on failure. It will retry up to maxRetries times with exponential backoff.
-// Returns: (status, errorMsg, output) where status is "success" or "failed"
+// Returns: (status, errorMsg, output) where status is StatusSuccess or StatusFailed
 func installToolWithRetry(state *models.State, method, tool string) (string, string, string) {
 	maxRetries := 2
 	var lastErr string
@@ -177,32 +91,32 @@ func installToolWithRetry(state *models.State, method, tool string) (string, str
 		lastOutput = output
 		lastErr = errMsg
 
-		if status == "success" {
-			return "success", "", output
+		if status == constants.StatusSuccess {
+			return constants.StatusSuccess, "", output
 		}
 	}
 
-	return "failed", lastErr, lastOutput
+	return constants.StatusFailed, lastErr, lastOutput
 }
 
 // installToolWithOutput executes installation command with cancellation support
 // Uses state's cancel context to allow aborting running installations
-// Returns: (status, errorMsg, output) where status is "success" or "failed"
+// Returns: (status, errorMsg, output) where status is StatusSuccess or StatusFailed
 // errorMsg contains the actual error from command output when possible
 func installToolWithOutput(state *models.State, method, tool string) (string, string, string) {
 	cmd := commands.GetInstallCommand(method, tool)
 	if cmd == "" {
-		return "failed", constants.ErrorNoInstallCommand, ""
+		return constants.StatusFailed, constants.ErrorNoInstallCommand, ""
 	}
 
 	ctx := state.GetCancelContext()
 	result := executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
 
 	if result.TimedOut {
-		return "failed", "Installation timed out after 15 minutes", result.Output
+		return constants.StatusFailed, constants.ErrorInstallationTimedOut, result.Output
 	}
 	if result.Cancelled {
-		return "failed", "Installation was cancelled", result.Output
+		return constants.StatusFailed, constants.ErrorInstallationCancelled, result.Output
 	}
 	if result.ExitCode != 0 {
 		// Use actual command output as error message if available, otherwise use generic message
@@ -215,14 +129,14 @@ func installToolWithOutput(state *models.State, method, tool string) (string, st
 			}
 			errMsg = trimmedOutput
 		}
-		return "failed", errMsg, result.Output
+		return constants.StatusFailed, errMsg, result.Output
 	}
 
-	return "success", "", result.Output
+	return constants.StatusSuccess, "", result.Output
 }
 
 // checkInstallation verifies if a package manager is installed and available
-// Returns: (status, errorMsg) where status is "Already installed" or "Not installed"
+// Returns: (status, errorMsg) where status is StatusAlreadyInstalled or StatusNotInstalled
 func checkInstallation(method string) (string, string) {
 	cmd := commands.GetCheckCommand(method)
 	if cmd == "" {
@@ -237,10 +151,10 @@ func checkInstallation(method string) (string, string) {
 		if result.Output != "" {
 			errMsg = result.Output
 		}
-		return "Not installed", errMsg
+		return constants.StatusNotInstalled, errMsg
 	}
 
-	return "Already installed", ""
+	return constants.StatusAlreadyInstalled, ""
 }
 
 // GoBack implements double-escape key handling for aborting installations
@@ -379,112 +293,6 @@ func MultiPanelSelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) e
 				state.ToolsIndex = 0
 				state.SetActivePanel(models.PanelTools)
 			}
-		}
-		return nil
-	}
-}
-
-// MultiPanelStartInstallation initiates parallel installation in multi-panel mode
-// Validates tool selection, launches goroutines, collects results, and handles abort requests
-func MultiPanelStartInstallation(state *models.State) func(*gocui.Gui, *gocui.View) error {
-	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.GetCurrentPage() == models.PageMultiPanel && state.GetActivePanel() == models.PanelTools {
-			// Check if at least one tool is selected
-			selectedTools := state.GetSelectedTools()
-			selectedCount := 0
-			for _, selected := range selectedTools {
-				if selected {
-					selectedCount++
-				}
-			}
-
-			if selectedCount == 0 {
-				state.Error = constants.ErrorNoToolsSelected
-				return nil
-			}
-
-			// Initialize installation state using thread-safe methods
-			state.ClearInstallResults()
-			state.ClearToolStartTimes()
-			state.ClearInstallOutput()
-			state.SetInstallingIndex(0)
-			state.SetInstallationDone(false)
-			state.SetInstallStartTime(time.Now().Unix())
-
-			go func() {
-				spinnerTicker := time.NewTicker(100 * time.Millisecond)
-				defer spinnerTicker.Stop()
-
-				spinnerDone := make(chan bool)
-
-				go func() {
-					for {
-						select {
-						case <-spinnerDone:
-							return
-						case <-spinnerTicker.C:
-							if !state.GetInstallationDone() {
-								state.IncrementSpinnerFrame()
-							}
-						}
-					}
-				}()
-
-				var wg sync.WaitGroup
-				var mu sync.Mutex
-				resultsChan := make(chan models.InstallResult, len(state.Tools))
-
-				for _, tool := range state.Tools {
-					if state.SelectedTools[tool] {
-						// Check if abort was requested
-						if state.GetAbortInstallation() {
-							break
-						}
-
-						wg.Add(1)
-						go func(toolName string) {
-							defer wg.Done()
-
-							// Check abort flag before starting installation
-							if state.GetAbortInstallation() {
-								return
-							}
-
-							startTime := time.Now().Unix()
-							state.SetToolStartTime(toolName, startTime)
-							status, errMsg, output := installToolWithRetry(state, state.SelectedMethod, toolName)
-
-							mu.Lock()
-							state.AppendInstallOutput("Tool: " + toolName + "\n" + output + "\n")
-							mu.Unlock()
-
-							duration := time.Now().Unix() - state.GetToolStartTime(toolName)
-							result := models.InstallResult{
-								Tool:     toolName,
-								Success:  status == "success",
-								Error:    errMsg,
-								Duration: duration,
-								Retries:  0,
-							}
-							resultsChan <- result
-						}(tool)
-					}
-				}
-
-				go func() {
-					wg.Wait()
-					close(resultsChan)
-				}()
-
-				for result := range resultsChan {
-					state.AddInstallResult(result)
-					state.IncrementInstallingIndex()
-				}
-
-				state.SetInstallationDone(true)
-				spinnerDone <- true
-				time.Sleep(1 * time.Second)
-			}()
 		}
 		return nil
 	}
