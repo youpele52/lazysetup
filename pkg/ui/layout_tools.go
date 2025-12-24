@@ -22,7 +22,7 @@ func layoutToolsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = "[2]-" + constants.TitleToolSelection
+		v.Title = "[3]-" + constants.TitleTools
 		v.Highlight = true
 		v.SelBgColor = colors.HighlightBg
 		v.SelFgColor = colors.HighlightFg

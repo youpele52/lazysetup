@@ -9,7 +9,7 @@ import (
 )
 
 // SetupKeybindings configures all keyboard shortcuts for the application
-// Bindings: Ctrl+C (quit), Tab (next panel), 0/1/2 (jump to panel),
+// Bindings: Ctrl+C (quit), Tab (next panel), 0/1/2/3 (jump to panel),
 // Arrow keys (navigate), Space (toggle), Enter (confirm/execute), Esc (back/abort)
 func SetupKeybindings(g *gocui.Gui, state *models.State) {
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, handlers.Quit); err != nil {
@@ -20,15 +20,19 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '0', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelProgress)); err != nil {
+	if err := g.SetKeybinding("", '0', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelStatus)); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '1', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelInstallation)); err != nil {
+	if err := g.SetKeybinding("", '1', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelPackageManager)); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '2', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelTools)); err != nil {
+	if err := g.SetKeybinding("", '2', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelAction)); err != nil {
+		log.Panicln(err)
+	}
+
+	if err := g.SetKeybinding("", '3', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelTools)); err != nil {
 		log.Panicln(err)
 	}
 
@@ -46,10 +50,13 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 
 	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
 		if state.GetCurrentPage() == models.PageMultiPanel {
-			if state.GetActivePanel() == models.PanelInstallation {
+			switch state.GetActivePanel() {
+			case models.PanelPackageManager:
 				return handlers.MultiPanelSelectMethod(state)(g, v)
-			} else if state.GetActivePanel() == models.PanelTools {
-				return handlers.MultiPanelStartInstallation(state)(g, v)
+			case models.PanelAction:
+				return handlers.MultiPanelSelectAction(state)(g, v)
+			case models.PanelTools:
+				return handlers.MultiPanelExecuteAction(state)(g, v)
 			}
 		}
 		return nil
