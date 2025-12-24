@@ -73,7 +73,7 @@ func getActionText(action models.ActionType) string {
 		return "Installation"
 	case models.ActionUpdate:
 		return "Update"
-	case models.ActionDelete:
+	case models.ActionUninstall:
 		return "Uninstall"
 	default:
 		return "Action"
@@ -87,16 +87,16 @@ func getActionVerb(action models.ActionType) string {
 		return "Installing"
 	case models.ActionUpdate:
 		return "Updating"
-	case models.ActionDelete:
+	case models.ActionUninstall:
 		return "Uninstalling"
 	default:
 		return "Processing"
 	}
 }
 
-// BuildInstallationResultsMessage creates a formatted summary of installation results
+// BuildInstallationResultsMessage creates a formatted summary of action results
 // Shows success/failure for each tool with color coding, error details, and totals
-func BuildInstallationResultsMessage(results []models.InstallResult) string {
+func BuildInstallationResultsMessage(results []models.InstallResult, action models.ActionType) string {
 	mb := NewMessageBuilder()
 
 	mb.AddSeparator()
@@ -105,13 +105,17 @@ func BuildInstallationResultsMessage(results []models.InstallResult) string {
 	successCount := 0
 	failureCount := 0
 
+	// Get action-specific result text
+	successVerb := getSuccessVerb(action)
+	failVerb := getFailVerb(action)
+
 	for _, result := range results {
 		if result.Success {
-			successLine := fmt.Sprintf("%s✓ %s - Success (%ds)%s", colors.ANSIGreen, result.Tool, result.Duration, colors.ANSIReset)
+			successLine := fmt.Sprintf("%s✓ %s - %s (%ds)%s", colors.ANSIGreen, result.Tool, successVerb, result.Duration, colors.ANSIReset)
 			mb.AddLine(successLine)
 			successCount++
 		} else {
-			failedLine := fmt.Sprintf("%s✗ %s - Failed (%ds)%s", colors.ANSIRed, result.Tool, result.Duration, colors.ANSIReset)
+			failedLine := fmt.Sprintf("%s✗ %s - %s (%ds)%s", colors.ANSIRed, result.Tool, failVerb, result.Duration, colors.ANSIReset)
 			mb.AddLine(failedLine)
 			if result.Error != "" {
 				// Display error message, split by newlines for readability
@@ -133,4 +137,32 @@ func BuildInstallationResultsMessage(results []models.InstallResult) string {
 	mb.AddLine(fmt.Sprintf("Total: %d Success, %d Failed", successCount, failureCount))
 
 	return mb.Build()
+}
+
+// getSuccessVerb returns the past tense success verb for the action type
+func getSuccessVerb(action models.ActionType) string {
+	switch action {
+	case models.ActionInstall:
+		return "Successfully installed"
+	case models.ActionUpdate:
+		return "Successfully updated"
+	case models.ActionUninstall:
+		return "Successfully uninstalled"
+	default:
+		return "Success"
+	}
+}
+
+// getFailVerb returns the failure verb for the action type
+func getFailVerb(action models.ActionType) string {
+	switch action {
+	case models.ActionInstall:
+		return "Failed to install"
+	case models.ActionUpdate:
+		return "Failed to update"
+	case models.ActionUninstall:
+		return "Failed to uninstall"
+	default:
+		return "Failed"
+	}
 }
