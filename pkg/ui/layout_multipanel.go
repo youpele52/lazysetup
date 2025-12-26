@@ -152,7 +152,7 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 
 	if v, err := g.View("status_bar"); err == nil {
 		v.Clear()
-		fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | Enter: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
+		fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
 	}
 
 	// Render sudo confirmation popup if needed
