@@ -61,6 +61,15 @@ const (
 	ToolActionInstall   = "install"
 	ToolActionUpdate    = "update"
 	ToolActionUninstall = "uninstall"
+
+	// Update messages
+	UpdateAvailable    = "Update available: v%s → v%s"
+	UpdateDownloading  = "Downloading update..."
+	UpdateInstalling   = "Installing update..."
+	UpdateSuccess      = "Update installed! Press 'r' to restart."
+	UpdateFailed       = "Update failed: %s"
+	UpdateCheckFailed  = "Failed to check for updates: %s"
+	UpdateNotAvailable = "You're running the latest version (v%s)"
 )
 
 const Logo = ` _                          _               

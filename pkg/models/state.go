@@ -93,6 +93,12 @@ type State struct {
 	// Results display state
 	LastRenderedResultCount int   // Track how many results were last rendered to avoid duplication
 	ActionCompletionTime    int64 // Unix timestamp when last action completed (for auto-clear timeout)
+
+	// Update state
+	UpdateAvailable   bool   // Whether an update is available
+	UpdateVersion     string // Latest version available
+	UpdateMessage     string // Update status message to display
+	UpdateDownloadURL string // URL to download the update
 }
 
 func NewState() *State {

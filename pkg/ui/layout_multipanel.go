@@ -97,6 +97,14 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		completionTime := state.ActionCompletionTime
 		errorMsg := state.Error
 
+		// Show update notification if available
+		if state.UpdateMessage != "" {
+			v.Clear()
+			fmt.Fprintf(v, "%s%s%s\n\n", colors.ANSIYellow, state.UpdateMessage, colors.ANSIReset)
+			fmt.Fprint(v, constants.Logo)
+			return nil
+		}
+
 		// Show validation errors
 		if errorMsg != "" {
 			v.Clear()
@@ -160,7 +168,11 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 
 	if v, err := g.View("status_bar"); err == nil {
 		v.Clear()
-		fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
+		if state.UpdateAvailable {
+			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | ⏎: Confirm | C: Clear | U: Update | Ctrl+C: Quit")
+		} else {
+			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
+		}
 	}
 
 	// Render sudo confirmation popup if needed

@@ -117,7 +117,23 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 			state.ActionCompletionTime = 0
 			state.LastRenderedResultCount = 0
 			state.SetInstallStartTime(0)
+			state.Error = ""
 			fmt.Fprint(v, constants.Logo)
+		}
+		return nil
+	}); err != nil {
+		log.Panicln(err)
+	}
+
+	// Update application with 'u' key
+	if err := g.SetKeybinding("", 'u', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('u')
+			return nil
+		}
+		// Trigger update if available
+		if state.UpdateAvailable {
+			go handlers.PerformUpdate(state)
 		}
 		return nil
 	}); err != nil {
