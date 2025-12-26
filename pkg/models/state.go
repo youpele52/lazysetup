@@ -36,9 +36,10 @@ const (
 type ActionType int
 
 const (
-	ActionInstall   ActionType = 0
-	ActionUpdate    ActionType = 1
-	ActionUninstall ActionType = 2
+	ActionCheck     ActionType = 0
+	ActionInstall   ActionType = 1
+	ActionUpdate    ActionType = 2
+	ActionUninstall ActionType = 3
 )
 
 // InstallResult captures the outcome of a single tool installation

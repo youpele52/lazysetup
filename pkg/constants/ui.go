@@ -47,6 +47,11 @@ const (
 	ResultsFailed       = "✗ %s - Failed (%ds)\n"
 	ResultsError        = "  Error: %s\n"
 	ResultsTotal        = "Total: %d Success, %d Failed\n"
+
+	ToolActionCheck     = "check"
+	ToolActionInstall   = "install"
+	ToolActionUpdate    = "update"
+	ToolActionUninstall = "uninstall"
 )
 
 const Logo = ` _                          _               

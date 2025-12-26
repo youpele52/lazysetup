@@ -130,10 +130,19 @@ func BuildInstallationResultsMessage(results []models.InstallResult, action mode
 	successVerb := getSuccessVerb(action)
 	failVerb := getFailVerb(action)
 
+	// For check action, display version info instead of generic success message
+	isCheckAction := action == models.ActionCheck
+
 	for _, result := range results {
 		if result.Success {
-			successLine := fmt.Sprintf("%s✓ %s - %s successful (%ds)%s", colors.ANSIGreen, result.Tool, successVerb, result.Duration, colors.ANSIReset)
-			mb.AddLine(successLine)
+			if isCheckAction && result.Error != "" {
+				// For check action, show the version output
+				versionLine := fmt.Sprintf("%s✓ %s%s\n  %s", colors.ANSIGreen, result.Tool, colors.ANSIReset, strings.TrimSpace(result.Error))
+				mb.AddLine(versionLine)
+			} else {
+				successLine := fmt.Sprintf("%s✓ %s - %s successful (%ds)%s", colors.ANSIGreen, result.Tool, successVerb, result.Duration, colors.ANSIReset)
+				mb.AddLine(successLine)
+			}
 			successCount++
 		} else {
 			failedLine := fmt.Sprintf("%s✗ %s - %s failed (%ds)%s", colors.ANSIRed, result.Tool, failVerb, result.Duration, colors.ANSIReset)

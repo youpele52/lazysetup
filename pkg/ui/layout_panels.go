@@ -5,6 +5,7 @@ import (
 
 	"github.com/jesseduffield/gocui"
 	"github.com/youpele52/lazysetup/pkg/colors"
+	"github.com/youpele52/lazysetup/pkg/config"
 	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/models"
 )
@@ -96,7 +97,7 @@ func renderActionPanel(params ActionPanelParams) error {
 	leftPanelWidth := params.LeftPanelWidth
 	packageManagerHeight := params.PackageManagerY
 	actionHeight := params.ActionHeight
-	actions := []string{"Install", "Update", "Uninstall"}
+	actions := config.Actions
 	if v, err := g.SetView(constants.PanelAction, 0, packageManagerHeight+1, leftPanelWidth, packageManagerHeight+actionHeight+1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err

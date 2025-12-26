@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jesseduffield/gocui"
+	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/models"
 	"github.com/youpele52/lazysetup/pkg/tools"
 )
@@ -58,6 +59,8 @@ func MultiPanelExecuteAction(state *models.State) func(*gocui.Gui, *gocui.View) 
 		}
 
 		switch state.SelectedAction {
+		case models.ActionCheck:
+			return executeCheckAction(state)
 		case models.ActionInstall:
 			return executeInstallAction(state)
 		case models.ActionUpdate:
@@ -79,7 +82,7 @@ func executeInstallAction(state *models.State) error {
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
 
-	go runToolAction(state, "install")
+	go runToolAction(state, constants.ToolActionInstall)
 	return nil
 }
 
@@ -92,7 +95,7 @@ func executeUpdateAction(state *models.State) error {
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
 
-	go runToolAction(state, "update")
+	go runToolAction(state, constants.ToolActionUpdate)
 	return nil
 }
 
@@ -105,6 +108,18 @@ func executeUninstallAction(state *models.State) error {
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
 
-	go runToolAction(state, "uninstall")
+	go runToolAction(state, constants.ToolActionUninstall)
+	return nil
+}
+
+func executeCheckAction(state *models.State) error {
+	state.ClearInstallResults()
+	state.ClearToolStartTimes()
+	state.ClearInstallOutput()
+	state.SetInstallingIndex(0)
+	state.SetInstallationDone(false)
+	state.SetInstallStartTime(time.Now().Unix())
+
+	go runToolAction(state, constants.ToolActionCheck)
 	return nil
 }
