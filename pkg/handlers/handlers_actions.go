@@ -96,6 +96,8 @@ func executeInstallAction(state *models.State) error {
 	state.SetInstallingIndex(0)
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
+	state.ActionCompletionTime = 0
+	state.LastRenderedResultCount = 0
 
 	go runToolAction(state, constants.ToolActionInstall)
 	return nil
@@ -109,6 +111,8 @@ func executeUpdateAction(state *models.State) error {
 	state.SetInstallingIndex(0)
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
+	state.ActionCompletionTime = 0
+	state.LastRenderedResultCount = 0
 
 	go runToolAction(state, constants.ToolActionUpdate)
 	return nil
@@ -122,6 +126,8 @@ func executeUninstallAction(state *models.State) error {
 	state.SetInstallingIndex(0)
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
+	state.ActionCompletionTime = 0
+	state.LastRenderedResultCount = 0
 
 	go runToolAction(state, constants.ToolActionUninstall)
 	return nil
@@ -134,6 +140,8 @@ func executeCheckAction(state *models.State) error {
 	state.SetInstallingIndex(0)
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
+	state.ActionCompletionTime = 0
+	state.LastRenderedResultCount = 0
 
 	go runToolAction(state, constants.ToolActionCheck)
 	return nil

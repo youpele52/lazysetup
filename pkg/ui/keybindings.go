@@ -1,9 +1,11 @@
 package ui
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/jesseduffield/gocui"
+	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/handlers"
 	"github.com/youpele52/lazysetup/pkg/models"
 )
@@ -60,15 +62,65 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, handlers.MultiPanelCursorUp(state)); err != nil {
+	if err := g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			return nil
+		}
+		// Scroll up in status panel ONLY if active
+		if state.GetActivePanel() == models.PanelStatus {
+			if v, err := g.View(constants.PanelProgress); err == nil {
+				ox, oy := v.Origin()
+				if oy > 0 {
+					v.SetOrigin(ox, oy-1)
+				}
+			}
+			return nil
+		}
+		// Navigate in other panels
+		return handlers.MultiPanelCursorUp(state)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone, handlers.MultiPanelCursorDown(state)); err != nil {
+	if err := g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			return nil
+		}
+		// Scroll down in status panel ONLY if active
+		if state.GetActivePanel() == models.PanelStatus {
+			if v, err := g.View(constants.PanelProgress); err == nil {
+				ox, oy := v.Origin()
+				v.SetOrigin(ox, oy+1)
+			}
+			return nil
+		}
+		// Navigate in other panels
+		return handlers.MultiPanelCursorDown(state)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
 	if err := g.SetKeybinding("", gocui.KeySpace, gocui.ModNone, handlers.MultiPanelToggleTool(state)); err != nil {
+		log.Panicln(err)
+	}
+
+	// Clear status screen with 'c' key
+	if err := g.SetKeybinding("", 'c', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('c')
+			return nil
+		}
+		// Clear status screen and reset all state
+		if v, err := g.View(constants.PanelProgress); err == nil {
+			v.Clear()
+			state.SetInstallationDone(false)
+			state.ActionCompletionTime = 0
+			state.LastRenderedResultCount = 0
+			state.SetInstallStartTime(0)
+			fmt.Fprint(v, constants.Logo)
+		}
+		return nil
+	}); err != nil {
 		log.Panicln(err)
 	}
 

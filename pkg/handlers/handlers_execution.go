@@ -97,13 +97,12 @@ func runToolAction(state *models.State, action string) {
 
 	state.SetInstallationDone(true)
 	spinnerDone <- true
-	time.Sleep(20 * time.Second)
+
+	// Set completion time for auto-clear timeout (40 seconds)
+	state.ActionCompletionTime = time.Now().Unix()
 
 	// Clear sudo password after action completes
 	state.ClearSudoPassword()
-
-	// Reset action state after completion
-	state.ResetActionState()
 }
 
 func checkToolWithOutput(params ToolActionParams) (string, string, string) {

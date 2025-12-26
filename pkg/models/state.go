@@ -89,6 +89,10 @@ type State struct {
 	PendingAction   ActionType // Action waiting for sudo confirmation
 	SudoPassword    string     // Temporary sudo password (cleared after action)
 	PasswordInput   string     // Current password input buffer
+
+	// Results display state
+	LastRenderedResultCount int   // Track how many results were last rendered to avoid duplication
+	ActionCompletionTime    int64 // Unix timestamp when last action completed (for auto-clear timeout)
 }
 
 func NewState() *State {
