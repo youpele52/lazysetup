@@ -97,7 +97,10 @@ func runToolAction(state *models.State, action string) {
 
 	state.SetInstallationDone(true)
 	spinnerDone <- true
-	time.Sleep(1 * time.Second)
+	time.Sleep(20 * time.Second)
+
+	// Reset action state after completion
+	state.ResetActionState()
 }
 
 func checkToolWithOutput(params ToolActionParams) (string, string, string) {

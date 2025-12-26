@@ -93,7 +93,7 @@ func NewState() *State {
 		SelectedMethod: config.InstallMethods[0],
 		CurrentPage:    PageMultiPanel,
 		ActivePanel:    PanelPackageManager,
-		SelectedAction: ActionInstall,
+		SelectedAction: ActionCheck,
 		ActionIndex:    0,
 		SelectedTools:  make(map[string]bool),
 		ToolsIndex:     0,
@@ -117,6 +117,25 @@ func (s *State) Reset() {
 	s.SelectedTools = make(map[string]bool)
 	s.ToolsIndex = 0
 	s.ActionIndex = 0
-	s.SelectedAction = ActionInstall
+	s.SelectedAction = ActionCheck
 	s.InstallResults = []InstallResult{}
+}
+
+// ResetActionState clears action-related state after an action completes
+func (s *State) ResetActionState() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.InstallResults = []InstallResult{}
+	s.InstallOutput = ""
+	s.CurrentTool = ""
+	s.InstallingIndex = 0
+	s.InstallationDone = false
+	s.SpinnerFrame = 0
+	s.InstallStartTime = 0
+	s.ToolStartTimes = make(map[string]int64)
+	s.SelectedTools = make(map[string]bool)
+	s.ToolsIndex = 0
+	s.ActionIndex = 0
+	s.SelectedAction = ActionCheck
 }
