@@ -12,6 +12,7 @@ const (
 	PanelProgress       = "panel_progress"
 	PanelAction         = "panel_action"
 	PanelStatusView     = "Status"
+	PopupConfirm        = "popup_confirm"
 
 	TitlePackageManager = "Package Manager"
 	TitleInstalling     = "Installing"
@@ -26,6 +27,11 @@ const (
 	MessageSelected       = "You have selected %s for the installation\n"
 	ErrorNoInstallCommand = "No install command found"
 	ErrorNoToolsSelected  = "Please select at least one tool for installation"
+
+	// Sudo confirmation messages
+	SudoConfirmTitle   = "Sudo Password Required"
+	SudoConfirmMessage = "Enter your sudo password:\n\nPassword: %s\n\nPress Enter to confirm or Esc to cancel."
+	PasswordMask       = "•"
 
 	// Installation status constants
 	StatusSuccess              = "success"

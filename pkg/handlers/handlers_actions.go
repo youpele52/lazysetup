@@ -58,9 +58,24 @@ func MultiPanelExecuteAction(state *models.State) func(*gocui.Gui, *gocui.View) 
 			return nil
 		}
 
-		switch state.SelectedAction {
-		case models.ActionCheck:
+		// Check action doesn't need sudo confirmation
+		if state.SelectedAction == models.ActionCheck {
 			return executeCheckAction(state)
+		}
+
+		// Only show sudo popup for package managers that need it (APT, Curl, YUM)
+		method := state.GetSelectedMethod()
+		needsSudo := method == "APT" || method == "Curl" || method == "YUM"
+
+		if needsSudo {
+			// Show sudo confirmation popup
+			state.SetPendingAction(state.SelectedAction)
+			state.SetShowSudoConfirm(true)
+			return nil
+		}
+
+		// For Homebrew, Scoop, Chocolatey - execute directly without sudo
+		switch state.SelectedAction {
 		case models.ActionInstall:
 			return executeInstallAction(state)
 		case models.ActionUpdate:
@@ -122,4 +137,53 @@ func executeCheckAction(state *models.State) error {
 
 	go runToolAction(state, constants.ToolActionCheck)
 	return nil
+}
+
+// ConfirmSudoPopup handles Enter key on sudo confirmation popup
+func ConfirmSudoPopup(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if !state.GetShowSudoConfirm() {
+			return nil
+		}
+
+		// Save the password from input buffer
+		password := state.GetPasswordInput()
+		if password == "" {
+			// Don't proceed without a password
+			return nil
+		}
+		state.SetSudoPassword(password)
+		state.SetPasswordInput("") // Clear input buffer
+
+		// Hide popup
+		state.SetShowSudoConfirm(false)
+
+		// Execute the pending action
+		pendingAction := state.GetPendingAction()
+		switch pendingAction {
+		case models.ActionInstall:
+			return executeInstallAction(state)
+		case models.ActionUpdate:
+			return executeUpdateAction(state)
+		case models.ActionUninstall:
+			return executeUninstallAction(state)
+		}
+
+		return nil
+	}
+}
+
+// CancelSudoPopup handles Esc key on sudo confirmation popup
+func CancelSudoPopup(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if !state.GetShowSudoConfirm() {
+			return nil
+		}
+
+		// Hide popup and clear pending action
+		state.SetShowSudoConfirm(false)
+		state.SetPendingAction(models.ActionCheck)
+
+		return nil
+	}
 }

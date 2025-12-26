@@ -130,5 +130,15 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		fmt.Fprintf(v, "Tab/Numbers: Switch panels | ↑↓: Navigate | Space: Toggle | Enter: Confirm | Esc: Back | Ctrl+C: Quit")
 	}
 
+	// Render sudo confirmation popup if needed
+	if state.GetShowSudoConfirm() {
+		if err := renderSudoConfirmPopup(g, maxX, maxY, state); err != nil {
+			return err
+		}
+	} else {
+		// Delete popup if not needed
+		g.DeleteView(constants.PopupConfirm)
+	}
+
 	return nil
 }

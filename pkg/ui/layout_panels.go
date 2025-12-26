@@ -193,3 +193,40 @@ func renderToolsPanel(params ToolsPanelParams) error {
 	}
 	return nil
 }
+
+// renderSudoConfirmPopup renders a centered password input popup for sudo
+func renderSudoConfirmPopup(g *gocui.Gui, maxX, maxY int, state *models.State) error {
+	popupWidth := 50
+	popupHeight := 8
+	x0 := (maxX - popupWidth) / 2
+	y0 := (maxY - popupHeight) / 2
+	x1 := x0 + popupWidth
+	y1 := y0 + popupHeight
+
+	if v, err := g.SetView(constants.PopupConfirm, x0, y0, x1, y1); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Wrap = true
+		v.FgColor = colors.TextPrimary
+		v.Editable = false
+	}
+
+	if v, err := g.View(constants.PopupConfirm); err == nil {
+		v.Title = constants.SudoConfirmTitle
+		v.Clear()
+		// Create masked password display
+		passwordInput := state.GetPasswordInput()
+		maskedPassword := ""
+		for range passwordInput {
+			maskedPassword += constants.PasswordMask
+		}
+		fmt.Fprintf(v, constants.SudoConfirmMessage, maskedPassword)
+	}
+
+	// Bring popup to front
+	g.SetViewOnTop(constants.PopupConfirm)
+	g.SetCurrentView(constants.PopupConfirm)
+
+	return nil
+}

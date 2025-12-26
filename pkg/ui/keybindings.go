@@ -20,19 +20,43 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '0', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelStatus)); err != nil {
+	if err := g.SetKeybinding("", '0', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('0')
+			return nil
+		}
+		return handlers.SwitchToPanel(state, models.PanelStatus)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '1', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelPackageManager)); err != nil {
+	if err := g.SetKeybinding("", '1', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('1')
+			return nil
+		}
+		return handlers.SwitchToPanel(state, models.PanelPackageManager)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '2', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelAction)); err != nil {
+	if err := g.SetKeybinding("", '2', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('2')
+			return nil
+		}
+		return handlers.SwitchToPanel(state, models.PanelAction)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '3', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelTools)); err != nil {
+	if err := g.SetKeybinding("", '3', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('3')
+			return nil
+		}
+		return handlers.SwitchToPanel(state, models.PanelTools)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
@@ -49,6 +73,11 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 	}
 
 	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		// Handle sudo confirmation popup first
+		if state.GetShowSudoConfirm() {
+			return handlers.ConfirmSudoPopup(state)(g, v)
+		}
+
 		if state.GetCurrentPage() == models.PageMultiPanel {
 			switch state.GetActivePanel() {
 			case models.PanelPackageManager:
@@ -64,7 +93,45 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", gocui.KeyEsc, gocui.ModNone, handlers.GoBack(state)); err != nil {
+	if err := g.SetKeybinding("", gocui.KeyEsc, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		// Handle sudo confirmation popup first
+		if state.GetShowSudoConfirm() {
+			return handlers.CancelSudoPopup(state)(g, v)
+		}
+		return handlers.GoBack(state)(g, v)
+	}); err != nil {
 		log.Panicln(err)
+	}
+
+	// Backspace for password input
+	if err := g.SetKeybinding("", gocui.KeyBackspace, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.BackspacePasswordInput()
+		}
+		return nil
+	}); err != nil {
+		log.Panicln(err)
+	}
+
+	if err := g.SetKeybinding("", gocui.KeyBackspace2, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.BackspacePasswordInput()
+		}
+		return nil
+	}); err != nil {
+		log.Panicln(err)
+	}
+
+	// Character input for password - bind printable characters (excluding 0-3 which are handled above)
+	for _, char := range "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ456789!@#$%^&*()-_=+[]{}|;:',.<>?/`~\"\\  " {
+		c := char // capture for closure
+		if err := g.SetKeybinding("", c, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+			if state.GetShowSudoConfirm() {
+				state.AppendPasswordInput(c)
+			}
+			return nil
+		}); err != nil {
+			log.Panicln(err)
+		}
 	}
 }

@@ -99,6 +99,9 @@ func runToolAction(state *models.State, action string) {
 	spinnerDone <- true
 	time.Sleep(20 * time.Second)
 
+	// Clear sudo password after action completes
+	state.ClearSudoPassword()
+
 	// Reset action state after completion
 	state.ResetActionState()
 }
@@ -134,7 +137,16 @@ func updateToolWithOutput(params ToolActionParams) (string, string, string) {
 	}
 
 	ctx := params.State.GetCancelContext()
-	result := executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
+	var result *executor.CommandResult
+
+	// Use sudo password only for APT and Curl methods
+	password := params.State.GetSudoPassword()
+	needsSudo := params.Method == "APT" || params.Method == "Curl" || params.Method == "YUM"
+	if password != "" && needsSudo {
+		result = executor.ExecuteWithSudo(ctx, cmd, password, 15*time.Minute)
+	} else {
+		result = executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
+	}
 
 	if result.TimedOut {
 		return constants.StatusFailed, constants.ErrorInstallationTimedOut, result.Output
@@ -165,7 +177,16 @@ func uninstallToolWithOutput(params ToolActionParams) (string, string, string) {
 	}
 
 	ctx := params.State.GetCancelContext()
-	result := executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
+	var result *executor.CommandResult
+
+	// Use sudo password only for APT and Curl methods
+	password := params.State.GetSudoPassword()
+	needsSudo := params.Method == "APT" || params.Method == "Curl" || params.Method == "YUM"
+	if password != "" && needsSudo {
+		result = executor.ExecuteWithSudo(ctx, cmd, password, 15*time.Minute)
+	} else {
+		result = executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
+	}
 
 	if result.TimedOut {
 		return constants.StatusFailed, constants.ErrorInstallationTimedOut, result.Output

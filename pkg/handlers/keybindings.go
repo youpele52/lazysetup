@@ -57,6 +57,7 @@ func installToolWithRetry(state *models.State, method, tool string) (string, str
 
 // installToolWithOutput executes installation command with cancellation support
 // Uses state's cancel context to allow aborting running installations
+// Uses sudo password if available for APT and Curl methods only
 // Returns: (status, errorMsg, output) where status is StatusSuccess or StatusFailed
 // errorMsg contains the actual error from command output when possible
 func installToolWithOutput(state *models.State, method, tool string) (string, string, string) {
@@ -66,7 +67,16 @@ func installToolWithOutput(state *models.State, method, tool string) (string, st
 	}
 
 	ctx := state.GetCancelContext()
-	result := executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
+	var result *executor.CommandResult
+
+	// Use sudo password only for APT and Curl methods
+	password := state.GetSudoPassword()
+	needsSudo := method == "APT" || method == "Curl" || method == "YUM"
+	if password != "" && needsSudo {
+		result = executor.ExecuteWithSudo(ctx, cmd, password, 15*time.Minute)
+	} else {
+		result = executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
+	}
 
 	if result.TimedOut {
 		return constants.StatusFailed, constants.ErrorInstallationTimedOut, result.Output

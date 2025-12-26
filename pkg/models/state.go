@@ -83,6 +83,12 @@ type State struct {
 	AbortInstallation bool               // Flag to signal running installations to abort
 	CancelCtx         context.Context    // Context for cancelling running installations
 	CancelFunc        context.CancelFunc // Function to cancel the context
+
+	// Popup state
+	ShowSudoConfirm bool       // Whether to show sudo confirmation popup
+	PendingAction   ActionType // Action waiting for sudo confirmation
+	SudoPassword    string     // Temporary sudo password (cleared after action)
+	PasswordInput   string     // Current password input buffer
 }
 
 func NewState() *State {
@@ -138,4 +144,84 @@ func (s *State) ResetActionState() {
 	s.ToolsIndex = 0
 	s.ActionIndex = 0
 	s.SelectedAction = ActionCheck
+}
+
+// GetShowSudoConfirm returns whether the sudo confirmation popup is visible
+func (s *State) GetShowSudoConfirm() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.ShowSudoConfirm
+}
+
+// SetShowSudoConfirm sets the sudo confirmation popup visibility
+func (s *State) SetShowSudoConfirm(show bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.ShowSudoConfirm = show
+}
+
+// GetPendingAction returns the action waiting for sudo confirmation
+func (s *State) GetPendingAction() ActionType {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.PendingAction
+}
+
+// SetPendingAction sets the action waiting for sudo confirmation
+func (s *State) SetPendingAction(action ActionType) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.PendingAction = action
+}
+
+// GetSudoPassword returns the temporary sudo password
+func (s *State) GetSudoPassword() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.SudoPassword
+}
+
+// SetSudoPassword sets the temporary sudo password
+func (s *State) SetSudoPassword(password string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.SudoPassword = password
+}
+
+// ClearSudoPassword clears the sudo password from memory
+func (s *State) ClearSudoPassword() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.SudoPassword = ""
+	s.PasswordInput = ""
+}
+
+// GetPasswordInput returns the current password input buffer
+func (s *State) GetPasswordInput() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.PasswordInput
+}
+
+// SetPasswordInput sets the password input buffer
+func (s *State) SetPasswordInput(input string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.PasswordInput = input
+}
+
+// AppendPasswordInput appends a character to the password input
+func (s *State) AppendPasswordInput(char rune) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.PasswordInput += string(char)
+}
+
+// BackspacePasswordInput removes the last character from password input
+func (s *State) BackspacePasswordInput() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if len(s.PasswordInput) > 0 {
+		s.PasswordInput = s.PasswordInput[:len(s.PasswordInput)-1]
+	}
 }

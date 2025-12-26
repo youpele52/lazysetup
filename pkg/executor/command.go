@@ -91,6 +91,68 @@ func (r *CommandResult) IsSuccess() bool {
 	return r.Error == nil && r.ExitCode == 0
 }
 
+// ExecuteWithSudo runs a command with sudo using the provided password
+// The password is piped to sudo via stdin
+func ExecuteWithSudo(ctx context.Context, command string, password string, timeout time.Duration) *CommandResult {
+	startTime := time.Now()
+	result := &CommandResult{}
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	// Wrap command with sudo -S to read password from stdin
+	sudoCommand := fmt.Sprintf("echo '%s' | sudo -S %s", password, command)
+	cmd := exec.CommandContext(ctx, "sh", "-c", sudoCommand)
+
+	// Capture both stdout and stderr
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	// Run the command
+	err := cmd.Run()
+
+	// Calculate duration
+	result.Duration = time.Since(startTime).Milliseconds()
+
+	// Check for timeout
+	if ctx.Err() == context.DeadlineExceeded {
+		result.TimedOut = true
+		result.Error = fmt.Errorf("command timed out after %v", timeout)
+		result.ExitCode = -1
+		result.Output = stdout.String() + stderr.String()
+		return result
+	}
+
+	// Check for cancellation
+	if ctx.Err() == context.Canceled {
+		result.Cancelled = true
+		result.Error = fmt.Errorf("command was cancelled")
+		result.ExitCode = -1
+		result.Output = stdout.String() + stderr.String()
+		return result
+	}
+
+	// Combine output (filter out password prompt from stderr)
+	output := stdout.String() + stderr.String()
+	result.Output = output
+
+	// Handle execution errors
+	if err != nil {
+		result.Error = err
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			result.ExitCode = exitErr.ExitCode()
+		} else {
+			result.ExitCode = -1
+		}
+	} else {
+		result.ExitCode = 0
+	}
+
+	return result
+}
+
 // GetErrorMessage returns a human-readable error message
 func (r *CommandResult) GetErrorMessage() string {
 	if r.TimedOut {
