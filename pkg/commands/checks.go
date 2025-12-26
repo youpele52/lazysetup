@@ -16,6 +16,7 @@ var ToolCheckCommands = CheckCommandsType{
 	"docker":     "docker --version",
 	"lazygit":    "lazygit --version",
 	"lazydocker": "lazydocker --version",
+	"htop":       "htop --version",
 }
 
 var CheckCommands = MergeMaps(ToolCheckCommands, PackageManagerCheckCommands)
