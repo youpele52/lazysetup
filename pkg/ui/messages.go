@@ -136,9 +136,15 @@ func BuildInstallationResultsMessage(results []models.InstallResult, action mode
 	for _, result := range results {
 		if result.Success {
 			if isCheckAction && result.Error != "" {
-				// For check action, show the version output
-				versionLine := fmt.Sprintf("%s✓ %s%s\n  %s", colors.ANSIGreen, result.Tool, colors.ANSIReset, strings.TrimSpace(result.Error))
-				mb.AddLine(versionLine)
+				// For check action, show the version output with proper formatting
+				mb.AddLine(fmt.Sprintf("%s✓ %s%s", colors.ANSIGreen, result.Tool, colors.ANSIReset))
+				// Split version output by newlines and indent each line
+				versionLines := strings.Split(strings.TrimSpace(result.Error), "\n")
+				for _, versionLine := range versionLines {
+					if strings.TrimSpace(versionLine) != "" {
+						mb.AddLine(fmt.Sprintf("  %s", strings.TrimSpace(versionLine)))
+					}
+				}
 			} else {
 				successLine := fmt.Sprintf("%s✓ %s - %s successful (%ds)%s", colors.ANSIGreen, result.Tool, successVerb, result.Duration, colors.ANSIReset)
 				mb.AddLine(successLine)
