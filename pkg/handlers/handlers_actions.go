@@ -63,9 +63,19 @@ func MultiPanelExecuteAction(state *models.State) func(*gocui.Gui, *gocui.View) 
 			return executeCheckAction(state)
 		}
 
-		// Only show sudo popup for package managers that need it (APT, Curl, YUM)
+		// Validate tool-method compatibility
 		method := state.GetSelectedMethod()
-		needsSudo := method == "APT" || method == "Curl" || method == "YUM"
+		if method == "Curl" {
+			// Check if htop is selected - htop cannot be installed via Curl
+			if selectedTools["htop"] {
+				state.Error = constants.ErrorHtopCurlNotSupported
+				return nil
+			}
+		}
+
+		// Only show sudo popup for package managers that need it (APT, YUM)
+		// Curl and Homebrew don't require sudo
+		needsSudo := method == "APT" || method == "YUM"
 
 		if needsSudo {
 			// Show sudo confirmation popup

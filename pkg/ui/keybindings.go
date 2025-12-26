@@ -174,8 +174,10 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		log.Panicln(err)
 	}
 
-	// Character input for password - bind printable characters (excluding 0-3 which are handled above)
-	for _, char := range "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ456789!@#$%^&*()-_=+[]{}|;:',.<>?/`~\"\\  " {
+	// Character input for password - bind all printable ASCII characters
+	// Range 33-126 covers all printable ASCII except space (32)
+	for i := 33; i <= 126; i++ {
+		char := rune(i)
 		c := char // capture for closure
 		if err := g.SetKeybinding("", c, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
 			if state.GetShowSudoConfirm() {
@@ -185,5 +187,16 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		}); err != nil {
 			log.Panicln(err)
 		}
+	}
+
+	// Also bind space character for passwords
+	if err := g.SetKeybinding("", ' ', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput(' ')
+			return nil
+		}
+		return handlers.MultiPanelToggleTool(state)(g, v)
+	}); err != nil {
+		log.Panicln(err)
 	}
 }

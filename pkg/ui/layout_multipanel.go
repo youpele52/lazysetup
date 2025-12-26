@@ -95,6 +95,14 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		results := state.GetInstallResults()
 		lastRenderedCount := state.LastRenderedResultCount
 		completionTime := state.ActionCompletionTime
+		errorMsg := state.Error
+
+		// Show validation errors
+		if errorMsg != "" {
+			v.Clear()
+			fmt.Fprintf(v, "%s%s%s\n", colors.ANSIRed, errorMsg, colors.ANSIReset)
+			return nil
+		}
 
 		// Auto-clear results after 40 seconds
 		if installationDone && completionTime > 0 {

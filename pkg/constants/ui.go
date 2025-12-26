@@ -28,6 +28,9 @@ const (
 	ErrorNoInstallCommand = "No install command found"
 	ErrorNoToolsSelected  = "Please select at least one tool for installation"
 
+	// Tool-specific error messages
+	ErrorHtopCurlNotSupported = "htop cannot be installed via Curl. Please use Homebrew or APT instead."
+
 	// Sudo confirmation messages
 	SudoConfirmTitle   = "Sudo Password Required"
 	SudoConfirmMessage = "Enter your sudo password:\n\nPassword: %s\n\nPress Enter to confirm or Esc to cancel."
@@ -67,5 +70,5 @@ const Logo = ` _                          _
 |_|\__,_/___|\__, |___/\___|\__|\__,_| .__/ 
              |___/                   |_|    
 
-Copyright 2025 Youpele Michael
+Copyright 2025 P.E.L.E.
 `
