@@ -58,11 +58,13 @@ func runToolAction(state *models.State, action string) {
 					Tool:   toolName,
 				}
 				switch action {
-				case "install":
+				case constants.ToolActionCheck:
+					status, errMsg, output = checkToolWithOutput(params)
+				case constants.ToolActionInstall:
 					status, errMsg, output = installToolWithRetry(state, state.SelectedMethod, toolName)
-				case "update":
+				case constants.ToolActionUpdate:
 					status, errMsg, output = updateToolWithOutput(params)
-				case "uninstall":
+				case constants.ToolActionUninstall:
 					status, errMsg, output = uninstallToolWithOutput(params)
 				}
 
@@ -95,7 +97,35 @@ func runToolAction(state *models.State, action string) {
 
 	state.SetInstallationDone(true)
 	spinnerDone <- true
-	time.Sleep(1 * time.Second)
+
+	// Set completion time for auto-clear timeout (40 seconds)
+	state.ActionCompletionTime = time.Now().Unix()
+
+	// Clear sudo password after action completes
+	state.ClearSudoPassword()
+}
+
+func checkToolWithOutput(params ToolActionParams) (string, string, string) {
+	cmd := commands.GetToolCheckCommand(params.Tool)
+	if cmd == "" {
+		return constants.StatusFailed, "No check command found for " + params.Tool, ""
+	}
+
+	ctx := params.State.GetCancelContext()
+	result := executor.ExecuteWithTimeout(ctx, cmd, 30*time.Second)
+
+	if result.TimedOut {
+		return constants.StatusFailed, "Check timed out", result.Output
+	}
+	if result.Cancelled {
+		return constants.StatusFailed, "Check cancelled", result.Output
+	}
+	if result.ExitCode != 0 {
+		return constants.StatusFailed, params.Tool + " not installed", result.Output
+	}
+
+	// Return version info in error field for check action display
+	return constants.StatusSuccess, result.Output, result.Output
 }
 
 // updateToolWithOutput executes update command for a tool
@@ -106,7 +136,16 @@ func updateToolWithOutput(params ToolActionParams) (string, string, string) {
 	}
 
 	ctx := params.State.GetCancelContext()
-	result := executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
+	var result *executor.CommandResult
+
+	// Use sudo password only for APT and Curl methods
+	password := params.State.GetSudoPassword()
+	needsSudo := params.Method == "APT" || params.Method == "Curl" || params.Method == "YUM"
+	if password != "" && needsSudo {
+		result = executor.ExecuteWithSudo(ctx, cmd, password, 15*time.Minute)
+	} else {
+		result = executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
+	}
 
 	if result.TimedOut {
 		return constants.StatusFailed, constants.ErrorInstallationTimedOut, result.Output
@@ -137,7 +176,16 @@ func uninstallToolWithOutput(params ToolActionParams) (string, string, string) {
 	}
 
 	ctx := params.State.GetCancelContext()
-	result := executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
+	var result *executor.CommandResult
+
+	// Use sudo password only for APT and Curl methods
+	password := params.State.GetSudoPassword()
+	needsSudo := params.Method == "APT" || params.Method == "Curl" || params.Method == "YUM"
+	if password != "" && needsSudo {
+		result = executor.ExecuteWithSudo(ctx, cmd, password, 15*time.Minute)
+	} else {
+		result = executor.ExecuteWithTimeout(ctx, cmd, 15*time.Minute)
+	}
 
 	if result.TimedOut {
 		return constants.StatusFailed, constants.ErrorInstallationTimedOut, result.Output

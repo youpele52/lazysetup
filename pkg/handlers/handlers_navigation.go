@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/jesseduffield/gocui"
+	"github.com/youpele52/lazysetup/pkg/config"
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
@@ -104,7 +105,7 @@ func MultiPanelCursorDown(state *models.State) func(*gocui.Gui, *gocui.View) err
 					state.SelectedIndex++
 				}
 			case models.PanelAction:
-				if state.ActionIndex < 2 { // 3 actions: Install, Update, Uninstall
+				if state.ActionIndex < len(config.Actions)-1 {
 					state.ActionIndex++
 					state.SelectedAction = models.ActionType(state.ActionIndex)
 				}

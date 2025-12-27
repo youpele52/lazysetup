@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/jesseduffield/gocui"
+	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/models"
 	"github.com/youpele52/lazysetup/pkg/ui"
+	"github.com/youpele52/lazysetup/pkg/updater"
 )
 
 func main() {
@@ -24,8 +27,26 @@ func main() {
 	// Start UI refresh goroutine for animations and status updates
 	go refreshUI(g, state)
 
+	// Check for updates on startup (in background)
+	go checkForUpdates(state)
+
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Panicln(err)
+	}
+}
+
+// checkForUpdates checks for available updates on startup
+func checkForUpdates(state *models.State) {
+	info := updater.CheckForUpdates()
+	if info.Error != nil {
+		return
+	}
+	if info.Available {
+		state.UpdateAvailable = true
+		state.UpdateVersion = info.LatestVersion
+		state.UpdateDownloadURL = info.DownloadURL
+		state.UpdateMessage = fmt.Sprintf(constants.UpdateAvailable, info.CurrentVersion, info.LatestVersion)
+		state.UpdateMessageTime = time.Now().Unix()
 	}
 }
 

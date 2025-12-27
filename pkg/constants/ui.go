@@ -12,6 +12,7 @@ const (
 	PanelProgress       = "panel_progress"
 	PanelAction         = "panel_action"
 	PanelStatusView     = "Status"
+	PopupConfirm        = "popup_confirm"
 
 	TitlePackageManager = "Package Manager"
 	TitleInstalling     = "Installing"
@@ -26,6 +27,14 @@ const (
 	MessageSelected       = "You have selected %s for the installation\n"
 	ErrorNoInstallCommand = "No install command found"
 	ErrorNoToolsSelected  = "Please select at least one tool for installation"
+
+	// Tool-specific error messages
+	ErrorHtopCurlNotSupported = "htop cannot be installed via Curl. Please use Homebrew or APT instead."
+
+	// Sudo confirmation messages
+	SudoConfirmTitle   = "Sudo Password Required"
+	SudoConfirmMessage = "Enter your sudo password:\n\nPassword: %s\n\nPress Enter to confirm or Esc to cancel."
+	PasswordMask       = "•"
 
 	// Installation status constants
 	StatusSuccess              = "success"
@@ -47,6 +56,20 @@ const (
 	ResultsFailed       = "✗ %s - Failed (%ds)\n"
 	ResultsError        = "  Error: %s\n"
 	ResultsTotal        = "Total: %d Success, %d Failed\n"
+
+	ToolActionCheck     = "check"
+	ToolActionInstall   = "install"
+	ToolActionUpdate    = "update"
+	ToolActionUninstall = "uninstall"
+
+	// Update messages
+	UpdateAvailable    = "Update available: v%s → v%s"
+	UpdateDownloading  = "Downloading update..."
+	UpdateInstalling   = "Installing update..."
+	UpdateSuccess      = "Update installed! Press 'r' to restart."
+	UpdateFailed       = "Update failed: %s"
+	UpdateCheckFailed  = "Failed to check for updates: %s"
+	UpdateNotAvailable = "You're running the latest version (v%s)"
 )
 
 const Logo = ` _                          _               
@@ -56,5 +79,5 @@ const Logo = ` _                          _
 |_|\__,_/___|\__, |___/\___|\__|\__,_| .__/ 
              |___/                   |_|    
 
-Copyright 2025 Youpele Michael
+Copyright 2025 P.E.L.E.
 `
