@@ -46,6 +46,7 @@ func checkForUpdates(state *models.State) {
 		state.UpdateVersion = info.LatestVersion
 		state.UpdateDownloadURL = info.DownloadURL
 		state.UpdateMessage = fmt.Sprintf(constants.UpdateAvailable, info.CurrentVersion, info.LatestVersion)
+		state.UpdateMessageTime = time.Now().Unix()
 	}
 }
 

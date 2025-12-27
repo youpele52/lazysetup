@@ -99,6 +99,7 @@ type State struct {
 	UpdateVersion     string // Latest version available
 	UpdateMessage     string // Update status message to display
 	UpdateDownloadURL string // URL to download the update
+	UpdateMessageTime int64  // Unix timestamp when update message was shown
 }
 
 func NewState() *State {

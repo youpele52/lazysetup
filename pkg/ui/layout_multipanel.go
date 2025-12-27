@@ -97,12 +97,18 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		completionTime := state.ActionCompletionTime
 		errorMsg := state.Error
 
-		// Show update notification if available
+		// Show update notification if available (hide after 10 seconds)
 		if state.UpdateMessage != "" {
-			v.Clear()
-			fmt.Fprintf(v, "%s%s%s\n\n", colors.ANSIYellow, state.UpdateMessage, colors.ANSIReset)
-			fmt.Fprint(v, constants.Logo)
-			return nil
+			elapsed := time.Now().Unix() - state.UpdateMessageTime
+			if elapsed < 10 {
+				v.Clear()
+				fmt.Fprintf(v, "%s%s%s\n\n", colors.ANSIYellow, state.UpdateMessage, colors.ANSIReset)
+				fmt.Fprint(v, constants.Logo)
+				return nil
+			} else {
+				// Clear message after timeout
+				state.UpdateMessage = ""
+			}
 		}
 
 		// Show validation errors
