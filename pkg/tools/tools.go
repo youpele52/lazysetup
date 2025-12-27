@@ -5,4 +5,5 @@ var Tools = []string{
 	"docker",
 	"lazygit",
 	"lazydocker",
+	"htop",
 }
