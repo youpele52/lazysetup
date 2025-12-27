@@ -1,9 +1,11 @@
 package ui
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/jesseduffield/gocui"
+	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/handlers"
 	"github.com/youpele52/lazysetup/pkg/models"
 )
@@ -20,27 +22,81 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '0', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelStatus)); err != nil {
+	if err := g.SetKeybinding("", '0', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('0')
+			return nil
+		}
+		return handlers.SwitchToPanel(state, models.PanelStatus)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '1', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelPackageManager)); err != nil {
+	if err := g.SetKeybinding("", '1', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('1')
+			return nil
+		}
+		return handlers.SwitchToPanel(state, models.PanelPackageManager)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '2', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelAction)); err != nil {
+	if err := g.SetKeybinding("", '2', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('2')
+			return nil
+		}
+		return handlers.SwitchToPanel(state, models.PanelAction)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", '3', gocui.ModNone, handlers.SwitchToPanel(state, models.PanelTools)); err != nil {
+	if err := g.SetKeybinding("", '3', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('3')
+			return nil
+		}
+		return handlers.SwitchToPanel(state, models.PanelTools)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, handlers.MultiPanelCursorUp(state)); err != nil {
+	if err := g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			return nil
+		}
+		// Scroll up in status panel ONLY if active
+		if state.GetActivePanel() == models.PanelStatus {
+			if v, err := g.View(constants.PanelProgress); err == nil {
+				ox, oy := v.Origin()
+				if oy > 0 {
+					v.SetOrigin(ox, oy-1)
+				}
+			}
+			return nil
+		}
+		// Navigate in other panels
+		return handlers.MultiPanelCursorUp(state)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone, handlers.MultiPanelCursorDown(state)); err != nil {
+	if err := g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			return nil
+		}
+		// Scroll down in status panel ONLY if active
+		if state.GetActivePanel() == models.PanelStatus {
+			if v, err := g.View(constants.PanelProgress); err == nil {
+				ox, oy := v.Origin()
+				v.SetOrigin(ox, oy+1)
+			}
+			return nil
+		}
+		// Navigate in other panels
+		return handlers.MultiPanelCursorDown(state)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 
@@ -48,7 +104,48 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		log.Panicln(err)
 	}
 
+	// Clear status screen with 'c' key
+	if err := g.SetKeybinding("", 'c', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('c')
+			return nil
+		}
+		// Clear status screen and reset all state
+		if v, err := g.View(constants.PanelProgress); err == nil {
+			v.Clear()
+			state.SetInstallationDone(false)
+			state.ActionCompletionTime = 0
+			state.LastRenderedResultCount = 0
+			state.SetInstallStartTime(0)
+			state.Error = ""
+			fmt.Fprint(v, constants.Logo)
+		}
+		return nil
+	}); err != nil {
+		log.Panicln(err)
+	}
+
+	// Update application with 'u' key
+	if err := g.SetKeybinding("", 'u', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput('u')
+			return nil
+		}
+		// Trigger update if available
+		if state.UpdateAvailable {
+			go handlers.PerformUpdate(state)
+		}
+		return nil
+	}); err != nil {
+		log.Panicln(err)
+	}
+
 	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		// Handle sudo confirmation popup first
+		if state.GetShowSudoConfirm() {
+			return handlers.ConfirmSudoPopup(state)(g, v)
+		}
+
 		if state.GetCurrentPage() == models.PageMultiPanel {
 			switch state.GetActivePanel() {
 			case models.PanelPackageManager:
@@ -64,7 +161,58 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		log.Panicln(err)
 	}
 
-	if err := g.SetKeybinding("", gocui.KeyEsc, gocui.ModNone, handlers.GoBack(state)); err != nil {
+	if err := g.SetKeybinding("", gocui.KeyEsc, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		// Handle sudo confirmation popup first
+		if state.GetShowSudoConfirm() {
+			return handlers.CancelSudoPopup(state)(g, v)
+		}
+		return handlers.GoBack(state)(g, v)
+	}); err != nil {
+		log.Panicln(err)
+	}
+
+	// Backspace for password input
+	if err := g.SetKeybinding("", gocui.KeyBackspace, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.BackspacePasswordInput()
+		}
+		return nil
+	}); err != nil {
+		log.Panicln(err)
+	}
+
+	if err := g.SetKeybinding("", gocui.KeyBackspace2, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.BackspacePasswordInput()
+		}
+		return nil
+	}); err != nil {
+		log.Panicln(err)
+	}
+
+	// Character input for password - bind all printable ASCII characters
+	// Range 33-126 covers all printable ASCII except space (32)
+	for i := 33; i <= 126; i++ {
+		char := rune(i)
+		c := char // capture for closure
+		if err := g.SetKeybinding("", c, gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+			if state.GetShowSudoConfirm() {
+				state.AppendPasswordInput(c)
+			}
+			return nil
+		}); err != nil {
+			log.Panicln(err)
+		}
+	}
+
+	// Also bind space character for passwords
+	if err := g.SetKeybinding("", ' ', gocui.ModNone, func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			state.AppendPasswordInput(' ')
+			return nil
+		}
+		return handlers.MultiPanelToggleTool(state)(g, v)
+	}); err != nil {
 		log.Panicln(err)
 	}
 }

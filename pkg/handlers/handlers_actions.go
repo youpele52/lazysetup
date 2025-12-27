@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jesseduffield/gocui"
+	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/models"
 	"github.com/youpele52/lazysetup/pkg/tools"
 )
@@ -57,6 +58,33 @@ func MultiPanelExecuteAction(state *models.State) func(*gocui.Gui, *gocui.View) 
 			return nil
 		}
 
+		// Check action doesn't need sudo confirmation
+		if state.SelectedAction == models.ActionCheck {
+			return executeCheckAction(state)
+		}
+
+		// Validate tool-method compatibility
+		method := state.GetSelectedMethod()
+		if method == "Curl" {
+			// Check if htop is selected - htop cannot be installed via Curl
+			if selectedTools["htop"] {
+				state.Error = constants.ErrorHtopCurlNotSupported
+				return nil
+			}
+		}
+
+		// Only show sudo popup for package managers that need it (APT, YUM)
+		// Curl and Homebrew don't require sudo
+		needsSudo := method == "APT" || method == "YUM"
+
+		if needsSudo {
+			// Show sudo confirmation popup
+			state.SetPendingAction(state.SelectedAction)
+			state.SetShowSudoConfirm(true)
+			return nil
+		}
+
+		// For Homebrew, Scoop, Chocolatey - execute directly without sudo
 		switch state.SelectedAction {
 		case models.ActionInstall:
 			return executeInstallAction(state)
@@ -78,8 +106,10 @@ func executeInstallAction(state *models.State) error {
 	state.SetInstallingIndex(0)
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
+	state.ActionCompletionTime = 0
+	state.LastRenderedResultCount = 0
 
-	go runToolAction(state, "install")
+	go runToolAction(state, constants.ToolActionInstall)
 	return nil
 }
 
@@ -91,8 +121,10 @@ func executeUpdateAction(state *models.State) error {
 	state.SetInstallingIndex(0)
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
+	state.ActionCompletionTime = 0
+	state.LastRenderedResultCount = 0
 
-	go runToolAction(state, "update")
+	go runToolAction(state, constants.ToolActionUpdate)
 	return nil
 }
 
@@ -104,7 +136,72 @@ func executeUninstallAction(state *models.State) error {
 	state.SetInstallingIndex(0)
 	state.SetInstallationDone(false)
 	state.SetInstallStartTime(time.Now().Unix())
+	state.ActionCompletionTime = 0
+	state.LastRenderedResultCount = 0
 
-	go runToolAction(state, "uninstall")
+	go runToolAction(state, constants.ToolActionUninstall)
 	return nil
+}
+
+func executeCheckAction(state *models.State) error {
+	state.ClearInstallResults()
+	state.ClearToolStartTimes()
+	state.ClearInstallOutput()
+	state.SetInstallingIndex(0)
+	state.SetInstallationDone(false)
+	state.SetInstallStartTime(time.Now().Unix())
+	state.ActionCompletionTime = 0
+	state.LastRenderedResultCount = 0
+
+	go runToolAction(state, constants.ToolActionCheck)
+	return nil
+}
+
+// ConfirmSudoPopup handles Enter key on sudo confirmation popup
+func ConfirmSudoPopup(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if !state.GetShowSudoConfirm() {
+			return nil
+		}
+
+		// Save the password from input buffer
+		password := state.GetPasswordInput()
+		if password == "" {
+			// Don't proceed without a password
+			return nil
+		}
+		state.SetSudoPassword(password)
+		state.SetPasswordInput("") // Clear input buffer
+
+		// Hide popup
+		state.SetShowSudoConfirm(false)
+
+		// Execute the pending action
+		pendingAction := state.GetPendingAction()
+		switch pendingAction {
+		case models.ActionInstall:
+			return executeInstallAction(state)
+		case models.ActionUpdate:
+			return executeUpdateAction(state)
+		case models.ActionUninstall:
+			return executeUninstallAction(state)
+		}
+
+		return nil
+	}
+}
+
+// CancelSudoPopup handles Esc key on sudo confirmation popup
+func CancelSudoPopup(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if !state.GetShowSudoConfirm() {
+			return nil
+		}
+
+		// Hide popup and clear pending action
+		state.SetShowSudoConfirm(false)
+		state.SetPendingAction(models.ActionCheck)
+
+		return nil
+	}
 }

@@ -9,3 +9,9 @@ var InstallMethods = []string{
 	"Chocolatey",
 }
 
+var Actions = []string{
+	"Check",
+	"Install",
+	"Update",
+	"Uninstall",
+}

@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jesseduffield/gocui"
 	"github.com/youpele52/lazysetup/pkg/colors"
@@ -71,13 +72,14 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		return err
 	}
 
-	// Panel 0: Status/Results (right - full height, read-only)
+	// Panel 0: Status/Results (right - full height, read-only, scrollable)
 	if v, err := g.SetView(constants.PanelProgress, leftPanelWidth+1, 0, maxX-1, panelHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		v.Wrap = true
 		v.Highlight = false
+		v.Autoscroll = false
 	}
 
 	if v, err := g.View(constants.PanelProgress); err == nil {
@@ -87,11 +89,52 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		} else {
 			v.FgColor = colors.TextPrimary
 		}
-		v.Clear()
+
 		installationDone := state.GetInstallationDone()
 		installStartTime := state.GetInstallStartTime()
+		results := state.GetInstallResults()
+		lastRenderedCount := state.LastRenderedResultCount
+		completionTime := state.ActionCompletionTime
+		errorMsg := state.Error
+
+		// Show update notification if available (hide after 10 seconds)
+		if state.UpdateMessage != "" {
+			elapsed := time.Now().Unix() - state.UpdateMessageTime
+			if elapsed < 10 {
+				v.Clear()
+				fmt.Fprintf(v, "%s%s%s\n\n", colors.ANSIYellow, state.UpdateMessage, colors.ANSIReset)
+				fmt.Fprint(v, constants.Logo)
+				return nil
+			} else {
+				// Clear message after timeout
+				state.UpdateMessage = ""
+			}
+		}
+
+		// Show validation errors
+		if errorMsg != "" {
+			v.Clear()
+			fmt.Fprintf(v, "%s%s%s\n", colors.ANSIRed, errorMsg, colors.ANSIReset)
+			return nil
+		}
+
+		// Auto-clear results after 40 seconds
+		if installationDone && completionTime > 0 {
+			elapsed := time.Now().Unix() - completionTime
+			if elapsed >= 40 {
+				// Clear and reset
+				v.Clear()
+				state.InstallationDone = false
+				state.ActionCompletionTime = 0
+				state.LastRenderedResultCount = 0
+				fmt.Fprint(v, constants.Logo)
+				return nil
+			}
+		}
+
 		if installStartTime > 0 && !installationDone {
-			// Show installation progress
+			// Show installation progress - clear and update every frame for spinner
+			v.Clear()
 			params := ProgressMessageParams{
 				SelectedMethod:   state.GetSelectedMethod(),
 				CurrentTool:      state.GetCurrentTool(),
@@ -104,16 +147,20 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 			}
 			message := BuildInstallationProgressMessage(params)
 			fmt.Fprint(v, message)
-		} else if installationDone {
-			// Show results
-			results := state.GetInstallResults()
+		} else if installationDone && len(results) > lastRenderedCount {
+			// Append only new results (rolling credits style)
+			// Latest results at top, oldest at bottom
 			selectedAction := state.GetSelectedAction()
-			message := BuildInstallationResultsMessage(results, selectedAction)
+			newResults := results[lastRenderedCount:]
+			message := BuildNewResultsMessage(newResults, selectedAction)
 			fmt.Fprint(v, message)
-		} else {
-			// Show logo by default
+			state.LastRenderedResultCount = len(results)
+		} else if len(results) == 0 {
+			// Show logo only if no results exist
+			v.Clear()
 			fmt.Fprint(v, constants.Logo)
 		}
+		// If results exist, preserve them for scrolling
 	}
 
 	// Status bar at bottom
@@ -127,7 +174,21 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 
 	if v, err := g.View("status_bar"); err == nil {
 		v.Clear()
-		fmt.Fprintf(v, "Tab/Numbers: Switch panels | ↑↓: Navigate | Space: Toggle | Enter: Confirm | Esc: Back | Ctrl+C: Quit")
+		if state.UpdateAvailable {
+			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | ⏎: Confirm | C: Clear | U: Update | Ctrl+C: Quit")
+		} else {
+			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
+		}
+	}
+
+	// Render sudo confirmation popup if needed
+	if state.GetShowSudoConfirm() {
+		if err := renderSudoConfirmPopup(g, maxX, maxY, state); err != nil {
+			return err
+		}
+	} else {
+		// Delete popup if not needed
+		g.DeleteView(constants.PopupConfirm)
 	}
 
 	return nil

@@ -36,9 +36,10 @@ const (
 type ActionType int
 
 const (
-	ActionInstall   ActionType = 0
-	ActionUpdate    ActionType = 1
-	ActionUninstall ActionType = 2
+	ActionCheck     ActionType = 0
+	ActionInstall   ActionType = 1
+	ActionUpdate    ActionType = 2
+	ActionUninstall ActionType = 3
 )
 
 // InstallResult captures the outcome of a single tool installation
@@ -82,6 +83,23 @@ type State struct {
 	AbortInstallation bool               // Flag to signal running installations to abort
 	CancelCtx         context.Context    // Context for cancelling running installations
 	CancelFunc        context.CancelFunc // Function to cancel the context
+
+	// Popup state
+	ShowSudoConfirm bool       // Whether to show sudo confirmation popup
+	PendingAction   ActionType // Action waiting for sudo confirmation
+	SudoPassword    string     // Temporary sudo password (cleared after action)
+	PasswordInput   string     // Current password input buffer
+
+	// Results display state
+	LastRenderedResultCount int   // Track how many results were last rendered to avoid duplication
+	ActionCompletionTime    int64 // Unix timestamp when last action completed (for auto-clear timeout)
+
+	// Update state
+	UpdateAvailable   bool   // Whether an update is available
+	UpdateVersion     string // Latest version available
+	UpdateMessage     string // Update status message to display
+	UpdateDownloadURL string // URL to download the update
+	UpdateMessageTime int64  // Unix timestamp when update message was shown
 }
 
 func NewState() *State {
@@ -92,7 +110,7 @@ func NewState() *State {
 		SelectedMethod: config.InstallMethods[0],
 		CurrentPage:    PageMultiPanel,
 		ActivePanel:    PanelPackageManager,
-		SelectedAction: ActionInstall,
+		SelectedAction: ActionCheck,
 		ActionIndex:    0,
 		SelectedTools:  make(map[string]bool),
 		ToolsIndex:     0,
@@ -116,6 +134,105 @@ func (s *State) Reset() {
 	s.SelectedTools = make(map[string]bool)
 	s.ToolsIndex = 0
 	s.ActionIndex = 0
-	s.SelectedAction = ActionInstall
+	s.SelectedAction = ActionCheck
 	s.InstallResults = []InstallResult{}
+}
+
+// ResetActionState clears action-related state after an action completes
+func (s *State) ResetActionState() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.InstallResults = []InstallResult{}
+	s.InstallOutput = ""
+	s.CurrentTool = ""
+	s.InstallingIndex = 0
+	s.InstallationDone = false
+	s.SpinnerFrame = 0
+	s.InstallStartTime = 0
+	s.ToolStartTimes = make(map[string]int64)
+	s.SelectedTools = make(map[string]bool)
+	s.ToolsIndex = 0
+	s.ActionIndex = 0
+	s.SelectedAction = ActionCheck
+}
+
+// GetShowSudoConfirm returns whether the sudo confirmation popup is visible
+func (s *State) GetShowSudoConfirm() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.ShowSudoConfirm
+}
+
+// SetShowSudoConfirm sets the sudo confirmation popup visibility
+func (s *State) SetShowSudoConfirm(show bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.ShowSudoConfirm = show
+}
+
+// GetPendingAction returns the action waiting for sudo confirmation
+func (s *State) GetPendingAction() ActionType {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.PendingAction
+}
+
+// SetPendingAction sets the action waiting for sudo confirmation
+func (s *State) SetPendingAction(action ActionType) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.PendingAction = action
+}
+
+// GetSudoPassword returns the temporary sudo password
+func (s *State) GetSudoPassword() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.SudoPassword
+}
+
+// SetSudoPassword sets the temporary sudo password
+func (s *State) SetSudoPassword(password string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.SudoPassword = password
+}
+
+// ClearSudoPassword clears the sudo password from memory
+func (s *State) ClearSudoPassword() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.SudoPassword = ""
+	s.PasswordInput = ""
+}
+
+// GetPasswordInput returns the current password input buffer
+func (s *State) GetPasswordInput() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.PasswordInput
+}
+
+// SetPasswordInput sets the password input buffer
+func (s *State) SetPasswordInput(input string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.PasswordInput = input
+}
+
+// AppendPasswordInput appends a character to the password input
+func (s *State) AppendPasswordInput(char rune) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.PasswordInput += string(char)
+}
+
+// BackspacePasswordInput removes the last character from password input
+func (s *State) BackspacePasswordInput() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if len(s.PasswordInput) > 0 {
+		s.PasswordInput = s.PasswordInput[:len(s.PasswordInput)-1]
+	}
 }
