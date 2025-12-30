@@ -15,18 +15,21 @@ func TestInstallMethods_Contains6Managers(t *testing.T) {
 	})
 
 	t.Run("contains expected managers", func(t *testing.T) {
-		expected := []string{"Homebrew", "APT", "Curl", "YUM", "Scoop", "Chocolatey"}
-		for _, method := range expected {
-			found := false
-			for _, m := range InstallMethods {
-				if m == method {
-					found = true
-					break
-				}
+		expectedManagers := map[string]bool{
+			"Homebrew":   true,
+			"APT":        true,
+			"Curl":       true,
+			"YUM":        true,
+			"Scoop":      true,
+			"Chocolatey": true,
+		}
+		for _, method := range InstallMethods {
+			if !expectedManagers[method] {
+				t.Errorf("Unexpected method '%s' in InstallMethods slice", method)
 			}
-			if !found {
-				t.Errorf("Expected method '%s' not found", method)
-			}
+		}
+		if len(InstallMethods) != len(expectedManagers) {
+			t.Errorf("Expected %d methods, got %d", len(expectedManagers), len(InstallMethods))
 		}
 	})
 }
@@ -42,18 +45,19 @@ func TestActions_Contains4Actions(t *testing.T) {
 	})
 
 	t.Run("contains expected actions", func(t *testing.T) {
-		expected := []string{"Check", "Install", "Update", "Uninstall"}
-		for _, action := range expected {
-			found := false
-			for _, a := range Actions {
-				if a == action {
-					found = true
-					break
-				}
+		expectedActions := map[string]bool{
+			"Check":     true,
+			"Install":   true,
+			"Update":    true,
+			"Uninstall": true,
+		}
+		for _, action := range Actions {
+			if !expectedActions[action] {
+				t.Errorf("Unexpected action '%s' in Actions slice", action)
 			}
-			if !found {
-				t.Errorf("Expected action '%s' not found", action)
-			}
+		}
+		if len(Actions) != len(expectedActions) {
+			t.Errorf("Expected %d actions, got %d", len(expectedActions), len(Actions))
 		}
 	})
 }

@@ -4,10 +4,10 @@ import (
 	"testing"
 )
 
-// TestTools_ContainsExpectedTools tests that Tools slice contains expected tools.
+// TestTools_NotEmpty tests that Tools slice is not empty.
 // Priority: P3 - Configuration validation.
-// Tests that the Tools slice is not empty and contains known tools.
-func TestTools_ContainsExpectedTools(t *testing.T) {
+// Tests that Tools slice is not empty.
+func TestTools_NotEmpty(t *testing.T) {
 	t.Run("tools slice is not empty", func(t *testing.T) {
 		if len(Tools) == 0 {
 			t.Error("Tools slice should not be empty")
@@ -15,18 +15,20 @@ func TestTools_ContainsExpectedTools(t *testing.T) {
 	})
 
 	t.Run("contains expected tools", func(t *testing.T) {
-		expected := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
-		for _, tool := range expected {
-			found := false
-			for _, t2 := range Tools {
-				if t2 == tool {
-					found = true
-					break
-				}
+		expectedTools := map[string]bool{
+			"git":        true,
+			"docker":     true,
+			"lazygit":    true,
+			"lazydocker": true,
+			"htop":       true,
+		}
+		for _, tool := range Tools {
+			if !expectedTools[tool] {
+				t.Errorf("Unexpected tool '%s' in Tools slice", tool)
 			}
-			if !found {
-				t.Errorf("Expected tool '%s' not found in Tools slice", tool)
-			}
+		}
+		if len(Tools) != len(expectedTools) {
+			t.Errorf("Expected %d tools, got %d", len(expectedTools), len(Tools))
 		}
 	})
 }

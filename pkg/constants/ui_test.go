@@ -1,52 +1,119 @@
 package constants
 
 import (
+	"strings"
 	"testing"
 )
 
-// TestConstants_AllDefinedAndNonEmpty tests that UI constants are defined and non-empty.
+// TestViewConstants_AreNonEmpty tests that view constants are defined and non-empty.
 // Priority: P3 - Configuration validation.
-// Tests that key UI constants have valid values.
-func TestConstants_AllDefinedAndNonEmpty(t *testing.T) {
-	t.Run("view constants are non-empty", func(t *testing.T) {
-		views := []string{ViewMenu, ViewResult, ViewResults, ViewTools, ViewInstalling}
-		for _, v := range views {
-			if v == "" {
-				t.Error("View constant should not be empty")
+// Tests that key UI view constants have valid values.
+func TestViewConstants_AreNonEmpty(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+	}{
+		{"ViewMenu", ViewMenu},
+		{"ViewResult", ViewResult},
+		{"ViewResults", ViewResults},
+		{"ViewTools", ViewTools},
+		{"ViewInstalling", ViewInstalling},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name+" is non-empty", func(t *testing.T) {
+			if tt.value == "" {
+				t.Errorf("Constant %s should not be empty", tt.name)
 			}
-		}
-	})
+		})
+	}
+}
 
-	t.Run("panel constants are non-empty", func(t *testing.T) {
-		panels := []string{PanelTools, PanelPackageManager, PanelProgress, PanelAction, PanelStatusView}
-		for _, p := range panels {
-			if p == "" {
-				t.Error("Panel constant should not be empty")
+// TestPanelConstants_AreNonEmpty tests that panel constants are defined and non-empty.
+// Priority: P3 - Configuration validation.
+// Tests that UI panel constants have valid values.
+func TestPanelConstants_AreNonEmpty(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+	}{
+		{"PanelTools", PanelTools},
+		{"PanelPackageManager", PanelPackageManager},
+		{"PanelProgress", PanelProgress},
+		{"PanelAction", PanelAction},
+		{"PanelStatusView", PanelStatusView},
+		{"PopupConfirm", PopupConfirm},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name+" is non-empty", func(t *testing.T) {
+			if tt.value == "" {
+				t.Errorf("Constant %s should not be empty", tt.name)
 			}
-		}
-	})
+		})
+	}
+}
 
-	t.Run("title constants are non-empty", func(t *testing.T) {
-		titles := []string{TitlePackageManager, TitleInstalling, TitleTools, TitleAction, TitleStatus}
-		for _, title := range titles {
-			if title == "" {
-				t.Error("Title constant should not be empty")
+// TestTitleConstants_AreNonEmpty tests that title constants are defined and non-empty.
+// Priority: P3 - Configuration validation.
+// Tests that UI title constants have valid values.
+func TestTitleConstants_AreNonEmpty(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+	}{
+		{"TitlePackageManager", TitlePackageManager},
+		{"TitleInstalling", TitleInstalling},
+		{"TitleTools", TitleTools},
+		{"TitleAction", TitleAction},
+		{"TitleStatus", TitleStatus},
+		{"TitleSelection", TitleSelection},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name+" is non-empty", func(t *testing.T) {
+			if tt.value == "" {
+				t.Errorf("Constant %s should not be empty", tt.name)
 			}
-		}
-	})
+		})
+	}
+}
 
-	t.Run("update message constants are non-empty", func(t *testing.T) {
-		messages := []string{UpdateAvailable, UpdateDownloading, UpdateInstalling, UpdateSuccess}
-		for _, msg := range messages {
-			if msg == "" {
-				t.Error("Update message constant should not be empty")
+// TestUpdateMessageConstants_AreNonEmpty tests that update message constants are defined and non-empty.
+// Priority: P3 - Configuration validation.
+// Tests that update notification constants have valid values.
+func TestUpdateMessageConstants_AreNonEmpty(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+	}{
+		{"UpdateAvailable", UpdateAvailable},
+		{"UpdateDownloading", UpdateDownloading},
+		{"UpdateInstalling", UpdateInstalling},
+		{"UpdateSuccess", UpdateSuccess},
+		{"UpdateFailed", UpdateFailed},
+		{"UpdateCheckFailed", UpdateCheckFailed},
+		{"UpdateNotAvailable", UpdateNotAvailable},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name+" is non-empty", func(t *testing.T) {
+			if tt.value == "" {
+				t.Errorf("Constant %s should not be empty", tt.name)
 			}
-		}
-	})
+		})
+	}
+}
 
+// TestLogo_IsNonEmpty tests that logo is defined and non-empty.
+// Priority: P3 - Configuration validation.
+// Tests that the ASCII art logo is present.
+func TestLogo_IsNonEmpty(t *testing.T) {
 	t.Run("logo is non-empty", func(t *testing.T) {
 		if Logo == "" {
-			t.Error("Logo should not be empty")
+			t.Error("Logo constant should not be empty")
+		}
+	})
+
+	t.Run("logo contains expected content", func(t *testing.T) {
+		if !strings.Contains(Logo, "lazysetup") && !strings.Contains(Logo, "P.E.L.E.") {
+			t.Error("Logo should contain 'lazysetup' or 'P.E.L.E.'")
 		}
 	})
 }
