@@ -133,7 +133,7 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		}
 		// Trigger update if available
 		if state.UpdateAvailable {
-			go handlers.PerformUpdate(state)
+			go handlers.ExecuteUpdate(state)
 		}
 		return nil
 	}); err != nil {
