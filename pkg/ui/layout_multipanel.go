@@ -8,6 +8,7 @@ import (
 	"github.com/youpele52/lazysetup/pkg/colors"
 	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/models"
+	"github.com/youpele52/lazysetup/pkg/ui/messages"
 )
 
 // layoutMultiPanel renders the four-panel layout used in PageMultiPanel
@@ -135,7 +136,7 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		if installStartTime > 0 && !installationDone {
 			// Show installation progress - clear and update every frame for spinner
 			v.Clear()
-			params := ProgressMessageParams{
+			params := messages.ProgressMessageParams{
 				SelectedMethod:   state.GetSelectedMethod(),
 				CurrentTool:      state.GetCurrentTool(),
 				InstallingIndex:  state.GetInstallingIndex(),
@@ -145,14 +146,14 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 				InstallOutput:    state.GetInstallOutput(),
 				Action:           state.GetSelectedAction(),
 			}
-			message := BuildInstallationProgressMessage(params)
+			message := messages.BuildInstallationProgressMessage(params)
 			fmt.Fprint(v, message)
 		} else if installationDone && len(results) > lastRenderedCount {
 			// Append only new results (rolling credits style)
 			// Latest results at top, oldest at bottom
 			selectedAction := state.GetSelectedAction()
 			newResults := results[lastRenderedCount:]
-			message := BuildNewResultsMessage(newResults, selectedAction)
+			message := messages.BuildNewResultsMessage(newResults, selectedAction)
 			fmt.Fprint(v, message)
 			state.LastRenderedResultCount = len(results)
 		} else if len(results) == 0 {

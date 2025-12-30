@@ -7,6 +7,7 @@ import (
 	"github.com/youpele52/lazysetup/pkg/colors"
 	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/models"
+	"github.com/youpele52/lazysetup/pkg/ui/messages"
 )
 
 func layoutInstallingPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
@@ -36,7 +37,7 @@ func layoutInstallingPage(g *gocui.Gui, state *models.State, maxX, maxY int) err
 
 	if v, err := g.View(constants.ViewInstalling); err == nil {
 		v.Clear()
-		params := ProgressMessageParams{
+		params := messages.ProgressMessageParams{
 			SelectedMethod:   state.SelectedMethod,
 			CurrentTool:      state.CurrentTool,
 			InstallingIndex:  state.InstallingIndex,
@@ -46,7 +47,7 @@ func layoutInstallingPage(g *gocui.Gui, state *models.State, maxX, maxY int) err
 			InstallOutput:    state.InstallOutput,
 			Action:           state.SelectedAction,
 		}
-		message := BuildInstallationProgressMessage(params)
+		message := messages.BuildInstallationProgressMessage(params)
 		fmt.Fprint(v, message)
 	}
 

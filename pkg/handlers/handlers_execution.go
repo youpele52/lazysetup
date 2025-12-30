@@ -148,10 +148,10 @@ func updateToolWithOutput(params ToolActionParams) (string, string, string) {
 	}
 
 	if result.TimedOut {
-		return constants.StatusFailed, constants.ErrorInstallationTimedOut, result.Output
+		return constants.StatusFailed, constants.InstallationTimedOut, result.Output
 	}
 	if result.Cancelled {
-		return constants.StatusFailed, constants.ErrorInstallationCancelled, result.Output
+		return constants.StatusFailed, constants.InstallationCancelled, result.Output
 	}
 	if result.ExitCode != 0 {
 		errMsg := result.GetErrorMessage()
@@ -188,10 +188,10 @@ func uninstallToolWithOutput(params ToolActionParams) (string, string, string) {
 	}
 
 	if result.TimedOut {
-		return constants.StatusFailed, constants.ErrorInstallationTimedOut, result.Output
+		return constants.StatusFailed, constants.InstallationTimedOut, result.Output
 	}
 	if result.Cancelled {
-		return constants.StatusFailed, constants.ErrorInstallationCancelled, result.Output
+		return constants.StatusFailed, constants.InstallationCancelled, result.Output
 	}
 	if result.ExitCode != 0 {
 		errMsg := result.GetErrorMessage()

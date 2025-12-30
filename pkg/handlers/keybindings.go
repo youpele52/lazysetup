@@ -63,7 +63,7 @@ func installToolWithRetry(state *models.State, method, tool string) (string, str
 func installToolWithOutput(state *models.State, method, tool string) (string, string, string) {
 	cmd := commands.GetInstallCommand(method, tool)
 	if cmd == "" {
-		return constants.StatusFailed, constants.ErrorNoInstallCommand, ""
+		return constants.StatusFailed, constants.NoInstallCommandError, ""
 	}
 
 	ctx := state.GetCancelContext()
@@ -79,10 +79,10 @@ func installToolWithOutput(state *models.State, method, tool string) (string, st
 	}
 
 	if result.TimedOut {
-		return constants.StatusFailed, constants.ErrorInstallationTimedOut, result.Output
+		return constants.StatusFailed, constants.InstallationTimedOut, result.Output
 	}
 	if result.Cancelled {
-		return constants.StatusFailed, constants.ErrorInstallationCancelled, result.Output
+		return constants.StatusFailed, constants.InstallationCancelled, result.Output
 	}
 	if result.ExitCode != 0 {
 		// Use actual command output as error message if available, otherwise use generic message
