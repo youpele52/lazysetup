@@ -35,30 +35,18 @@ func main() {
 	}
 }
 
-// checkForUpdates checks for available updates on startup and automatically installs them
+// checkForUpdates checks for available updates on startup
 func checkForUpdates(state *models.State) {
 	info := updater.CheckForUpdates()
 	if info.Error != nil {
 		return
 	}
 	if info.Available {
-		// Automatically download and install the update
-		state.UpdateMessage = fmt.Sprintf(constants.UpdateDownloading)
+		state.UpdateAvailable = true
+		state.UpdateVersion = info.LatestVersion
+		state.UpdateDownloadURL = info.DownloadURL
+		state.UpdateMessage = fmt.Sprintf(constants.UpdateAvailable, info.CurrentVersion, info.LatestVersion)
 		state.UpdateMessageTime = time.Now().Unix()
-
-		err := updater.DownloadAndInstall(info.DownloadURL)
-		if err != nil {
-			// If update fails, show error message
-			state.UpdateMessage = fmt.Sprintf(constants.UpdateFailed, err.Error())
-			state.UpdateMessageTime = time.Now().Unix()
-			return
-		}
-
-		// Update successful, restart the application
-		state.UpdateMessage = constants.UpdateSuccess
-		state.UpdateMessageTime = time.Now().Unix()
-		time.Sleep(1 * time.Second) // Brief delay to show success message
-		updater.RestartApplication()
 	}
 }
 
