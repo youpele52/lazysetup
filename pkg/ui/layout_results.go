@@ -7,6 +7,7 @@ import (
 	"github.com/youpele52/lazysetup/pkg/colors"
 	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/models"
+	"github.com/youpele52/lazysetup/pkg/ui/messages"
 )
 
 func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
@@ -38,7 +39,7 @@ func layoutResultsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error 
 
 	if v, err := g.View(constants.ViewResults); err == nil {
 		v.Clear()
-		message := BuildInstallationResultsMessage(state.InstallResults, state.SelectedAction)
+		message := messages.BuildInstallationResultsMessage(state.InstallResults, state.SelectedAction)
 		fmt.Fprint(v, message)
 	}
 

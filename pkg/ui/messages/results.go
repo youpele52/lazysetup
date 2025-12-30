@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/youpele52/lazysetup/pkg/colors"
-	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
@@ -33,6 +32,7 @@ func BuildInstallationResultsMessage(results []models.InstallResult, action mode
 			}
 			successCount++
 		} else {
+			verb := getActionVerb(action)
 			failedLine := fmt.Sprintf("%s✗ %s - %s failed (%ds)%s", colors.ANSIRed, result.Tool, verb, result.Duration, colors.ANSIReset)
 			mb.AddLine(failedLine)
 			if result.Error != "" {
@@ -56,15 +56,3 @@ func BuildInstallationResultsMessage(results []models.InstallResult, action mode
 
 	return mb.Build()
 }
-
-func getActionVerb(action models.ActionType) string {
-	switch action {
-	case models.ActionInstall:
-		return "install"
-	case models.ActionUpdate:
-		return "update"
-	case models.ActionUninstall:
-		return "uninstall"
-	default:
-		return "action"
-	}

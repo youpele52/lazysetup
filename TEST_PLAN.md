@@ -1,10 +1,97 @@
 # Test Plan for lazysetup
 
 ## Priority Legend
-- **P0**: Critical - Core functionality, security, or data safety at risk
-- **P1**: High - Major features, common user paths, or complex concurrency
-- **P2**: Medium - Standard features, edge cases, or validation
-- **P3**: Low - Nice-to-have, UI details, or simple constants
+
+### P0 - Critical
+**Definition:** Core functionality, security, or data safety at risk
+
+**Examples:**
+- Installation execution and command handling
+- Password/credential handling and security
+- Race conditions in concurrent operations
+- Data corruption or loss scenarios
+- Application crashes or panics
+
+**Decision Criteria:**
+- Does it cause crashes, data loss, or security breaches if broken?
+- Does it affect the core installation workflow?
+- Does it involve concurrent access to shared state?
+
+**Test Expectations:**
+- 100% code coverage required
+- Race detection (`-race` flag) mandatory
+- All edge cases and error paths tested
+- Tests must be added immediately after implementation
+
+---
+
+### P1 - High Priority
+**Definition:** Major features, common user paths, or complex concurrency
+
+**Examples:**
+- Tool selection and installation workflows
+- Update checking and notifications
+- Error recovery and retry logic
+- Concurrent tool installations
+- User abort/cancellation functionality
+- Password input and validation
+
+**Decision Criteria:**
+- Does it break a major user workflow if broken?
+- Is it part of the common installation path?
+- Does it involve concurrency or state mutations?
+
+**Test Expectations:**
+- 80%+ code coverage required
+- Race detection for concurrent code paths
+- Common use cases and error paths tested
+- Tests must be added immediately after implementation
+
+---
+
+### P2 - Medium Priority
+**Definition:** Standard features, edge cases, or validation
+
+**Examples:**
+- Cursor movement and bounds checking
+- Input validation and error handling
+- Navigation between panels/views
+- Edge case handling (empty lists, invalid inputs)
+- Performance optimizations
+
+**Decision Criteria:**
+- Does it affect user experience in edge cases?
+- Is it a standard feature that could fail silently?
+- Does it validate or transform user input?
+
+**Test Expectations:**
+- 60%+ code coverage
+- Functional testing of main paths
+- User preference on timing: ask whether to add tests immediately or defer
+- Can be deferred if P0/P1 items are pending
+
+---
+
+### P3 - Low Priority
+**Definition:** Nice-to-have, UI details, or simple constants
+
+**Examples:**
+- UI formatting and styling
+- Constant definitions and configuration
+- Helper functions with obvious behavior
+- Non-critical logging or debugging
+- ASCII art and decorative elements
+
+**Decision Criteria:**
+- Is it purely cosmetic or decorative?
+- Is it a simple constant or configuration value?
+- Would the app still work correctly if this broke?
+
+**Test Expectations:**
+- Basic validation testing (optional)
+- Simple assertions on values
+- Can be deferred or skipped if resources are limited
+- User preference on timing: ask whether to add tests
 
 ---
 
