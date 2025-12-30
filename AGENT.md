@@ -6,7 +6,7 @@ Follow these rules strictly unless instructed otherwise.
 No file should exceed 250 lines. Split larger files into focused modules with clear naming (e.g., `handlers_navigation.go`, `handlers_actions.go`).
 
 ## 2. Single Responsibility
-Each function should do one thing well. Use clear names, accept only necessary parameters, avoid unrelated side effects. Functions with more than 3 parameters should package arguments into a struct.
+Each function should do one thing well. Use clear names, accept only necessary parameters, avoid unrelated side effects. Functions with more than 3 parameters should package arguments into a struct. Multiple struct arguments are acceptable when reasonable.
 
 ## 3. Documentation
 Add doc strings to functions and structs that aren't immediately clear: complex logic, public APIs, state mutations, multiple returns, complex structs.
