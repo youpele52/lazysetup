@@ -218,6 +218,8 @@ go build -o lazysetup
 go test ./...
 ```
 
+For detailed testing documentation including test structure, race detection, and test priorities, see [TESTING.md](TESTING.md).
+
 ### Code Structure
 
 The project follows a modular architecture with clear separation of concerns:

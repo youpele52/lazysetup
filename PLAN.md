@@ -197,6 +197,23 @@ AvailableUpdates map[string]string  // tool → newVersion
 └── E2E Tests → Full Workflow
 ```
 
+### Testing Status
+
+**Completed Tests:**
+- [x] Unit tests for state management (concurrent access, thread-safety)
+- [x] Unit tests for handler execution (parallel tool execution, abort handling)
+- [x] Unit tests for installation flow (state initialization, parallel goroutines)
+- [x] Test utilities and helpers
+- [x] Race detection for all concurrent code
+
+**Pending Tests:**
+- [ ] Unit tests for executor command execution
+- [ ] Unit tests for commands (install/update/uninstall)
+- [ ] Integration tests for AI providers
+- [ ] E2E tests for full workflow
+
+See [TESTING.md](TESTING.md) for running tests and test details.
+
 ## Roadmap
 **Phase 1**: Go project + basic installer + TUI ✓ (Current)
 - [x] Multi-tool installation support
@@ -204,6 +221,8 @@ AvailableUpdates map[string]string  // tool → newVersion
 - [x] TUI with multi-panel layout
 - [x] Update tool functionality
 - [x] Delete/uninstall tool functionality
+- [x] P0 tests (race conditions, concurrent access)
+- [x] P1 tests (handler execution, abort handling)
 
 **Phase 2**: Update & Delete Operations
 - [x] Implement update command handlers
@@ -212,6 +231,7 @@ AvailableUpdates map[string]string  // tool → newVersion
 - [x] Create Update and Delete UI pages (integrated into Action panel)
 - [ ] Add update progress tracking
 - [ ] Add delete confirmation dialogs
+- [ ] P1 tests for update/uninstall functionality
 
 **Phase 3**: Multi-platform + AI integration  
 - [ ] Cross-platform compatibility testing
@@ -222,6 +242,8 @@ AvailableUpdates map[string]string  // tool → newVersion
 - [ ] Team configuration sharing
 - [ ] Solution caching system
 - [ ] Advanced error handling
+- [ ] Integration tests for AI providers
+- [ ] E2E tests for full workflow
 
 ## Why This Wins
 - **AI troubleshooting** eliminates manual searches
