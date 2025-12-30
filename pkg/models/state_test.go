@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// TestNewState tests initial state creation and default values.
+// Priority: P2 - Prevents nil pointer panics on startup.
+// Tests that NewState returns non-nil state with correct default values.
 func TestNewState(t *testing.T) {
 	t.Run("creates valid initial state", func(t *testing.T) {
 		state := NewState()
@@ -27,6 +30,9 @@ func TestNewState(t *testing.T) {
 	})
 }
 
+// TestState_ConcurrentAccess tests thread-safety of state with multiple goroutines.
+// Priority: P0 - Race conditions can cause crashes or data corruption.
+// Stress tests with 100 goroutines performing concurrent read/write operations.
 func TestState_ConcurrentAccess(t *testing.T) {
 	t.Run("multiple goroutines can safely read and write", func(t *testing.T) {
 		state := NewState()
@@ -56,6 +62,9 @@ func TestState_ConcurrentAccess(t *testing.T) {
 	})
 }
 
+// TestState_PasswordMethods_ThreadSafety tests thread-safety of password operations.
+// Priority: P1 - Password security must be maintained under concurrent access.
+// Tests Set, Get, and Clear password operations with 50 concurrent goroutines.
 func TestState_PasswordMethods_ThreadSafety(t *testing.T) {
 	t.Run("concurrent password access is safe", func(t *testing.T) {
 		state := NewState()
@@ -81,6 +90,9 @@ func TestState_PasswordMethods_ThreadSafety(t *testing.T) {
 	})
 }
 
+// TestState_PasswordInputMethods_ThreadSafety tests thread-safety of password input buffer.
+// Priority: P1 - Input buffer corruption causes incorrect passwords.
+// Tests Set, Get, Append, and Backspace operations with concurrent goroutines.
 func TestState_PasswordInputMethods_ThreadSafety(t *testing.T) {
 	t.Run("concurrent password input operations are safe", func(t *testing.T) {
 		state := NewState()
@@ -112,6 +124,9 @@ func TestState_PasswordInputMethods_ThreadSafety(t *testing.T) {
 	})
 }
 
+// TestState_SelectedTools_ConcurrentOperations tests thread-safety of tool selection.
+// Priority: P1 - Tool selection corruption causes wrong installations.
+// Tests concurrent Get and Set operations on selected tools map.
 func TestState_SelectedTools_ConcurrentOperations(t *testing.T) {
 	t.Run("concurrent selected tools operations are safe", func(t *testing.T) {
 		state := NewState()
@@ -138,6 +153,9 @@ func TestState_SelectedTools_ConcurrentOperations(t *testing.T) {
 	})
 }
 
+// TestState_InstallOutputMethods_ThreadSafety tests thread-safety of install output.
+// Priority: P1 - Output display corruption breaks user feedback.
+// Tests Append, Get, and Clear output operations with concurrent goroutines.
 func TestState_InstallOutputMethods_ThreadSafety(t *testing.T) {
 	t.Run("concurrent install output operations are safe", func(t *testing.T) {
 		state := NewState()
@@ -163,6 +181,9 @@ func TestState_InstallOutputMethods_ThreadSafety(t *testing.T) {
 	})
 }
 
+// TestState_InstallResults_ConcurrentAccess tests thread-safety of install results.
+// Priority: P1 - Results tracking corruption causes incorrect status display.
+// Tests AddInstallResult and GetInstallResults with exact count verification.
 func TestState_InstallResults_ConcurrentAccess(t *testing.T) {
 	t.Run("concurrent install results operations are safe", func(t *testing.T) {
 		state := NewState()
@@ -198,6 +219,9 @@ func TestState_InstallResults_ConcurrentAccess(t *testing.T) {
 	})
 }
 
+// TestState_InstallationDoneFlag_ThreadSafety tests thread-safety of installation done flag.
+// Priority: P1 - Premature completion flag blocks UI updates.
+// Tests concurrent Set and Get operations on installation done flag.
 func TestState_InstallationDoneFlag_ThreadSafety(t *testing.T) {
 	t.Run("concurrent installation done flag operations are safe", func(t *testing.T) {
 		state := NewState()
@@ -221,6 +245,9 @@ func TestState_InstallationDoneFlag_ThreadSafety(t *testing.T) {
 	})
 }
 
+// TestState_PagePanelMethods_ThreadSafety tests thread-safety of page and panel navigation.
+// Priority: P1 - UI navigation breaks with incorrect state.
+// Tests concurrent page and panel switching operations.
 func TestState_PagePanelMethods_ThreadSafety(t *testing.T) {
 	t.Run("concurrent page and panel operations are safe", func(t *testing.T) {
 		state := NewState()
@@ -248,6 +275,9 @@ func TestState_PagePanelMethods_ThreadSafety(t *testing.T) {
 	})
 }
 
+// TestState_ToolStartTime_ConcurrentAccess tests thread-safety of tool start time tracking.
+// Priority: P2 - Duration display depends on correct timestamps.
+// Tests concurrent Set and Get operations on tool start times.
 func TestState_ToolStartTime_ConcurrentAccess(t *testing.T) {
 	t.Run("concurrent tool start time operations are safe", func(t *testing.T) {
 		state := NewState()
@@ -273,6 +303,9 @@ func TestState_ToolStartTime_ConcurrentAccess(t *testing.T) {
 	})
 }
 
+// TestState_CancelContext_ThreadSafety tests thread-safety of cancel context operations.
+// Priority: P1 - Cancellation must work correctly for user abort functionality.
+// Tests concurrent GetCancelContext, CancelInstallations, and ResetCancelContext.
 func TestState_CancelContext_ThreadSafety(t *testing.T) {
 	t.Run("concurrent cancel context operations are safe", func(t *testing.T) {
 		state := NewState()
@@ -298,6 +331,9 @@ func TestState_CancelContext_ThreadSafety(t *testing.T) {
 	})
 }
 
+// TestState_AbortFlag_ThreadSafety tests thread-safety of abort flag operations.
+// Priority: P1 - Abort flag must be thread-safe for user control.
+// Tests concurrent Set and Get operations on abort installation flag.
 func TestState_AbortFlag_ThreadSafety(t *testing.T) {
 	t.Run("concurrent abort flag operations are safe", func(t *testing.T) {
 		state := NewState()
@@ -321,6 +357,9 @@ func TestState_AbortFlag_ThreadSafety(t *testing.T) {
 	})
 }
 
+// TestState_Reset tests that Reset clears all state fields.
+// Priority: P2 - Prevents state corruption between operations.
+// Tests that Reset clears selected method, tools, and resets page to default.
 func TestState_Reset(t *testing.T) {
 	t.Run("reset clears all fields", func(t *testing.T) {
 		state := NewState()

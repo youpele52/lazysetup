@@ -8,6 +8,9 @@ import (
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
+// TestRunToolAction_SingleToolExecution tests basic single tool execution flow.
+// Priority: P1 - Basic installation flow must work for single tool.
+// Tests that a single tool executes, produces results, and sets installation done flag.
 func TestRunToolAction_SingleToolExecution(t *testing.T) {
 	t.Run("executes action on single tool", func(t *testing.T) {
 		state := models.NewState()
@@ -44,6 +47,9 @@ func TestRunToolAction_SingleToolExecution(t *testing.T) {
 	})
 }
 
+// TestRunToolAction_ConcurrentExecution tests concurrent execution of multiple tools.
+// Priority: P0 - Race condition risk with parallel execution.
+// Tests that multiple tools execute concurrently without race conditions.
 func TestRunToolAction_ConcurrentExecution(t *testing.T) {
 	t.Run("multiple tools execute concurrently without race conditions", func(t *testing.T) {
 		state := models.NewState()
@@ -78,6 +84,9 @@ func TestRunToolAction_ConcurrentExecution(t *testing.T) {
 	})
 }
 
+// TestRunToolAction_AbortFlagStopsExecution tests that abort flag stops tool execution.
+// Priority: P1 - User control during parallel execution.
+// Tests that setting abort flag and cancelling context stops execution.
 func TestRunToolAction_AbortFlagStopsExecution(t *testing.T) {
 	t.Run("abort flag stops concurrent tool execution", func(t *testing.T) {
 		state := models.NewState()
@@ -122,6 +131,9 @@ func TestRunToolAction_AbortFlagStopsExecution(t *testing.T) {
 	})
 }
 
+// TestRunToolAction_ResultsCollectedCorrectly tests that results are collected from all tools.
+// Priority: P1 - Results display depends on correct collection.
+// Tests that results are collected and tool names are not empty.
 func TestRunToolAction_ResultsCollectedCorrectly(t *testing.T) {
 	t.Run("results are collected correctly from all tools", func(t *testing.T) {
 		state := models.NewState()
@@ -162,6 +174,9 @@ func TestRunToolAction_ResultsCollectedCorrectly(t *testing.T) {
 	})
 }
 
+// TestRunToolAction_SpinnerFrameIncrements tests spinner animation during execution.
+// Priority: P2 - UI feedback for progress indication.
+// Tests that spinner frame is valid and non-negative during execution.
 func TestRunToolAction_SpinnerFrameIncrements(t *testing.T) {
 	t.Run("spinner frame increments during execution", func(t *testing.T) {
 		state := models.NewState()
@@ -201,6 +216,9 @@ func TestRunToolAction_SpinnerFrameIncrements(t *testing.T) {
 	})
 }
 
+// TestCheckToolWithOutput_TimeoutHandling tests check action completion and status.
+// Priority: P1 - Version display feature depends on correct check results.
+// Tests that check action returns valid status and appropriate output/error.
 func TestCheckToolWithOutput_TimeoutHandling(t *testing.T) {
 	t.Run("check action completes and returns valid status", func(t *testing.T) {
 		state := models.NewState()
@@ -241,6 +259,9 @@ func TestCheckToolWithOutput_TimeoutHandling(t *testing.T) {
 	})
 }
 
+// TestCheckToolWithOutput_CancelledHandling tests check action cancellation handling.
+// Priority: P1 - User abort during check must be handled gracefully.
+// Tests that cancellation produces valid status and doesn't crash.
 func TestCheckToolWithOutput_CancelledHandling(t *testing.T) {
 	t.Run("check action handles cancellation correctly", func(t *testing.T) {
 		state := models.NewState()
@@ -273,6 +294,9 @@ func TestCheckToolWithOutput_CancelledHandling(t *testing.T) {
 	})
 }
 
+// TestUpdateToolWithOutput_SuccessCase tests update action returns valid status.
+// Priority: P1 - Core update feature for security patches.
+// Tests that update action returns valid status and output/error message.
 func TestUpdateToolWithOutput_SuccessCase(t *testing.T) {
 	t.Run("update tool returns valid status and output", func(t *testing.T) {
 		state := models.NewState()
@@ -308,6 +332,9 @@ func TestUpdateToolWithOutput_SuccessCase(t *testing.T) {
 	})
 }
 
+// TestUpdateToolWithOutput_FailureWithError tests update action error handling.
+// Priority: P1 - Error reporting for updates must be clear.
+// Tests invalid method and nonexistent tool scenarios.
 func TestUpdateToolWithOutput_FailureWithError(t *testing.T) {
 	t.Run("update tool with invalid method returns failure", func(t *testing.T) {
 		state := models.NewState()
@@ -348,6 +375,9 @@ func TestUpdateToolWithOutput_FailureWithError(t *testing.T) {
 	})
 }
 
+// TestUninstallToolWithOutput_SuccessCase tests uninstall action returns valid status.
+// Priority: P1 - Core uninstall feature for removing tools.
+// Tests that uninstall action returns valid status and output/error message.
 func TestUninstallToolWithOutput_SuccessCase(t *testing.T) {
 	t.Run("uninstall tool returns valid status", func(t *testing.T) {
 		state := models.NewState()
@@ -382,6 +412,9 @@ func TestUninstallToolWithOutput_SuccessCase(t *testing.T) {
 	})
 }
 
+// TestUninstallToolWithOutput_InvalidMethod tests uninstall with invalid method.
+// Priority: P1 - Error handling for invalid package manager.
+// Tests that invalid method is handled gracefully without crash.
 func TestUninstallToolWithOutput_InvalidMethod(t *testing.T) {
 	t.Run("uninstall with invalid method handles gracefully", func(t *testing.T) {
 		state := models.NewState()

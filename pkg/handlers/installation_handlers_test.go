@@ -8,6 +8,9 @@ import (
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
+// TestMultiPanelStartInstallation_NoToolsError tests error handling when no tools are selected.
+// Priority: P2 - Validation before execution prevents confusing empty execution.
+// Tests that the handler returns appropriate error message when no tools are selected.
 func TestMultiPanelStartInstallation_NoToolsError(t *testing.T) {
 	t.Run("returns error when no tools selected", func(t *testing.T) {
 		state := models.NewState()
@@ -31,6 +34,9 @@ func TestMultiPanelStartInstallation_NoToolsError(t *testing.T) {
 	})
 }
 
+// TestMultiPanelStartInstallation_StateInitialization tests state reset before installation.
+// Priority: P1 - Prevents state corruption on installation start.
+// Tests that old results, output, and flags are cleared before new installation.
 func TestMultiPanelStartInstallation_StateInitialization(t *testing.T) {
 	t.Run("initializes state before installation", func(t *testing.T) {
 		state := models.NewState()
@@ -76,6 +82,9 @@ func TestMultiPanelStartInstallation_StateInitialization(t *testing.T) {
 	})
 }
 
+// TestMultiPanelStartInstallation_ParallelGoroutines tests concurrent goroutine execution.
+// Priority: P0 - Complex concurrency requires testing for race conditions.
+// Tests that multiple tools execute in parallel without race conditions.
 func TestMultiPanelStartInstallation_ParallelGoroutines(t *testing.T) {
 	t.Run("launches parallel goroutines without race conditions", func(t *testing.T) {
 		state := models.NewState()
@@ -122,6 +131,9 @@ func TestMultiPanelStartInstallation_ParallelGoroutines(t *testing.T) {
 	})
 }
 
+// TestMultiPanelStartInstallation_FullIntegrationFlow tests complete installation workflow.
+// Priority: P0 - Main user journey must work end-to-end.
+// Tests full installation flow including results collection and output generation.
 func TestMultiPanelStartInstallation_FullIntegrationFlow(t *testing.T) {
 	t.Run("executes full installation flow with multiple tools", func(t *testing.T) {
 		state := models.NewState()
