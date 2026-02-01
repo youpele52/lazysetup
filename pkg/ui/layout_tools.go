@@ -45,18 +45,18 @@ func layoutToolsPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 				marker = constants.CheckboxUnselected
 			}
 			// Active panel: green text by default
-			if i == state.ToolsIndex {
+			if i == state.ToolsScroll.Cursor {
 				// Cursor position: magenta text (will have magenta background from highlight)
-				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, constants.GetToolDisplayName(tool), colors.ANSIReset)
 			} else if selected {
 				// Selected item: magenta text
-				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, constants.GetToolDisplayName(tool), colors.ANSIReset)
 			} else {
 				// Unselected item: green text
-				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, tool, colors.ANSIReset)
+				fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, constants.GetToolDisplayName(tool), colors.ANSIReset)
 			}
 		}
-		v.SetCursor(0, state.ToolsIndex)
+		v.SetCursor(0, state.ToolsScroll.Cursor)
 	}
 
 	return nil

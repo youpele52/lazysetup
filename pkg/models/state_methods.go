@@ -157,3 +157,47 @@ func (s *State) GetSelectedAction() ActionType {
 	defer s.mu.RUnlock()
 	return s.SelectedAction
 }
+
+// Scroll state methods - thread-safe access to PanelScrollState
+
+// GetPackageManagerScroll safely gets the package manager scroll state
+func (s *State) GetPackageManagerScroll() PanelScrollState {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.PackageManagerScroll
+}
+
+// SetPackageManagerScroll safely sets the package manager scroll state
+func (s *State) SetPackageManagerScroll(scroll PanelScrollState) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.PackageManagerScroll = scroll
+}
+
+// GetActionScroll safely gets the action scroll state
+func (s *State) GetActionScroll() PanelScrollState {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.ActionScroll
+}
+
+// SetActionScroll safely sets the action scroll state
+func (s *State) SetActionScroll(scroll PanelScrollState) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.ActionScroll = scroll
+}
+
+// GetToolsScroll safely gets the tools scroll state
+func (s *State) GetToolsScroll() PanelScrollState {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.ToolsScroll
+}
+
+// SetToolsScroll safely sets the tools scroll state
+func (s *State) SetToolsScroll(scroll PanelScrollState) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.ToolsScroll = scroll
+}

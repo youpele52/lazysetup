@@ -39,6 +39,9 @@ const (
 	UpdateFailed       = "Update failed: %s"
 	UpdateCheckFailed  = "Failed to check for updates: %s"
 	UpdateNotAvailable = "You're running the latest version (v%s)"
+
+	// Nix package manager disclaimer
+	NixDisclaimer = "⚠️  NIX NOTICE: Requires nixpkgs channel configured.\n    Some tools may not be available via Nix.\n    Setup guide: https://nixos.org/manual/nix/stable/installation/installing-binary\n    If errors occur, try another package manager."
 )
 
 const Logo = ` _                          _               
@@ -48,5 +51,21 @@ const Logo = ` _                          _
 |_|\__,_/___|\__, |___/\___|\__|\__,_| .__/ 
              |___/                   |_|    
 
-Copyright 2025 P.E.L.E.
+Copyright 2026 P.E.L.E. - https://youpele.com/
 `
+
+// ToolDisplayNames maps internal tool identifiers to user-friendly display names
+// Used in the UI to show more readable tool names (e.g., "claude code" instead of "claude-code")
+var ToolDisplayNames = map[string]string{
+	"claude-code": "claude code",
+	"opencode":    "opencode",
+}
+
+// GetToolDisplayName returns the display name for a tool
+// Returns the tool name itself if no display name mapping exists
+func GetToolDisplayName(tool string) string {
+	if displayName, ok := ToolDisplayNames[tool]; ok {
+		return displayName
+	}
+	return tool
+}

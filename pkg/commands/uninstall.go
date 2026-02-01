@@ -1,49 +1,67 @@
 package commands
 
+import (
+	"fmt"
+
+	"github.com/youpele52/lazysetup/pkg/tools"
+)
+
 // PackageManagerUninstallCommands maps package managers to tools and their uninstall commands
+// Standard package manager commands are auto-generated using helper functions.
+// Curl commands use direct binary removal since Curl-based installs don't track packages.
 var PackageManagerUninstallCommands = LifecycleCommandsType{
-	"Homebrew": {
-		"git":        "brew uninstall git",
-		"docker":     "brew uninstall docker",
-		"lazygit":    "brew uninstall lazygit",
-		"lazydocker": "brew uninstall lazydocker",
-		"htop":       "brew uninstall htop",
-	},
-	"Curl": {
-		"git":        "rm -f /usr/local/bin/git",
-		"docker":     "rm -f /usr/local/bin/docker",
-		"lazygit":    "rm -f /usr/local/bin/lazygit",
-		"lazydocker": "rm -f /usr/local/bin/lazydocker",
-		"htop":       "rm -f /usr/local/bin/htop",
-	},
-	"APT": {
-		"git":        "apt-get remove -y git",
-		"docker":     "apt-get remove -y docker.io",
-		"lazygit":    "apt-get remove -y lazygit",
-		"lazydocker": "apt-get remove -y lazydocker",
-		"htop":       "apt-get remove -y htop",
-	},
-	"YUM": {
-		"git":        "yum remove -y git",
-		"docker":     "yum remove -y docker",
-		"lazygit":    "yum remove -y lazygit",
-		"lazydocker": "yum remove -y lazydocker",
-		"htop":       "yum remove -y htop",
-	},
-	"Scoop": {
-		"git":        "scoop uninstall git",
-		"docker":     "scoop uninstall docker",
-		"lazygit":    "scoop uninstall lazygit",
-		"lazydocker": "scoop uninstall lazydocker",
-		"htop":       "scoop uninstall htop",
-	},
-	"Chocolatey": {
-		"git":        "choco uninstall git -y",
-		"docker":     "choco uninstall docker-desktop -y",
-		"lazygit":    "choco uninstall lazygit -y",
-		"lazydocker": "choco uninstall lazydocker -y",
-		"htop":       "choco uninstall htop -y",
-	},
+	"Homebrew":   buildToolMap("Homebrew", "uninstall"),
+	"APT":        buildToolMap("APT", "uninstall"),
+	"YUM":        buildToolMap("YUM", "uninstall"),
+	"Scoop":      buildToolMap("Scoop", "uninstall"),
+	"Chocolatey": buildToolMap("Chocolatey", "uninstall"),
+	"Pacman":     buildToolMap("Pacman", "uninstall"),
+	"Curl":       buildCurlUninstallMap(),
+}
+
+// buildCurlUninstallMap creates uninstall commands for Curl-based installs
+// These remove binaries from common installation locations
+func buildCurlUninstallMap() map[string]string {
+	uninstallMap := make(map[string]string)
+
+	for _, tool := range tools.Tools {
+		switch tool {
+		case "nvim":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/nvim /usr/local/share/nvim /usr/local/lib/nvim"
+		case "zsh":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/zsh /usr/local/share/zsh ~/.oh-my-zsh"
+		case "fzf":
+			uninstallMap[tool] = "rm -rf ~/.fzf /usr/local/bin/fzf"
+		case "zoxide":
+			uninstallMap[tool] = "rm -rf ~/.local/bin/zoxide /usr/local/bin/zoxide"
+		case "starship":
+			uninstallMap[tool] = "rm -f /usr/local/bin/starship ~/.local/bin/starship"
+		case "node":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/node /usr/local/bin/npm /usr/local/lib/node_modules /usr/local/include/node"
+		case "python3":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/python3 /usr/local/bin/pip3 /usr/local/lib/python3*"
+		case "gh":
+			uninstallMap[tool] = "rm -f /usr/local/bin/gh"
+		case "eza":
+			uninstallMap[tool] = "rm -f /usr/local/bin/eza"
+		case "delta":
+			uninstallMap[tool] = "rm -f /usr/local/bin/delta"
+		case "btop":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/btop ~/.config/btop"
+		case "httpie":
+			uninstallMap[tool] = "rm -f /usr/local/bin/http /usr/local/bin/https"
+		case "lazysql":
+			uninstallMap[tool] = "rm -f /usr/local/bin/lazysql"
+		case "claude-code":
+			uninstallMap[tool] = "rm -f /usr/local/bin/claude"
+		case "opencode":
+			uninstallMap[tool] = "rm -f /usr/local/bin/opencode"
+		default:
+			uninstallMap[tool] = fmt.Sprintf("rm -f /usr/local/bin/%s", tool)
+		}
+	}
+
+	return uninstallMap
 }
 
 // GetUninstallCommand retrieves the uninstall command for a specific tool using a specific method

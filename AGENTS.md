@@ -6,7 +6,7 @@ This file provides guidelines for agentic coding agents operating in this reposi
 
 ```bash
 # Build the binary
-go build -o lazysetup .
+CGO_ENABLED=0 go build -o lazysetup .
 
 # Build for all platforms
 ./build.sh  # or see PUBLISHING.md for cross-compilation
@@ -58,16 +58,44 @@ go vet -shadow ./...
 
 ```
 
+## Recent Improvements (v0.3.0)
+
+**Static Binary Builds:**
+- All builds use `CGO_ENABLED=0` for static linking
+- Single binary works on all Linux distributions (Ubuntu 18.04+, CentOS 7+, Debian 9+, Alpine)
+- Fixes GLIBC version compatibility issues
+
+**Vim-Style Navigation:**
+- `g` or `w` - Jump to first item
+- `G` or `s` - Jump to last item
+- Unified scroll state management via `PanelScrollState`
+
+**UI Improvements:**
+- Dynamic panel dimensions that adapt to content
+- Fixed critical JumpToLast bug causing empty panels
+- Clear status screen with `c` key
+- Update application with `u` key
+
+**Tool & Package Manager Support:**
+- 27 CLI tools (added nvim, zsh, tmux, fzf, ripgrep, fd, bat, jq, node, gh, eza, zoxide, starship, python3, delta, btop, httpie, lazysql, tree, make, wget, tldr)
+- 9 package managers (added Pacman, DNF, Nix)
+- Command auto-generation for 8/9 package managers
+
 ## Project Structure
 
 - `main.go` - Entry point
-- `pkg/handlers/` - UI event handlers (keybindings, navigation, actions)
+- `pkg/handlers/` - UI event handlers (keybindings, navigation, actions, vim-style jumps)
 - `pkg/models/` - State management with thread-safe access
-- `pkg/ui/` - UI rendering and layouts
-- `pkg/tools/` - Tool definitions
-- `pkg/config/` - Configuration and installation methods
-- `pkg/commands/` - Command definitions
-- `pkg/executor/` - Command execution
+  - `state.go` - Core state struct
+  - `state_methods.go` - UI state getters/setters
+  - `state_installation.go` - Installation state methods
+  - `scroll.go` - Unified scroll state for all panels
+- `pkg/ui/` - UI rendering and layouts (dynamic panel dimensions, keybindings)
+- `pkg/tools/` - Tool definitions (27 tools)
+- `pkg/config/` - Configuration and installation methods (9 package managers)
+- `pkg/commands/` - Command definitions and auto-generation
+  - `utils.go` - Command generation helpers
+- `pkg/executor/` - Command execution with timeout
 - `pkg/constants/` - UI and application constants
 - `pkg/colors/` - ANSI color schemes
 - `pkg/updater/` - Update checking
@@ -79,6 +107,7 @@ go vet -shadow ./...
 - **Single Responsibility**: Each function does one thing well
 - **File Size Limit**: No file should exceed 250 lines
 - **No Duplication**: Reuse existing constants, avoid duplicating data
+- **Static Builds**: ALWAYS use `CGO_ENABLED=0` when building (avoids GLIBC dependencies)
 
 ### Imports
 - Standard library first, then third-party, then internal packages
@@ -157,22 +186,67 @@ testing.WaitForCondition(t, func() bool { ... }, timeout, message)
 ```
 
 ### Before Adding New Code
-1. Check `pkg/tools/tools.go` for existing tools
-2. Check `pkg/config/methods.go` for installation methods
+1. Check `pkg/tools/tools.go` for existing tools (currently 27 tools)
+2. Check `pkg/config/methods.go` for installation methods (9 package managers)
 3. Check `pkg/constants/` for existing constants
 4. Check `pkg/models/state.go` for state patterns
 5. Check if similar functionality exists
 
+### Adding New Tools
+When adding a new tool to the system:
+1. Add tool name to `pkg/tools/tools.go` array
+2. Add package name mappings to `pkg/commands/utils.go` if name differs across package managers
+3. Add Curl install/update/uninstall commands (only if needed):
+   - **MUST** use `/releases/latest/` for GitHub-hosted tools (never hardcode versions like `v1.2.3`)
+   - **MUST** use `$(uname -m)` and `$(uname -s)` for architecture detection
+   - **MUST** use wildcard patterns: `cd tool-*` not `cd tool-1.2.3`
+4. Run tests: `go test -race ./pkg/commands/ -run TestCurlCommands`
+5. Verify auto-generated commands work for all 8 package managers (Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey)
+
+### Curl Command Requirements (CRITICAL)
+Curl commands are manually maintained and **must follow these patterns**:
+
+**GitHub-hosted tools:**
+```bash
+# CORRECT - Uses /latest/ for auto-updates
+curl -fsSL https://github.com/user/repo/releases/latest/download/tool.tar.gz
+
+# WRONG - Hardcoded version becomes outdated
+curl -fsSL https://github.com/user/repo/releases/download/v1.2.3/tool.tar.gz
+```
+
+**Architecture detection:**
+```bash
+# CORRECT - Works on x86_64 and ARM
+download/tool-$(uname -m)-linux-gnu.tar.gz
+
+# WRONG - Breaks on ARM servers
+download/tool-x86_64-linux-gnu.tar.gz
+```
+
+**Extraction patterns:**
+```bash
+# CORRECT - Version-agnostic wildcard
+cd /tmp && tar -xzf tool.tar.gz && cd tool-* && make install
+
+# WRONG - Hardcoded version in path
+cd /tmp && tar -xzf tool.tar.gz && cd tool-1.2.3 && make install
+```
+
+Tests enforce these requirements: `TestCurlCommands_UseLatestVersions` and `TestCurlCommands_UseArchitectureDetection`
+
 ## Existing Documentation
-- See `AGENT.md` for additional development guidelines
+- See `CLAUDE.md` for Claude Code-specific guidance (architecture, threading model, command patterns)
 - See `TESTING.md` for detailed test documentation
 - See `TEST_PLAN.md` for test priorities
-- See `README.md` for project overview
+- See `README.md` for project overview and user documentation
 - See `PUBLISHING.md` for release procedures
+- See `PLAN.md` for roadmap and planned features
 
 ## Dependencies
 - Go 1.25.0+
 - `github.com/jesseduffield/gocui` - Terminal UI framework
-- `github.com/integrii/flaggy` - CLI argument parsing
 - `github.com/mattn/go-runewidth` - Unicode width calculation
 - `github.com/nsf/termbox-go` - Terminal input handling
+
+**Note:** `github.com/integrii/flaggy` is in go.mod but currently unused (run `go mod tidy` to remove)

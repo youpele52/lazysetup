@@ -11,6 +11,105 @@ import (
 	"github.com/youpele52/lazysetup/pkg/ui/messages"
 )
 
+// PanelHeights holds calculated heights for each panel
+type PanelHeights struct {
+	PackageManagerHeight int
+	ActionHeight         int
+	ToolsHeight          int
+}
+
+// calculatePanelHeights computes optimal panel heights based on content needs
+// Uses responsive design with breakpoints for different terminal sizes:
+// - Large (45+ rows): Spacious mode - all panels get ideal space
+// - Medium (25-44 rows): Balanced mode - compressed but comfortable
+// - Small (<25 rows): Compact mode - minimize top panels, maximize Tools
+// Package Manager: 9 items, Action: 4 items, Tools: 27 items
+func calculatePanelHeights(totalHeight int, minHeight int) PanelHeights {
+	const (
+		packageManagerItems = 9
+		actionItems         = 4
+		toolsItems          = 27
+		spacing             = 2
+
+		// Responsive breakpoints
+		largeTerminal  = 45 // Spacious mode
+		mediumTerminal = 25 // Balanced mode
+		// Below mediumTerminal = Compact mode
+	)
+
+	// Ideal heights (items + borders/padding)
+	packageManagerIdeal := packageManagerItems + 2 // 11 rows
+	actionIdeal := actionItems + 2                  // 6 rows
+
+	var packageManagerHeight, actionHeight, toolsHeight int
+
+	if totalHeight >= largeTerminal {
+		// SPACIOUS MODE (45+ rows)
+		// Give all panels ideal/comfortable space
+		packageManagerHeight = packageManagerIdeal
+		actionHeight = actionIdeal
+		toolsHeight = totalHeight - packageManagerHeight - actionHeight - spacing
+
+	} else if totalHeight >= mediumTerminal {
+		// BALANCED MODE (25-44 rows)
+		// Compress top panels moderately, give Tools good space
+		packageManagerHeight = min(packageManagerIdeal, totalHeight/4)
+		actionHeight = min(actionIdeal, totalHeight/6)
+
+		// Give remaining space to Tools panel
+		remaining := totalHeight - packageManagerHeight - actionHeight - spacing
+		if remaining < minHeight {
+			// Adjust if remaining is too small
+			packageManagerHeight = totalHeight / 3
+			actionHeight = totalHeight / 4
+			remaining = totalHeight - packageManagerHeight - actionHeight - spacing
+		}
+		toolsHeight = remaining
+
+	} else {
+		// COMPACT MODE (<25 rows)
+		// Minimize top panels, maximize Tools (has 27 items - most content)
+		// Package Manager: just enough for 9 items
+		packageManagerHeight = max(minHeight, min(7, totalHeight/4))
+
+		// Action: minimal (only 4 items)
+		actionHeight = max(minHeight, min(6, totalHeight/6))
+
+		// Tools: all remaining space (27 items need it)
+		toolsHeight = totalHeight - packageManagerHeight - actionHeight - spacing
+
+		// Safety check: ensure minimum heights
+		if toolsHeight < minHeight {
+			// Extreme case - fall back to equal distribution
+			packageManagerHeight = totalHeight / 3
+			actionHeight = totalHeight / 3
+			toolsHeight = totalHeight - packageManagerHeight - actionHeight - spacing
+		}
+	}
+
+	return PanelHeights{
+		PackageManagerHeight: packageManagerHeight,
+		ActionHeight:         actionHeight,
+		ToolsHeight:          toolsHeight,
+	}
+}
+
+// min returns the minimum of two integers
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// max returns the maximum of two integers
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 // layoutMultiPanel renders the four-panel layout used in PageMultiPanel
 // Left side (stacked vertically):
 //   - Panel 1: Package Manager selection (top)
@@ -31,10 +130,26 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	panelHeight := maxY - 3
 	activePanel := state.GetActivePanel()
 
-	// Calculate heights for left panels (3 panels stacked)
-	packageManagerHeight := panelHeight / 3
-	actionHeight := panelHeight / 4
-	toolsStartY := packageManagerHeight + actionHeight + 2
+	// Calculate minimum space requirements
+	// 3 panels minimum + 2 spacing lines between panels + 1 status bar
+	minPanelHeight := 5 // Minimum 5 rows per panel (title + borders + at least 3 content lines)
+	panelSpacing := 2   // Space between stacked panels
+	statusBarHeight := 2
+	requiredHeight := (minPanelHeight * 3) + panelSpacing + statusBarHeight
+
+	// Check if terminal is too small to display all panels
+	if maxY < requiredHeight {
+		// Terminal too small - show error in a simplified view
+		return renderTerminalTooSmallView(g, maxX, maxY, minPanelHeight, requiredHeight)
+	}
+
+	// Calculate heights for left panels using proportional allocation
+	// This gives more space to panels with more items (Tools has 27 items)
+	heights := calculatePanelHeights(panelHeight, minPanelHeight)
+	packageManagerHeight := heights.PackageManagerHeight
+	actionHeight := heights.ActionHeight
+	toolsHeight := heights.ToolsHeight
+	toolsStartY := packageManagerHeight + actionHeight + panelSpacing
 
 	// Render left-side panels
 	if err := renderPackageManagerPanel(PackageManagerParams{
@@ -68,7 +183,7 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 			LeftPanelWidth: leftPanelWidth,
 		},
 		ToolsStartY: toolsStartY,
-		PanelHeight: panelHeight,
+		ToolsHeight: toolsHeight, // FIXED: was PanelHeight (wrong boundary)
 	}); err != nil {
 		return err
 	}
@@ -159,6 +274,12 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		} else if len(results) == 0 {
 			// Show logo only if no results exist
 			v.Clear()
+
+			// Show Nix disclaimer if Nix is selected as package manager
+			if state.GetSelectedMethod() == "Nix" {
+				fmt.Fprintf(v, "%s%s%s\n\n", colors.ANSIYellow, constants.NixDisclaimer, colors.ANSIReset)
+			}
+
 			fmt.Fprint(v, constants.Logo)
 		}
 		// If results exist, preserve them for scrolling
@@ -176,9 +297,9 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	if v, err := g.View("status_bar"); err == nil {
 		v.Clear()
 		if state.UpdateAvailable {
-			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | ⏎: Confirm | C: Clear | U: Update | Ctrl+C: Quit")
+			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | g/w: First | G/s: Last | Space: Toggle | ⏎: Confirm | C: Clear | U: Update | Ctrl+C: Quit")
 		} else {
-			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
+			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | g/w: First | G/s: Last | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
 		}
 	}
 
@@ -190,6 +311,53 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	} else {
 		// Delete popup if not needed
 		g.DeleteView(constants.PopupConfirm)
+	}
+
+	return nil
+}
+
+// renderTerminalTooSmallView displays an error message when the terminal
+// is too small to accommodate the minimum panel requirements.
+// Clears all panels and shows only an error message with resize instructions.
+func renderTerminalTooSmallView(g *gocui.Gui, maxX, maxY, minPanelHeight, requiredHeight int) error {
+	// Clear all existing views
+	for _, viewName := range []string{
+		constants.ViewMenu, constants.ViewResult, constants.ViewTools,
+		"installing", "results", constants.PanelPackageManager,
+		constants.PanelAction, constants.PanelTools, "status_bar",
+		constants.PanelProgress,
+	} {
+		g.DeleteView(viewName)
+	}
+
+	// Create a full-screen error view
+	viewName := "terminal_too_small"
+	if v, err := g.SetView(viewName, 0, 0, maxX-1, maxY-1); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Wrap = true
+		v.Title = "Error"
+		v.FgColor = colors.FailureColor
+	}
+
+	if v, err := g.View(viewName); err == nil {
+		v.Clear()
+		fmt.Fprintf(v, "\n\n%s", colors.ANSIRed)
+		fmt.Fprintf(v, "  ╔════════════════════════════════════════════════════════╗\n")
+		fmt.Fprintf(v, "  ║                                                        ║\n")
+		fmt.Fprintf(v, "  ║     TERMINAL WINDOW TOO SMALL                          ║\n")
+		fmt.Fprintf(v, "  ║                                                        ║\n")
+		fmt.Fprintf(v, "  ║  Current size: %dx%d rows                              ║\n", maxX, maxY)
+		fmt.Fprintf(v, "  ║  Minimum required: %d rows                             ║\n", requiredHeight)
+		fmt.Fprintf(v, "  ║                                                        ║\n")
+		fmt.Fprintf(v, "  ║  Please resize your terminal window to at least        ║\n")
+		fmt.Fprintf(v, "  ║  80 columns x %d rows to use lazysetup.                ║\n", requiredHeight)
+		fmt.Fprintf(v, "  ║                                                        ║\n")
+		fmt.Fprintf(v, "  ║  Press Ctrl+C to quit.                                 ║\n")
+		fmt.Fprintf(v, "  ║                                                        ║\n")
+		fmt.Fprintf(v, "  ╚════════════════════════════════════════════════════════╝\n")
+		fmt.Fprintf(v, "%s", colors.ANSIReset)
 	}
 
 	return nil

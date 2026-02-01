@@ -5,14 +5,17 @@ A modern, interactive terminal UI for installing development tools across multip
 ## Features
 
 - **Multi-Panel Interface**: Intuitive side-by-side layout for installation method selection, tool selection, and status monitoring
-- **Multiple Package Managers**: Support for Homebrew, APT, YUM, Curl, Scoop, and Chocolatey
-- **Tool Selection**: Multi-select interface for choosing which tools to install (git, docker, lazygit, lazydocker)
+- **Dynamic Panel Sizing**: Responsive panel dimensions that adapt to content
+- **Multiple Package Managers**: Support for Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, and Curl
+- **Tool Selection**: Multi-select interface for choosing from 27 development tools
+- **Vim-Style Navigation**: Jump to first (g/w), last (G/s), and scroll through lists efficiently
 - **Real-Time Status**: Live installation status with spinner animation and output display
 - **Parallel Installation**: Install multiple tools simultaneously for faster setup
 - **Retry Logic**: Automatic retry mechanism with random delays for failed installations
 - **Installation Duration**: Track how long each tool takes to install
 - **Colored Output**: Green for successful installations, red for failures
 - **Error Handling**: Clear error messages and validation at each step
+- **Static Binary**: Single binary works across all Linux distributions (no GLIBC version issues)
 
 ## Installation
 
@@ -60,7 +63,7 @@ Binary will be installed to `$GOPATH/bin/lazysetup` (usually `~/go/bin/lazysetup
 ```bash
 git clone https://github.com/youpele52/lazysetup.git
 cd lazysetup
-go build -o lazysetup
+CGO_ENABLED=0 go build -o lazysetup
 ./lazysetup
 ```
 
@@ -116,33 +119,74 @@ rm ./lazysetup
 | `Tab` / `Shift+Tab` | Cycle through panels (left/right) |
 | `0`, `1`, `2`, `3` | Jump to specific panels (Status, Package Manager, Action, Tools) |
 | `↑` `↓` | Navigate within active panel |
+| `g` or `w` | Jump to first item (vim-style) |
+| `G` or `s` | Jump to last item (vim-style) |
 | `Space` | Toggle tool selection |
 | `Enter` | Confirm selection or proceed to next panel |
+| `c` | Clear status screen and reset state |
+| `u` | Update application (when update available) |
 | `Esc` (double-tap) | Cancel and return to main menu |
 | `Ctrl+C` | Quit application |
 
 ### Workflow
 
-1. **Panel 1 (Package Manager)**: Select your package manager (Homebrew, APT, YUM, Curl, Scoop, Chocolatey)
-2. **Panel 2 (Action)**: Choose action - Install, Update, or Uninstall
-3. **Panel 3 (Tools)**: Select which tools to install/update/uninstall (git, docker, lazygit, lazydocker)
+1. **Panel 1 (Package Manager)**: Select your package manager (Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, Curl)
+2. **Panel 2 (Action)**: Choose action - Check, Install, Update, or Uninstall
+3. **Panel 3 (Tools)**: Select which tools to install/update/uninstall (27 tools available)
 4. **Panel 0 (Status)**: Watch real-time progress with spinner animation and results
 
-## Supported Tools
+## Supported Tools (27 Total)
 
+### Version Control & Development
 - **git**: Version control system
-- **docker**: Container platform
+- **gh**: GitHub CLI for pull requests and issues
 - **lazygit**: Terminal UI for git
+- **delta**: Syntax-highlighting pager for git diffs
+
+### Containers
+- **docker**: Container platform
 - **lazydocker**: Terminal UI for docker
 
-## Supported Package Managers
+### Modern CLI Replacements
+- **ripgrep** (rg): Fast grep alternative with .gitignore support
+- **fd**: User-friendly find alternative
+- **bat**: Cat with syntax highlighting
+- **eza**: Better ls with git integration and colors
+- **zoxide**: Smarter cd that learns your habits
+- **fzf**: Fuzzy finder for files and command history
+
+### Editors & Shells
+- **nvim**: Modern Vim-based editor with LSP support
+- **zsh**: Superior shell with better completion
+
+### Terminal Utilities
+- **tmux**: Terminal multiplexer for persistent sessions
+- **starship**: Beautiful, fast cross-shell prompt
+- **htop**: Interactive process viewer
+- **btop**: Modern htop with more features
+- **tree**: Directory structure visualizer
+
+### Development Tools
+- **node**: JavaScript runtime
+- **python3**: Python interpreter and pip
+- **make**: Build automation tool
+- **jq**: JSON processor for APIs
+- **wget**: File downloader
+- **httpie**: User-friendly HTTP client
+- **tldr**: Simplified man pages
+- **lazysql**: Terminal UI for databases
+
+## Supported Package Managers (9 Total)
 
 - **Homebrew**: macOS and Linux
 - **APT**: Debian/Ubuntu
-- **YUM**: RedHat/CentOS
-- **Curl**: Universal (downloads and installs)
+- **YUM**: RHEL/CentOS (older versions)
+- **DNF**: Fedora/RHEL 8+
+- **Pacman**: Arch/Manjaro
+- **Nix**: NixOS and cross-platform
 - **Scoop**: Windows
 - **Chocolatey**: Windows
+- **Curl**: Universal fallback (downloads and installs from GitHub releases)
 
 ## Architecture
 
@@ -209,7 +253,7 @@ For optimal visual experience, use a terminal with:
 ### Building
 
 ```bash
-go build -o lazysetup
+CGO_ENABLED=0 go build -o lazysetup
 ```
 
 ### Running Tests
@@ -230,7 +274,7 @@ The project follows a modular architecture with clear separation of concerns:
 
 ## License
 
-Copyright 2025 Youpele Michael
+Copyright 2026 Youpele Michael
 
 ## Contributing
 
