@@ -32,6 +32,8 @@ const (
 
 	ErrorHtopCurlNotSupported = "htop cannot be installed via Curl. Please use Homebrew or APT instead."
 
+	ErrorTerminalTooSmall = "Terminal window too small. Please resize to at least %dx%d rows."
+
 	SudoConfirmTitle   = "Sudo Password Required"
 	SudoConfirmMessage = "Enter your sudo password:\n\nPassword: %s\n\nPress Enter to confirm or Esc to cancel."
 

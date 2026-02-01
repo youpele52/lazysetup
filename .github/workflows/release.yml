@@ -35,7 +35,7 @@ jobs:
       - name: Build
         run: |
           VERSION=${{ github.ref_name }}
-          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} \
+          CGO_ENABLED=0 GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} \
           go build -o lazysetup-${VERSION}-${{ matrix.os }}-${{ matrix.arch }} .
       
       - name: Upload artifact

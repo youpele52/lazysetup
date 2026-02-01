@@ -1,5 +1,54 @@
 # Change log
 
+## v0.3.0 (1st February 2026)
+
+**CRITICAL FIX - GLIBC Compatibility**: All builds now use `CGO_ENABLED=0` for static linking. Single binary works on ALL Linux distributions (Ubuntu 18.04+, CentOS 7+, Debian 9+, Alpine Linux) without GLIBC version conflicts.
+
+**Vim-Style Navigation**:
+- `g` or `w`: Jump to first item (vim-style gg)
+- `G` or `s`: Jump to last item (vim-style G)
+- Unified scroll state management via `PanelScrollState` with thread-safe bounds checking
+- Fixed critical JumpToLast bug that caused empty panel display
+
+**UI Enhancements**:
+- Dynamic panel dimensions that adapt to content length with responsive breakpoints
+- Fixed critical panel layout bugs causing empty displays and rendering issues
+- Fixed double-scrolling bugs in Package Manager and Action panels
+- Improved panel scrolling with automatic bounds checking and cursor visibility
+- Better visual feedback for long tool lists
+- UI consistency: Package managers and actions now display in lowercase (matching tools panel)
+
+**Tool Expansion** (5 → 29 tools):
+- **Editors & Shells**: nvim, zsh
+- **Terminal Utilities**: tmux, fzf, starship, btop, tree
+- **Modern CLI Tools**: ripgrep, fd, bat, eza, zoxide, delta
+- **Development Tools**: node, gh, python3, make, jq, wget, httpie, tldr, lazysql
+- **AI Assistants**: claude-code, opencode
+
+**Package Manager Support** (6 → 9 managers):
+- Added: Pacman (Arch/Manjaro), DNF (Fedora/RHEL 8+), Nix (NixOS)
+- Existing: Homebrew, APT, YUM, Curl, Scoop, Chocolatey
+
+**Command Generation Refactor**:
+- Auto-generation for 8/9 package managers (only Curl commands manually maintained)
+- Helper functions in `pkg/commands/utils.go` for Install/Update/Uninstall
+- `PackageNameMappings` handles cross-platform package name differences
+- Comprehensive test coverage for Curl commands (version detection, architecture handling)
+
+**Architecture Improvements**:
+- New `pkg/models/scroll.go` for unified scroll state management
+- New `PanelHeights` struct with `calculatePanelHeights()` for responsive design
+- Thread-safe scroll tracking with mutex protection and bounds validation
+- Refactored navigation handlers for vim-style jumps
+- Enhanced keybindings.go with scroll, clear, and update shortcuts
+- Added terminal size validation with minimum requirements error handling
+
+**Build System**:
+- Static binary compilation prevents GLIBC dependency issues
+- All build commands updated to include `CGO_ENABLED=0`
+- CI/CD workflow updated for static builds
+- Version bumped to 0.3.0
+
 ## v0.1.4 (30th December 2025)
 
 **Build System**: Fixed critical package conflict caused by duplicate `messages.go` files that prevented compilation on all platforms.
@@ -46,14 +95,16 @@ yum install lazysetup  # Linux (YUM)
 ## Key Bindings
 
 - **Tab/0-3**: Switch panels
-- **↑↓**: Navigate
+- **↑↓**: Navigate items
+- **g** or **w**: Jump to first item (vim-style gg)
+- **G** or **s**: Jump to last item (vim-style G)
 - **Space**: Toggle tool
-- **⏎**: Confirm
-- **C**: Clear status
-- **U**: Install update
-- **Esc**: Back
+- **⏎**: Confirm/Execute
+- **c**: Clear status screen
+- **u**: Install update (when available)
+- **Esc**: Back/Cancel
 - **Ctrl+C**: Quit
 
 ## Contributors
 
-P.E.L.E. (2025)
+P.E.L.E. (2026)

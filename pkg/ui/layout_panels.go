@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jesseduffield/gocui"
 	"github.com/youpele52/lazysetup/pkg/colors"
@@ -35,7 +36,7 @@ type ActionPanelParams struct {
 type ToolsPanelParams struct {
 	PanelParams
 	ToolsStartY int
-	PanelHeight int
+	ToolsHeight int // RENAMED: was PanelHeight (misleading - this is height, not boundary)
 }
 
 // renderPackageManagerPanel renders the Package Manager selection panel
@@ -62,20 +63,73 @@ func renderPackageManagerPanel(params PackageManagerParams) error {
 			v.FgColor = colors.TextPrimary
 		}
 		v.Clear()
-		for i, method := range state.InstallMethods {
+
+		// Get actual rendered dimensions from the view (excludes borders automatically)
+		_, visibleCount := v.Size()
+		if visibleCount < 1 {
+			visibleCount = 1
+		}
+
+		// Update scroll state - set visible count but don't adjust offset
+		// Offset is managed by navigation functions (ScrollUp/Down, JumpToFirst/Last)
+		state.PackageManagerScroll.VisibleCount = visibleCount
+		state.PackageManagerScroll.ItemCount = len(state.InstallMethods)
+
+		// Safety check: ensure cursor is visible
+		if state.PackageManagerScroll.Cursor >= state.PackageManagerScroll.ItemCount {
+			state.PackageManagerScroll.Cursor = state.PackageManagerScroll.ItemCount - 1
+		}
+		if state.PackageManagerScroll.Cursor < 0 {
+			state.PackageManagerScroll.Cursor = 0
+		}
+		// Ensure offset shows the cursor
+		if state.PackageManagerScroll.Cursor < state.PackageManagerScroll.Offset {
+			state.PackageManagerScroll.Offset = state.PackageManagerScroll.Cursor
+		} else if state.PackageManagerScroll.Cursor >= state.PackageManagerScroll.Offset+visibleCount {
+			state.PackageManagerScroll.Offset = state.PackageManagerScroll.Cursor - visibleCount + 1
+		}
+
+		// Calculate scroll offset to keep cursor visible
+		offset := state.PackageManagerScroll.Offset
+		cursor := state.PackageManagerScroll.Cursor
+
+		// Ensure cursor is within bounds
+		if cursor >= len(state.InstallMethods) {
+			cursor = len(state.InstallMethods) - 1
+			state.PackageManagerScroll.Cursor = cursor
+		}
+		if cursor < 0 {
+			cursor = 0
+			state.PackageManagerScroll.Cursor = cursor
+		}
+
+		// Adjust offset to keep cursor visible
+		if cursor < offset {
+			offset = cursor
+		} else if cursor >= offset+visibleCount {
+			offset = cursor - visibleCount + 1
+		}
+		state.PackageManagerScroll.Offset = offset
+
+		// Set scroll position
+		v.SetOrigin(0, offset)
+
+		// Render ALL methods (gocui's SetOrigin will handle which ones are visible)
+		for i := 0; i < len(state.InstallMethods); i++ {
+			method := strings.ToLower(state.InstallMethods[i])
 			marker := constants.RadioUnselected
-			if i == state.SelectedIndex {
+			if i == cursor {
 				marker = constants.RadioSelected
 			}
 
 			if activePanel == models.PanelPackageManager {
-				if i == state.SelectedIndex {
+				if i == cursor {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, method, colors.ANSIReset)
 				} else {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, method, colors.ANSIReset)
 				}
 			} else {
-				if i == state.SelectedIndex {
+				if i == cursor {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, method, colors.ANSIReset)
 				} else {
 					fmt.Fprintf(v, "%s %s\n", marker, method)
@@ -83,7 +137,8 @@ func renderPackageManagerPanel(params PackageManagerParams) error {
 			}
 		}
 		if activePanel == models.PanelPackageManager {
-			v.SetCursor(0, state.SelectedIndex)
+			// Set cursor position RELATIVE to visible area
+			v.SetCursor(0, cursor-offset)
 		}
 	}
 	return nil
@@ -115,20 +170,72 @@ func renderActionPanel(params ActionPanelParams) error {
 			v.FgColor = colors.TextPrimary
 		}
 		v.Clear()
-		for i, action := range actions {
+
+		// Get actual rendered dimensions from the view (excludes borders automatically)
+		_, visibleCount := v.Size()
+		if visibleCount < 1 {
+			visibleCount = 1
+		}
+
+		// Update scroll state
+		state.ActionScroll.VisibleCount = visibleCount
+		state.ActionScroll.ItemCount = len(actions)
+
+		// Safety check: ensure cursor is visible
+		if state.ActionScroll.Cursor >= state.ActionScroll.ItemCount {
+			state.ActionScroll.Cursor = state.ActionScroll.ItemCount - 1
+		}
+		if state.ActionScroll.Cursor < 0 {
+			state.ActionScroll.Cursor = 0
+		}
+		// Ensure offset shows the cursor
+		if state.ActionScroll.Cursor < state.ActionScroll.Offset {
+			state.ActionScroll.Offset = state.ActionScroll.Cursor
+		} else if state.ActionScroll.Cursor >= state.ActionScroll.Offset+visibleCount {
+			state.ActionScroll.Offset = state.ActionScroll.Cursor - visibleCount + 1
+		}
+
+		// Calculate scroll offset to keep cursor visible
+		offset := state.ActionScroll.Offset
+		cursor := state.ActionScroll.Cursor
+
+		// Ensure cursor is within bounds
+		if cursor >= len(actions) {
+			cursor = len(actions) - 1
+			state.ActionScroll.Cursor = cursor
+		}
+		if cursor < 0 {
+			cursor = 0
+			state.ActionScroll.Cursor = cursor
+		}
+
+		// Adjust offset to keep cursor visible
+		if cursor < offset {
+			offset = cursor
+		} else if cursor >= offset+visibleCount {
+			offset = cursor - visibleCount + 1
+		}
+		state.ActionScroll.Offset = offset
+
+		// Set scroll position
+		v.SetOrigin(0, offset)
+
+		// Render ALL actions (gocui's SetOrigin will handle which ones are visible)
+		for i := 0; i < len(actions); i++ {
+			action := strings.ToLower(actions[i])
 			marker := constants.RadioUnselected
-			if i == state.ActionIndex {
+			if i == cursor {
 				marker = constants.RadioSelected
 			}
 
 			if activePanel == models.PanelAction {
-				if i == state.ActionIndex {
+				if i == cursor {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, action, colors.ANSIReset)
 				} else {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, action, colors.ANSIReset)
 				}
 			} else {
-				if i == state.ActionIndex {
+				if i == cursor {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, action, colors.ANSIReset)
 				} else {
 					fmt.Fprintf(v, "%s %s\n", marker, action)
@@ -136,21 +243,31 @@ func renderActionPanel(params ActionPanelParams) error {
 			}
 		}
 		if activePanel == models.PanelAction {
-			v.SetCursor(0, state.ActionIndex)
+			// Set cursor position RELATIVE to visible area
+			v.SetCursor(0, cursor-offset)
 		}
 	}
 	return nil
 }
 
-// renderToolsPanel renders the Tools selection panel
+// renderToolsPanel renders the Tools selection panel with scrollbar indicator
 func renderToolsPanel(params ToolsPanelParams) error {
 	g := params.Gui
 	state := params.State
 	activePanel := params.ActivePanel
 	leftPanelWidth := params.LeftPanelWidth
 	toolsStartY := params.ToolsStartY
-	panelHeight := params.PanelHeight
-	if v, err := g.SetView(constants.PanelTools, 0, toolsStartY, leftPanelWidth, panelHeight); err != nil {
+	toolsHeight := params.ToolsHeight
+
+	// SAFETY: Ensure height is positive
+	if toolsHeight < 3 {
+		toolsHeight = 3 // Minimum height to show anything
+	}
+
+	// Calculate correct end Y coordinate (bottom of tools panel)
+	toolsEndY := toolsStartY + toolsHeight - 1
+
+	if v, err := g.SetView(constants.PanelTools, 0, toolsStartY, leftPanelWidth, toolsEndY); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -167,28 +284,82 @@ func renderToolsPanel(params ToolsPanelParams) error {
 			v.FgColor = colors.TextPrimary
 		}
 		v.Clear()
-		for i, tool := range state.Tools {
+
+		// Get actual rendered dimensions from the view (excludes borders automatically)
+		_, visibleCount := v.Size()
+		if visibleCount < 1 {
+			visibleCount = 1
+		}
+
+		// Update scroll state - set visible count but don't adjust offset
+		// Offset is managed by navigation functions (ScrollUp/Down, JumpToFirst/Last)
+		state.ToolsScroll.VisibleCount = visibleCount
+		state.ToolsScroll.ItemCount = len(state.Tools)
+
+		// Safety check: ensure cursor is visible
+		if state.ToolsScroll.Cursor >= state.ToolsScroll.ItemCount {
+			state.ToolsScroll.Cursor = state.ToolsScroll.ItemCount - 1
+		}
+		if state.ToolsScroll.Cursor < 0 {
+			state.ToolsScroll.Cursor = 0
+		}
+		// Ensure offset shows the cursor
+		if state.ToolsScroll.Cursor < state.ToolsScroll.Offset {
+			state.ToolsScroll.Offset = state.ToolsScroll.Cursor
+		} else if state.ToolsScroll.Cursor >= state.ToolsScroll.Offset+visibleCount {
+			state.ToolsScroll.Offset = state.ToolsScroll.Cursor - visibleCount + 1
+		}
+
+		// Calculate scroll offset to keep cursor visible
+		offset := state.ToolsScroll.Offset
+		cursor := state.ToolsScroll.Cursor
+
+		// Ensure cursor is within bounds
+		if cursor >= len(state.Tools) {
+			cursor = len(state.Tools) - 1
+			state.ToolsScroll.Cursor = cursor
+		}
+		if cursor < 0 {
+			cursor = 0
+			state.ToolsScroll.Cursor = cursor
+		}
+
+		// Adjust offset to keep cursor visible
+		if cursor < offset {
+			offset = cursor
+		} else if cursor >= offset+visibleCount {
+			offset = cursor - visibleCount + 1
+		}
+		state.ToolsScroll.Offset = offset
+
+		// Set scroll position
+		v.SetOrigin(0, offset)
+
+		// Render ALL tools (gocui's SetOrigin will handle which ones are visible)
+		for i := 0; i < len(state.Tools); i++ {
+			tool := state.Tools[i]
 			marker := constants.CheckboxUnselected
 			if state.SelectedTools[tool] {
 				marker = constants.CheckboxSelected
 			}
 
 			if activePanel == models.PanelTools {
-				if i == state.ToolsIndex {
-					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+				if i == cursor {
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, constants.GetToolDisplayName(tool), colors.ANSIReset)
 				} else {
-					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, tool, colors.ANSIReset)
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, constants.GetToolDisplayName(tool), colors.ANSIReset)
 				}
 			} else {
-				if i == state.ToolsIndex {
-					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
+				if i == cursor {
+					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, constants.GetToolDisplayName(tool), colors.ANSIReset)
 				} else {
-					fmt.Fprintf(v, "%s %s\n", marker, tool)
+					fmt.Fprintf(v, "%s %s\n", marker, constants.GetToolDisplayName(tool))
 				}
 			}
 		}
 		if activePanel == models.PanelTools {
-			v.SetCursor(0, state.ToolsIndex)
+			// Set cursor position RELATIVE to visible area
+			v.SetCursor(0, cursor-offset)
 		}
 	}
 	return nil

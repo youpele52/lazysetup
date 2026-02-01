@@ -58,18 +58,20 @@ type State struct {
 	mu sync.RWMutex
 
 	InstallMethods []string   // Available installation methods (Homebrew, APT, etc.)
-	SelectedIndex  int        // Currently selected method index in menu
 	SelectedMethod string     // Confirmed method to use for installation
 	CheckStatus    string     // Status of method availability check
 	Error          string     // Current error message to display
 	CurrentPage    Page       // Current page being rendered
 	ActivePanel    Panel      // Active panel in multi-panel layout (0-3)
 	SelectedAction ActionType // Currently selected action (Install, Update, Delete)
-	ActionIndex    int        // Currently selected action index in action panel
+
+	// Panel scroll states for automatic scrolling
+	PackageManagerScroll PanelScrollState // Scroll state for package manager panel
+	ActionScroll         PanelScrollState // Scroll state for action panel
+	ToolsScroll          PanelScrollState // Scroll state for tools panel
 
 	Tools            []string         // Available tools to install
 	SelectedTools    map[string]bool  // Tools user selected for installation
-	ToolsIndex       int              // Current tool index in selection list
 	InstallResults   []InstallResult  // Results of completed installations
 	InstallOutput    string           // Accumulated output from installation commands
 	CurrentTool      string           // Tool currently being installed
@@ -105,20 +107,20 @@ type State struct {
 func NewState() *State {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &State{
-		InstallMethods: config.InstallMethods,
-		SelectedIndex:  0,
-		SelectedMethod: config.InstallMethods[0],
-		CurrentPage:    PageMultiPanel,
-		ActivePanel:    PanelPackageManager,
-		SelectedAction: ActionCheck,
-		ActionIndex:    0,
-		SelectedTools:  make(map[string]bool),
-		ToolsIndex:     0,
-		InstallResults: []InstallResult{},
-		ToolStartTimes: make(map[string]int64),
-		Tools:          tools.Tools,
-		CancelCtx:      ctx,
-		CancelFunc:     cancel,
+		InstallMethods:       config.InstallMethods,
+		SelectedMethod:       config.InstallMethods[0],
+		CurrentPage:          PageMultiPanel,
+		ActivePanel:          PanelPackageManager,
+		SelectedAction:       ActionCheck,
+		PackageManagerScroll: PanelScrollState{ItemCount: len(config.InstallMethods)},
+		ActionScroll:         PanelScrollState{ItemCount: len(config.Actions)},
+		ToolsScroll:          PanelScrollState{ItemCount: len(tools.Tools)},
+		SelectedTools:        make(map[string]bool),
+		InstallResults:       []InstallResult{},
+		ToolStartTimes:       make(map[string]int64),
+		Tools:                tools.Tools,
+		CancelCtx:            ctx,
+		CancelFunc:           cancel,
 	}
 }
 
@@ -127,13 +129,13 @@ func (s *State) Reset() {
 	defer s.mu.Unlock()
 
 	s.SelectedMethod = ""
-	s.SelectedIndex = 0
+	s.PackageManagerScroll.JumpToFirst()
 	s.CheckStatus = ""
 	s.Error = ""
 	s.CurrentPage = PageMultiPanel
 	s.SelectedTools = make(map[string]bool)
-	s.ToolsIndex = 0
-	s.ActionIndex = 0
+	s.ToolsScroll.JumpToFirst()
+	s.ActionScroll.JumpToFirst()
 	s.SelectedAction = ActionCheck
 	s.InstallResults = []InstallResult{}
 }
@@ -152,8 +154,8 @@ func (s *State) ResetActionState() {
 	s.InstallStartTime = 0
 	s.ToolStartTimes = make(map[string]int64)
 	s.SelectedTools = make(map[string]bool)
-	s.ToolsIndex = 0
-	s.ActionIndex = 0
+	s.ToolsScroll.JumpToFirst()
+	s.ActionScroll.JumpToFirst()
 	s.SelectedAction = ActionCheck
 }
 

@@ -16,11 +16,45 @@ func TestTools_NotEmpty(t *testing.T) {
 
 	t.Run("contains expected tools", func(t *testing.T) {
 		expectedTools := map[string]bool{
+			// Version Control & Build
 			"git":        true,
 			"docker":     true,
 			"lazygit":    true,
 			"lazydocker": true,
-			"htop":       true,
+			"gh":         true,
+			"make":       true,
+			// Shell & Terminal
+			"zsh":  true,
+			"tmux": true,
+			// Development Environment
+			"nvim":    true,
+			"node":    true,
+			"python3": true,
+			// AI Assistants
+			"claude-code": true,
+			"opencode":    true,
+			// System Monitoring
+			"htop": true,
+			"btop": true,
+			// Core Utilities
+			"fzf":     true,
+			"ripgrep": true,
+			"fd":      true,
+			"bat":     true,
+			"eza":     true,
+			"zoxide":  true,
+			"tree":    true,
+			// Shell Enhancement
+			"starship": true,
+			"delta":    true,
+			// Data Processing
+			"jq": true,
+			// Network & Web
+			"httpie": true,
+			"wget":   true,
+			// Documentation
+			"tldr":    true,
+			"lazysql": true,
 		}
 		for _, tool := range Tools {
 			if !expectedTools[tool] {

@@ -4,13 +4,13 @@ import (
 	"testing"
 )
 
-// TestInstallMethods_Contains6Managers tests that InstallMethods contains 6 package managers.
+// TestInstallMethods_Contains9Managers tests that InstallMethods contains 9 package managers.
 // Priority: P3 - Configuration validation.
-// Tests that InstallMethods slice has exactly 6 package managers.
-func TestInstallMethods_Contains6Managers(t *testing.T) {
-	t.Run("contains exactly 6 package managers", func(t *testing.T) {
-		if len(InstallMethods) != 6 {
-			t.Errorf("Expected 6 install methods, got %d", len(InstallMethods))
+// Tests that InstallMethods slice has exactly 9 package managers.
+func TestInstallMethods_Contains9Managers(t *testing.T) {
+	t.Run("contains exactly 9 package managers", func(t *testing.T) {
+		if len(InstallMethods) != 9 {
+			t.Errorf("Expected 9 install methods, got %d", len(InstallMethods))
 		}
 	})
 
@@ -22,6 +22,9 @@ func TestInstallMethods_Contains6Managers(t *testing.T) {
 			"YUM":        true,
 			"Scoop":      true,
 			"Chocolatey": true,
+			"Pacman":     true,
+			"DNF":        true,
+			"Nix":        true,
 		}
 		for _, method := range InstallMethods {
 			if !expectedManagers[method] {

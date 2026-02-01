@@ -1,5 +1,9 @@
 package commands
 
+import (
+	"github.com/youpele52/lazysetup/pkg/tools"
+)
+
 // PackageManagerCheckCommands maps installation methods to commands that check if the package manager is installed
 // Returns version string if available, error if package manager is not found
 var PackageManagerCheckCommands = CheckCommandsType{
@@ -9,16 +13,27 @@ var PackageManagerCheckCommands = CheckCommandsType{
 	"YUM":        "yum --version",
 	"Scoop":      "scoop --version",
 	"Chocolatey": "choco --version",
+	"Pacman":     "pacman --version",
+	"DNF":        "dnf --version",
+	"Nix":        "nix --version",
 }
 
-var ToolCheckCommands = CheckCommandsType{
-	"git":        "git --version",
-	"docker":     "docker --version",
-	"lazygit":    "lazygit --version",
-	"lazydocker": "lazydocker --version",
-	"htop":       "htop --version",
+// ToolCheckCommands maps tool names to their version check commands
+// Auto-generated using helper functions for all tools in the tools package
+var ToolCheckCommands = buildToolCheckCommands()
+
+// buildToolCheckCommands creates check commands for all tools
+func buildToolCheckCommands() CheckCommandsType {
+	result := make(CheckCommandsType)
+
+	for _, tool := range tools.Tools {
+		result[tool] = GenerateCheckCommand(tool)
+	}
+
+	return result
 }
 
+// CheckCommands merges tool and package manager check commands
 var CheckCommands = MergeMaps(ToolCheckCommands, PackageManagerCheckCommands)
 
 // GetCheckCommand retrieves the version check command for a specific package manager

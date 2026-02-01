@@ -7,6 +7,9 @@ var InstallMethods = []string{
 	"YUM",
 	"Scoop",
 	"Chocolatey",
+	"Pacman",
+	"DNF",
+	"Nix",
 }
 
 var Actions = []string{

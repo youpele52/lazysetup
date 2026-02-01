@@ -3,6 +3,7 @@ package handlers
 import (
 	"testing"
 
+	"github.com/youpele52/lazysetup/pkg/config"
 	"github.com/youpele52/lazysetup/pkg/models"
 )
 
@@ -58,43 +59,43 @@ func TestPrevPanel_PanelSwitching(t *testing.T) {
 func TestCursorMovement_IndexBounds(t *testing.T) {
 	t.Run("cursor up at 0 stays at 0", func(t *testing.T) {
 		state := models.NewState()
-		state.SelectedIndex = 0
+		state.PackageManagerScroll.Cursor = 0
 
 		handler := CursorUp(state)
 		_ = handler(nil, nil)
 
-		if state.SelectedIndex != 0 {
-			t.Errorf("Expected index 0, got %d", state.SelectedIndex)
+		if state.PackageManagerScroll.Cursor != 0 {
+			t.Errorf("Expected index 0, got %d", state.PackageManagerScroll.Cursor)
 		}
 	})
 
 	t.Run("cursor down at max stays at max", func(t *testing.T) {
 		state := models.NewState()
 		maxIndex := len(state.InstallMethods) - 1
-		state.SelectedIndex = maxIndex
+		state.PackageManagerScroll.Cursor = maxIndex
 
 		handler := CursorDown(state)
 		_ = handler(nil, nil)
 
-		if state.SelectedIndex != maxIndex {
-			t.Errorf("Expected index %d, got %d", maxIndex, state.SelectedIndex)
+		if state.PackageManagerScroll.Cursor != maxIndex {
+			t.Errorf("Expected index %d, got %d", maxIndex, state.PackageManagerScroll.Cursor)
 		}
 	})
 
 	t.Run("cursor moves within bounds", func(t *testing.T) {
 		state := models.NewState()
-		state.SelectedIndex = 1
+		state.PackageManagerScroll.Cursor = 1
 
 		handlerUp := CursorUp(state)
 		_ = handlerUp(nil, nil)
-		if state.SelectedIndex != 0 {
-			t.Errorf("Expected index 0, got %d", state.SelectedIndex)
+		if state.PackageManagerScroll.Cursor != 0 {
+			t.Errorf("Expected index 0, got %d", state.PackageManagerScroll.Cursor)
 		}
 
 		handlerDown := CursorDown(state)
 		_ = handlerDown(nil, nil)
-		if state.SelectedIndex != 1 {
-			t.Errorf("Expected index 1, got %d", state.SelectedIndex)
+		if state.PackageManagerScroll.Cursor != 1 {
+			t.Errorf("Expected index 1, got %d", state.PackageManagerScroll.Cursor)
 		}
 	})
 }
@@ -105,26 +106,26 @@ func TestCursorMovement_IndexBounds(t *testing.T) {
 func TestToolsCursorMovement_IndexBounds(t *testing.T) {
 	t.Run("tools cursor up at 0 stays at 0", func(t *testing.T) {
 		state := models.NewState()
-		state.ToolsIndex = 0
+		state.ToolsScroll.Cursor = 0
 
 		handler := ToolsCursorUp(state)
 		_ = handler(nil, nil)
 
-		if state.ToolsIndex != 0 {
-			t.Errorf("Expected index 0, got %d", state.ToolsIndex)
+		if state.ToolsScroll.Cursor != 0 {
+			t.Errorf("Expected index 0, got %d", state.ToolsScroll.Cursor)
 		}
 	})
 
 	t.Run("tools cursor down at max stays at max", func(t *testing.T) {
 		state := models.NewState()
 		maxIndex := len(state.Tools) - 1
-		state.ToolsIndex = maxIndex
+		state.ToolsScroll.Cursor = maxIndex
 
 		handler := ToolsCursorDown(state)
 		_ = handler(nil, nil)
 
-		if state.ToolsIndex != maxIndex {
-			t.Errorf("Expected index %d, got %d", maxIndex, state.ToolsIndex)
+		if state.ToolsScroll.Cursor != maxIndex {
+			t.Errorf("Expected index %d, got %d", maxIndex, state.ToolsScroll.Cursor)
 		}
 	})
 }
@@ -135,7 +136,7 @@ func TestToolsCursorMovement_IndexBounds(t *testing.T) {
 func TestToggleTool_TogglesSelection(t *testing.T) {
 	t.Run("toggles tool selection", func(t *testing.T) {
 		state := models.NewState()
-		state.ToolsIndex = 0
+		state.ToolsScroll.Cursor = 0
 		tool := state.Tools[0]
 		state.SelectedTools[tool] = false
 
@@ -167,6 +168,119 @@ func TestSwitchToPanel_DirectSwitch(t *testing.T) {
 
 		if state.GetActivePanel() != models.PanelTools {
 			t.Errorf("Expected PanelTools, got %v", state.GetActivePanel())
+		}
+	})
+}
+
+// TestJumpToFirst_VimNavigation tests vim-style jump to first item.
+// Priority: P1 - Vim-style navigation is a core user feature.
+// Tests that JumpToFirst resets cursor to position 0 for all panels.
+func TestJumpToFirst_VimNavigation(t *testing.T) {
+	t.Run("jumps to first in package manager panel", func(t *testing.T) {
+		state := models.NewState()
+		state.SetCurrentPage(models.PageMultiPanel)
+		state.SetActivePanel(models.PanelPackageManager)
+		state.PackageManagerScroll.Cursor = 5
+
+		handler := JumpToFirst(state)
+		_ = handler(nil, nil)
+
+		if state.PackageManagerScroll.Cursor != 0 {
+			t.Errorf("Expected cursor 0, got %d", state.PackageManagerScroll.Cursor)
+		}
+	})
+
+	t.Run("jumps to first in tools panel", func(t *testing.T) {
+		state := models.NewState()
+		state.SetCurrentPage(models.PageMultiPanel)
+		state.SetActivePanel(models.PanelTools)
+		state.ToolsScroll.Cursor = 10
+
+		handler := JumpToFirst(state)
+		_ = handler(nil, nil)
+
+		if state.ToolsScroll.Cursor != 0 {
+			t.Errorf("Expected cursor 0, got %d", state.ToolsScroll.Cursor)
+		}
+	})
+
+	t.Run("disabled when sudo confirm is shown", func(t *testing.T) {
+		state := models.NewState()
+		state.SetCurrentPage(models.PageMultiPanel)
+		state.SetActivePanel(models.PanelPackageManager)
+		state.PackageManagerScroll.Cursor = 5
+		state.SetShowSudoConfirm(true)
+
+		handler := JumpToFirst(state)
+		_ = handler(nil, nil)
+
+		if state.PackageManagerScroll.Cursor != 5 {
+			t.Errorf("Expected cursor to remain 5 when disabled, got %d", state.PackageManagerScroll.Cursor)
+		}
+	})
+}
+
+// TestJumpToLast_VimNavigation tests vim-style jump to last item.
+// Priority: P1 - Vim-style navigation is a core user feature.
+// Tests that JumpToLast moves cursor to the last item for all panels.
+func TestJumpToLast_VimNavigation(t *testing.T) {
+	t.Run("jumps to last in package manager panel", func(t *testing.T) {
+		state := models.NewState()
+		state.SetCurrentPage(models.PageMultiPanel)
+		state.SetActivePanel(models.PanelPackageManager)
+		state.PackageManagerScroll.Cursor = 0
+		lastIndex := len(state.InstallMethods) - 1
+
+		handler := JumpToLast(state)
+		_ = handler(nil, nil)
+
+		if state.PackageManagerScroll.Cursor != lastIndex {
+			t.Errorf("Expected cursor %d, got %d", lastIndex, state.PackageManagerScroll.Cursor)
+		}
+	})
+
+	t.Run("jumps to last in tools panel", func(t *testing.T) {
+		state := models.NewState()
+		state.SetCurrentPage(models.PageMultiPanel)
+		state.SetActivePanel(models.PanelTools)
+		state.ToolsScroll.Cursor = 0
+		lastIndex := len(state.Tools) - 1
+
+		handler := JumpToLast(state)
+		_ = handler(nil, nil)
+
+		if state.ToolsScroll.Cursor != lastIndex {
+			t.Errorf("Expected cursor %d, got %d", lastIndex, state.ToolsScroll.Cursor)
+		}
+	})
+
+	t.Run("updates selected action when in action panel", func(t *testing.T) {
+		state := models.NewState()
+		state.SetCurrentPage(models.PageMultiPanel)
+		state.SetActivePanel(models.PanelAction)
+		state.ActionScroll.Cursor = 0
+		lastActionIndex := len(config.Actions) - 1
+
+		handler := JumpToLast(state)
+		_ = handler(nil, nil)
+
+		if state.ActionScroll.Cursor != lastActionIndex {
+			t.Errorf("Expected cursor %d, got %d", lastActionIndex, state.ActionScroll.Cursor)
+		}
+	})
+
+	t.Run("disabled when sudo confirm is shown", func(t *testing.T) {
+		state := models.NewState()
+		state.SetCurrentPage(models.PageMultiPanel)
+		state.SetActivePanel(models.PanelPackageManager)
+		state.PackageManagerScroll.Cursor = 0
+		state.SetShowSudoConfirm(true)
+
+		handler := JumpToLast(state)
+		_ = handler(nil, nil)
+
+		if state.PackageManagerScroll.Cursor != 0 {
+			t.Errorf("Expected cursor to remain 0 when disabled, got %d", state.PackageManagerScroll.Cursor)
 		}
 	})
 }
