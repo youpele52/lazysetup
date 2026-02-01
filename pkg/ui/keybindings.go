@@ -231,9 +231,4 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 	}); err != nil {
 		log.Panicln(err)
 	}
-
-	// Open website with 'w' key
-	if err := g.SetKeybinding("", 'w', gocui.ModNone, handlers.OpenWebsite); err != nil {
-		log.Panicln(err)
-	}
 }
