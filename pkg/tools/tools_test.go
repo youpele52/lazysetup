@@ -29,6 +29,20 @@ func TestTools_NotEmpty(t *testing.T) {
 			"fd":         true,
 			"bat":        true,
 			"jq":         true,
+			"node":       true,
+			"gh":         true,
+			"eza":        true,
+			"zoxide":     true,
+			"starship":   true,
+			"python3":    true,
+			"delta":      true,
+			"tree":       true,
+			"make":       true,
+			"btop":       true,
+			"wget":       true,
+			"httpie":     true,
+			"tldr":       true,
+			"lazysql":    true,
 		}
 		for _, tool := range Tools {
 			if !expectedTools[tool] {

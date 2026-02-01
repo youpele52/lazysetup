@@ -1,94 +1,63 @@
 package commands
 
+import (
+	"fmt"
+
+	"github.com/youpele52/lazysetup/pkg/tools"
+)
+
 // PackageManagerUninstallCommands maps package managers to tools and their uninstall commands
+// Standard package manager commands are auto-generated using helper functions.
+// Curl commands use direct binary removal since Curl-based installs don't track packages.
 var PackageManagerUninstallCommands = LifecycleCommandsType{
-	"Homebrew": {
-		"git":        "brew uninstall git",
-		"docker":     "brew uninstall docker",
-		"lazygit":    "brew uninstall lazygit",
-		"lazydocker": "brew uninstall lazydocker",
-		"htop":       "brew uninstall htop",
-		"nvim":       "brew uninstall nvim",
-		"zsh":        "brew uninstall zsh",
-		"tmux":       "brew uninstall tmux",
-		"fzf":        "brew uninstall fzf",
-		"ripgrep":    "brew uninstall ripgrep",
-		"fd":         "brew uninstall fd",
-		"bat":        "brew uninstall bat",
-		"jq":         "brew uninstall jq",
-	},
-	"Curl": {
-		"git":        "rm -f /usr/local/bin/git",
-		"docker":     "rm -f /usr/local/bin/docker",
-		"lazygit":    "rm -f /usr/local/bin/lazygit",
-		"lazydocker": "rm -f /usr/local/bin/lazydocker",
-		"htop":       "rm -f /usr/local/bin/htop",
-		"nvim":       "rm -rf /usr/local/bin/nvim /usr/local/share/nvim /usr/local/lib/nvim",
-		"zsh":        "rm -rf /usr/local/bin/zsh /usr/local/share/zsh ~/.oh-my-zsh",
-		"tmux":       "rm -f /usr/local/bin/tmux",
-		"fzf":        "rm -rf ~/.fzf /usr/local/bin/fzf",
-		"ripgrep":    "rm -f /usr/local/bin/rg",
-		"fd":         "rm -f /usr/local/bin/fd",
-		"bat":        "rm -f /usr/local/bin/bat",
-		"jq":         "rm -f /usr/local/bin/jq",
-	},
-	"APT": {
-		"git":        "apt-get remove -y git",
-		"docker":     "apt-get remove -y docker.io",
-		"lazygit":    "apt-get remove -y lazygit",
-		"lazydocker": "apt-get remove -y lazydocker",
-		"htop":       "apt-get remove -y htop",
-		"nvim":       "apt-get remove -y neovim",
-		"zsh":        "apt-get remove -y zsh",
-		"tmux":       "apt-get remove -y tmux",
-		"fzf":        "apt-get remove -y fzf",
-		"ripgrep":    "apt-get remove -y ripgrep",
-		"fd":         "apt-get remove -y fd-find",
-		"bat":        "apt-get remove -y bat",
-		"jq":         "apt-get remove -y jq",
-	},
-	"YUM": {
-		"git":        "yum remove -y git",
-		"docker":     "yum remove -y docker",
-		"lazygit":    "yum remove -y lazygit",
-		"lazydocker": "yum remove -y lazydocker",
-		"htop":       "yum remove -y htop",
-		"nvim":       "yum remove -y neovim",
-		"zsh":        "yum remove -y zsh",
-		"tmux":       "yum remove -y tmux",
-		"fzf":        "yum remove -y fzf",
-		"ripgrep":    "yum remove -y ripgrep",
-		"fd":         "yum remove -y fd-find",
-		"bat":        "yum remove -y bat",
-		"jq":         "yum remove -y jq",
-	},
-	"Scoop": {
-		"git":        "scoop uninstall git",
-		"docker":     "scoop uninstall docker",
-		"lazygit":    "scoop uninstall lazygit",
-		"lazydocker": "scoop uninstall lazydocker",
-		"htop":       "scoop uninstall htop",
-		"nvim":       "scoop uninstall neovim",
-		"tmux":       "scoop uninstall tmux",
-		"fzf":        "scoop uninstall fzf",
-		"ripgrep":    "scoop uninstall ripgrep",
-		"fd":         "scoop uninstall fd",
-		"bat":        "scoop uninstall bat",
-		"jq":         "scoop uninstall jq",
-	},
-	"Chocolatey": {
-		"git":        "choco uninstall git -y",
-		"docker":     "choco uninstall docker-desktop -y",
-		"lazygit":    "choco uninstall lazygit -y",
-		"lazydocker": "choco uninstall lazydocker -y",
-		"htop":       "choco uninstall htop -y",
-		"nvim":       "choco uninstall neovim -y",
-		"fzf":        "choco uninstall fzf -y",
-		"ripgrep":    "choco uninstall ripgrep -y",
-		"fd":         "choco uninstall fd -y",
-		"bat":        "choco uninstall bat -y",
-		"jq":         "choco uninstall jq -y",
-	},
+	"Homebrew":   buildToolMap("Homebrew", "uninstall"),
+	"APT":        buildToolMap("APT", "uninstall"),
+	"YUM":        buildToolMap("YUM", "uninstall"),
+	"Scoop":      buildToolMap("Scoop", "uninstall"),
+	"Chocolatey": buildToolMap("Chocolatey", "uninstall"),
+	"Pacman":     buildToolMap("Pacman", "uninstall"),
+	"Curl":       buildCurlUninstallMap(),
+}
+
+// buildCurlUninstallMap creates uninstall commands for Curl-based installs
+// These remove binaries from common installation locations
+func buildCurlUninstallMap() map[string]string {
+	uninstallMap := make(map[string]string)
+
+	for _, tool := range tools.Tools {
+		switch tool {
+		case "nvim":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/nvim /usr/local/share/nvim /usr/local/lib/nvim"
+		case "zsh":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/zsh /usr/local/share/zsh ~/.oh-my-zsh"
+		case "fzf":
+			uninstallMap[tool] = "rm -rf ~/.fzf /usr/local/bin/fzf"
+		case "zoxide":
+			uninstallMap[tool] = "rm -rf ~/.local/bin/zoxide /usr/local/bin/zoxide"
+		case "starship":
+			uninstallMap[tool] = "rm -f /usr/local/bin/starship ~/.local/bin/starship"
+		case "node":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/node /usr/local/bin/npm /usr/local/lib/node_modules /usr/local/include/node"
+		case "python3":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/python3 /usr/local/bin/pip3 /usr/local/lib/python3*"
+		case "gh":
+			uninstallMap[tool] = "rm -f /usr/local/bin/gh"
+		case "eza":
+			uninstallMap[tool] = "rm -f /usr/local/bin/eza"
+		case "delta":
+			uninstallMap[tool] = "rm -f /usr/local/bin/delta"
+		case "btop":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/btop ~/.config/btop"
+		case "httpie":
+			uninstallMap[tool] = "rm -f /usr/local/bin/http /usr/local/bin/https"
+		case "lazysql":
+			uninstallMap[tool] = "rm -f /usr/local/bin/lazysql"
+		default:
+			uninstallMap[tool] = fmt.Sprintf("rm -f /usr/local/bin/%s", tool)
+		}
+	}
+
+	return uninstallMap
 }
 
 // GetUninstallCommand retrieves the uninstall command for a specific tool using a specific method

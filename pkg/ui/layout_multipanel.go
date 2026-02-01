@@ -159,6 +159,12 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 		} else if len(results) == 0 {
 			// Show logo only if no results exist
 			v.Clear()
+
+			// Show Nix disclaimer if Nix is selected as package manager
+			if state.GetSelectedMethod() == "Nix" {
+				fmt.Fprintf(v, "%s%s%s\n\n", colors.ANSIYellow, constants.NixDisclaimer, colors.ANSIReset)
+			}
+
 			fmt.Fprint(v, constants.Logo)
 		}
 		// If results exist, preserve them for scrolling

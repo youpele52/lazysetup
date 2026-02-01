@@ -39,6 +39,9 @@ const (
 	UpdateFailed       = "Update failed: %s"
 	UpdateCheckFailed  = "Failed to check for updates: %s"
 	UpdateNotAvailable = "You're running the latest version (v%s)"
+
+	// Nix package manager disclaimer
+	NixDisclaimer = "⚠️  NIX NOTICE: Requires nixpkgs channel configured.\n    Some tools may not be available via Nix.\n    Setup guide: https://nixos.org/manual/nix/stable/installation/installing-binary\n    If errors occur, try another package manager."
 )
 
 const Logo = ` _                          _               
