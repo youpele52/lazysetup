@@ -100,6 +100,22 @@ func SetupKeybindings(g *gocui.Gui, state *models.State) {
 		log.Panicln(err)
 	}
 
+	// Jump to first item shortcuts: 'g' (vim-style) and 'w'
+	if err := g.SetKeybinding("", 'g', gocui.ModNone, handlers.JumpToFirst(state)); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", 'w', gocui.ModNone, handlers.JumpToFirst(state)); err != nil {
+		log.Panicln(err)
+	}
+
+	// Jump to last item shortcuts: 'G' (vim-style) and 's'
+	if err := g.SetKeybinding("", 'G', gocui.ModNone, handlers.JumpToLast(state)); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding("", 's', gocui.ModNone, handlers.JumpToLast(state)); err != nil {
+		log.Panicln(err)
+	}
+
 	if err := g.SetKeybinding("", gocui.KeySpace, gocui.ModNone, handlers.MultiPanelToggleTool(state)); err != nil {
 		log.Panicln(err)
 	}

@@ -7,25 +7,21 @@ import (
 
 func CursorUp(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.SelectedIndex > 0 {
-			state.SelectedIndex--
-		}
+		state.PackageManagerScroll.ScrollUp()
 		return nil
 	}
 }
 
 func CursorDown(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.SelectedIndex < len(state.InstallMethods)-1 {
-			state.SelectedIndex++
-		}
+		state.PackageManagerScroll.ScrollDown()
 		return nil
 	}
 }
 
 func SelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		state.SelectedMethod = state.InstallMethods[state.SelectedIndex]
+		state.SelectedMethod = state.InstallMethods[state.PackageManagerScroll.Cursor]
 		return nil
 	}
 }

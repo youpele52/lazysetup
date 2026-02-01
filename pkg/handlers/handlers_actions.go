@@ -13,13 +13,13 @@ import (
 func MultiPanelSelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
 		if state.GetCurrentPage() == models.PageMultiPanel && state.GetActivePanel() == models.PanelPackageManager {
-			state.SelectedMethod = state.InstallMethods[state.SelectedIndex]
+			state.SelectedMethod = state.InstallMethods[state.PackageManagerScroll.Cursor]
 			state.CheckStatus, state.Error = checkInstallation(state.SelectedMethod)
 
 			if state.Error == "" {
 				state.Tools = tools.Tools
 				state.SelectedTools = make(map[string]bool)
-				state.ToolsIndex = 0
+				state.ToolsScroll.JumpToFirst()
 				state.SetActivePanel(models.PanelAction)
 			}
 		}
@@ -31,7 +31,7 @@ func MultiPanelSelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) e
 func MultiPanelSelectAction(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
 		if state.GetCurrentPage() == models.PageMultiPanel && state.GetActivePanel() == models.PanelAction {
-			state.SelectedAction = models.ActionType(state.ActionIndex)
+			state.SelectedAction = models.ActionType(state.ActionScroll.Cursor)
 			state.SetActivePanel(models.PanelTools)
 		}
 		return nil

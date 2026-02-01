@@ -182,9 +182,9 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	if v, err := g.View("status_bar"); err == nil {
 		v.Clear()
 		if state.UpdateAvailable {
-			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | ⏎: Confirm | C: Clear | U: Update | Ctrl+C: Quit")
+			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | g/w: First | G/s: Last | Space: Toggle | ⏎: Confirm | C: Clear | U: Update | Ctrl+C: Quit")
 		} else {
-			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
+			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | g/w: First | G/s: Last | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
 		}
 	}
 

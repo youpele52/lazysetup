@@ -62,20 +62,43 @@ func renderPackageManagerPanel(params PackageManagerParams) error {
 			v.FgColor = colors.TextPrimary
 		}
 		v.Clear()
-		for i, method := range state.InstallMethods {
+
+		// Calculate visible count based on panel height (accounting for borders)
+		visibleCount := packageManagerHeight - 2
+		if visibleCount < 1 {
+			visibleCount = 1
+		}
+
+		// Update scroll state - set visible count but don't adjust offset
+		// Offset is managed by navigation functions (ScrollUp/Down, JumpToFirst/Last)
+		state.PackageManagerScroll.VisibleCount = visibleCount
+		state.PackageManagerScroll.ItemCount = len(state.InstallMethods)
+
+		// Set scroll origin
+		v.SetOrigin(0, state.PackageManagerScroll.Offset)
+
+		// Only render visible items
+		startIdx := state.PackageManagerScroll.Offset
+		endIdx := startIdx + visibleCount
+		if endIdx > len(state.InstallMethods) {
+			endIdx = len(state.InstallMethods)
+		}
+
+		for i := startIdx; i < endIdx; i++ {
+			method := state.InstallMethods[i]
 			marker := constants.RadioUnselected
-			if i == state.SelectedIndex {
+			if i == state.PackageManagerScroll.Cursor {
 				marker = constants.RadioSelected
 			}
 
 			if activePanel == models.PanelPackageManager {
-				if i == state.SelectedIndex {
+				if i == state.PackageManagerScroll.Cursor {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, method, colors.ANSIReset)
 				} else {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, method, colors.ANSIReset)
 				}
 			} else {
-				if i == state.SelectedIndex {
+				if i == state.PackageManagerScroll.Cursor {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, method, colors.ANSIReset)
 				} else {
 					fmt.Fprintf(v, "%s %s\n", marker, method)
@@ -83,7 +106,7 @@ func renderPackageManagerPanel(params PackageManagerParams) error {
 			}
 		}
 		if activePanel == models.PanelPackageManager {
-			v.SetCursor(0, state.SelectedIndex)
+			v.SetCursor(0, state.PackageManagerScroll.Cursor-state.PackageManagerScroll.Offset)
 		}
 	}
 	return nil
@@ -115,20 +138,42 @@ func renderActionPanel(params ActionPanelParams) error {
 			v.FgColor = colors.TextPrimary
 		}
 		v.Clear()
-		for i, action := range actions {
+
+		// Calculate visible count based on panel height (accounting for borders)
+		visibleCount := actionHeight - 2
+		if visibleCount < 1 {
+			visibleCount = 1
+		}
+
+		// Update scroll state
+		state.ActionScroll.VisibleCount = visibleCount
+		state.ActionScroll.ItemCount = len(actions)
+
+		// Set scroll origin
+		v.SetOrigin(0, state.ActionScroll.Offset)
+
+		// Only render visible items
+		startIdx := state.ActionScroll.Offset
+		endIdx := startIdx + visibleCount
+		if endIdx > len(actions) {
+			endIdx = len(actions)
+		}
+
+		for i := startIdx; i < endIdx; i++ {
+			action := actions[i]
 			marker := constants.RadioUnselected
-			if i == state.ActionIndex {
+			if i == state.ActionScroll.Cursor {
 				marker = constants.RadioSelected
 			}
 
 			if activePanel == models.PanelAction {
-				if i == state.ActionIndex {
+				if i == state.ActionScroll.Cursor {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, action, colors.ANSIReset)
 				} else {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, action, colors.ANSIReset)
 				}
 			} else {
-				if i == state.ActionIndex {
+				if i == state.ActionScroll.Cursor {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, action, colors.ANSIReset)
 				} else {
 					fmt.Fprintf(v, "%s %s\n", marker, action)
@@ -136,7 +181,7 @@ func renderActionPanel(params ActionPanelParams) error {
 			}
 		}
 		if activePanel == models.PanelAction {
-			v.SetCursor(0, state.ActionIndex)
+			v.SetCursor(0, state.ActionScroll.Cursor-state.ActionScroll.Offset)
 		}
 	}
 	return nil
@@ -169,37 +214,21 @@ func renderToolsPanel(params ToolsPanelParams) error {
 		v.Clear()
 
 		// Calculate visible tool count based on panel height (accounting for borders)
-		visibleCount := panelHeight - toolsStartY - 1
+		visibleCount := panelHeight - toolsStartY - 2
 		if visibleCount < 1 {
 			visibleCount = 1
 		}
 
-		// Ensure scroll offset stays within valid bounds and cursor is always visible
-		if state.ToolsScrollOffset < 0 {
-			state.ToolsScrollOffset = 0
-		}
-		maxScroll := len(state.Tools) - visibleCount
-		if maxScroll < 0 {
-			maxScroll = 0
-		}
-		if state.ToolsScrollOffset > maxScroll {
-			state.ToolsScrollOffset = maxScroll
-		}
-
-		// Adjust scroll offset to ensure cursor is always visible
-		if state.ToolsIndex < state.ToolsScrollOffset {
-			// Cursor moved above visible area - scroll up
-			state.ToolsScrollOffset = state.ToolsIndex
-		} else if state.ToolsIndex >= state.ToolsScrollOffset+visibleCount {
-			// Cursor moved below visible area - scroll down
-			state.ToolsScrollOffset = state.ToolsIndex - visibleCount + 1
-		}
+		// Update scroll state - set visible count but don't adjust offset
+		// Offset is managed by navigation functions (ScrollUp/Down, JumpToFirst/Last)
+		state.ToolsScroll.VisibleCount = visibleCount
+		state.ToolsScroll.ItemCount = len(state.Tools)
 
 		// Set scroll origin
-		v.SetOrigin(0, state.ToolsScrollOffset)
+		v.SetOrigin(0, state.ToolsScroll.Offset)
 
 		// Only render visible tools
-		startIdx := state.ToolsScrollOffset
+		startIdx := state.ToolsScroll.Offset
 		endIdx := startIdx + visibleCount
 		if endIdx > len(state.Tools) {
 			endIdx = len(state.Tools)
@@ -213,13 +242,13 @@ func renderToolsPanel(params ToolsPanelParams) error {
 			}
 
 			if activePanel == models.PanelTools {
-				if i == state.ToolsIndex {
+				if i == state.ToolsScroll.Cursor {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
 				} else {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIGreen, marker, tool, colors.ANSIReset)
 				}
 			} else {
-				if i == state.ToolsIndex {
+				if i == state.ToolsScroll.Cursor {
 					fmt.Fprintf(v, "%s%s %s%s\n", colors.ANSIMagenta, marker, tool, colors.ANSIReset)
 				} else {
 					fmt.Fprintf(v, "%s %s\n", marker, tool)
@@ -227,7 +256,7 @@ func renderToolsPanel(params ToolsPanelParams) error {
 			}
 		}
 		if activePanel == models.PanelTools {
-			v.SetCursor(0, state.ToolsIndex)
+			v.SetCursor(0, state.ToolsScroll.Cursor-state.ToolsScroll.Offset)
 		}
 	}
 	return nil

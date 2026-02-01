@@ -14,12 +14,12 @@ import (
 
 func SelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		state.SelectedMethod = state.InstallMethods[state.SelectedIndex]
+		state.SelectedMethod = state.InstallMethods[state.PackageManagerScroll.Cursor]
 		state.CheckStatus, state.Error = checkInstallation(state.SelectedMethod)
 		if state.Error == "" && state.CheckStatus == constants.StatusAlreadyInstalled {
 			state.Tools = tools.Tools
 			state.SelectedTools = make(map[string]bool)
-			state.ToolsIndex = 0
+			state.ToolsScroll.JumpToFirst()
 			state.CurrentPage = models.PageTools
 		} else {
 			state.CurrentPage = models.PageSelection

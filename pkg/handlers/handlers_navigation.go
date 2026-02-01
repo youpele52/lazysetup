@@ -75,18 +75,12 @@ func MultiPanelCursorUp(state *models.State) func(*gocui.Gui, *gocui.View) error
 			activePanel := state.GetActivePanel()
 			switch activePanel {
 			case models.PanelPackageManager:
-				if state.SelectedIndex > 0 {
-					state.SelectedIndex--
-				}
+				state.PackageManagerScroll.ScrollUp()
 			case models.PanelAction:
-				if state.ActionIndex > 0 {
-					state.ActionIndex--
-					state.SelectedAction = models.ActionType(state.ActionIndex)
-				}
+				state.ActionScroll.ScrollUp()
+				state.SelectedAction = models.ActionType(state.ActionScroll.Cursor)
 			case models.PanelTools:
-				if state.ToolsIndex > 0 {
-					state.ToolsIndex--
-				}
+				state.ToolsScroll.ScrollUp()
 			}
 		}
 		return nil
@@ -101,18 +95,12 @@ func MultiPanelCursorDown(state *models.State) func(*gocui.Gui, *gocui.View) err
 			activePanel := state.GetActivePanel()
 			switch activePanel {
 			case models.PanelPackageManager:
-				if state.SelectedIndex < len(state.InstallMethods)-1 {
-					state.SelectedIndex++
-				}
+				state.PackageManagerScroll.ScrollDown()
 			case models.PanelAction:
-				if state.ActionIndex < len(config.Actions)-1 {
-					state.ActionIndex++
-					state.SelectedAction = models.ActionType(state.ActionIndex)
-				}
+				state.ActionScroll.ScrollDown()
+				state.SelectedAction = models.ActionType(state.ActionScroll.Cursor)
 			case models.PanelTools:
-				if state.ToolsIndex < len(state.Tools)-1 {
-					state.ToolsIndex++
-				}
+				state.ToolsScroll.ScrollDown()
 			}
 		}
 		return nil
@@ -123,7 +111,7 @@ func MultiPanelCursorDown(state *models.State) func(*gocui.Gui, *gocui.View) err
 func MultiPanelToggleTool(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
 		if state.GetCurrentPage() == models.PageMultiPanel && state.GetActivePanel() == models.PanelTools {
-			tool := state.Tools[state.ToolsIndex]
+			tool := state.Tools[state.ToolsScroll.Cursor]
 			state.SelectedTools[tool] = !state.SelectedTools[tool]
 		}
 		return nil
@@ -133,9 +121,7 @@ func MultiPanelToggleTool(state *models.State) func(*gocui.Gui, *gocui.View) err
 // CursorUp moves cursor up in single-panel views
 func CursorUp(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.SelectedIndex > 0 {
-			state.SelectedIndex--
-		}
+		state.PackageManagerScroll.ScrollUp()
 		return nil
 	}
 }
@@ -143,9 +129,7 @@ func CursorUp(state *models.State) func(*gocui.Gui, *gocui.View) error {
 // CursorDown moves cursor down in single-panel views
 func CursorDown(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.SelectedIndex < len(state.InstallMethods)-1 {
-			state.SelectedIndex++
-		}
+		state.PackageManagerScroll.ScrollDown()
 		return nil
 	}
 }
@@ -153,9 +137,7 @@ func CursorDown(state *models.State) func(*gocui.Gui, *gocui.View) error {
 // ToolsCursorUp moves cursor up in tools list
 func ToolsCursorUp(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.ToolsIndex > 0 {
-			state.ToolsIndex--
-		}
+		state.ToolsScroll.ScrollUp()
 		return nil
 	}
 }
@@ -163,9 +145,7 @@ func ToolsCursorUp(state *models.State) func(*gocui.Gui, *gocui.View) error {
 // ToolsCursorDown moves cursor down in tools list
 func ToolsCursorDown(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.ToolsIndex < len(state.Tools)-1 {
-			state.ToolsIndex++
-		}
+		state.ToolsScroll.ScrollDown()
 		return nil
 	}
 }
@@ -173,8 +153,60 @@ func ToolsCursorDown(state *models.State) func(*gocui.Gui, *gocui.View) error {
 // ToggleTool toggles tool selection in single-panel view
 func ToggleTool(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		tool := state.Tools[state.ToolsIndex]
+		tool := state.Tools[state.ToolsScroll.Cursor]
 		state.SelectedTools[tool] = !state.SelectedTools[tool]
+		return nil
+	}
+}
+
+// JumpToFirst jumps to the first item in the active panel
+// Supports both 'g' (vim-style) and 'w' shortcuts
+// Disabled when sudo confirmation popup is shown
+func JumpToFirst(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			return nil // Disable in password mode
+		}
+
+		currentPage := state.GetCurrentPage()
+		if currentPage == models.PageMultiPanel {
+			activePanel := state.GetActivePanel()
+			switch activePanel {
+			case models.PanelPackageManager:
+				state.PackageManagerScroll.JumpToFirst()
+			case models.PanelAction:
+				state.ActionScroll.JumpToFirst()
+				state.SelectedAction = models.ActionType(0)
+			case models.PanelTools:
+				state.ToolsScroll.JumpToFirst()
+			}
+		}
+		return nil
+	}
+}
+
+// JumpToLast jumps to the last item in the active panel
+// Supports both 'G' (vim-style) and 's' shortcuts
+// Disabled when sudo confirmation popup is shown
+func JumpToLast(state *models.State) func(*gocui.Gui, *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		if state.GetShowSudoConfirm() {
+			return nil // Disable in password mode
+		}
+
+		currentPage := state.GetCurrentPage()
+		if currentPage == models.PageMultiPanel {
+			activePanel := state.GetActivePanel()
+			switch activePanel {
+			case models.PanelPackageManager:
+				state.PackageManagerScroll.JumpToLast()
+			case models.PanelAction:
+				state.ActionScroll.JumpToLast()
+				state.SelectedAction = models.ActionType(len(config.Actions) - 1)
+			case models.PanelTools:
+				state.ToolsScroll.JumpToLast()
+			}
+		}
 		return nil
 	}
 }

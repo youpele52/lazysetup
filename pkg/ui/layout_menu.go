@@ -37,13 +37,13 @@ func layoutMenuPage(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 	if v, err := g.View(constants.ViewMenu); err == nil {
 		v.Clear()
 		for i, method := range state.InstallMethods {
-			if i == state.SelectedIndex {
+			if i == state.PackageManagerScroll.Cursor {
 				fmt.Fprintf(v, "%s %s\n", constants.RadioSelected, method)
 			} else {
 				fmt.Fprintf(v, "%s %s\n", constants.RadioUnselected, method)
 			}
 		}
-		v.SetCursor(0, state.SelectedIndex)
+		v.SetCursor(0, state.PackageManagerScroll.Cursor)
 	}
 
 	return nil
