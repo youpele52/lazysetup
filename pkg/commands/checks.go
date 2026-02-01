@@ -17,6 +17,14 @@ var ToolCheckCommands = CheckCommandsType{
 	"lazygit":    "lazygit --version",
 	"lazydocker": "lazydocker --version",
 	"htop":       "htop --version",
+	"nvim":       "nvim --version",
+	"zsh":        "zsh --version",
+	"tmux":       "tmux -V",
+	"fzf":        "fzf --version",
+	"ripgrep":    "rg --version",
+	"fd":         "fd --version",
+	"bat":        "bat --version",
+	"jq":         "jq --version",
 }
 
 var CheckCommands = MergeMaps(ToolCheckCommands, PackageManagerCheckCommands)

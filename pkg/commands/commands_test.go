@@ -9,7 +9,7 @@ import (
 // Tests all 6 package managers (Homebrew, APT, YUM, Curl, Scoop, Chocolatey) with all supported tools.
 func TestGetInstallCommand_ValidReturnsCommand(t *testing.T) {
 	t.Run("Homebrew returns valid commands for all tools", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetInstallCommand("Homebrew", tool)
 			if cmd == "" {
@@ -19,7 +19,7 @@ func TestGetInstallCommand_ValidReturnsCommand(t *testing.T) {
 	})
 
 	t.Run("APT returns valid commands for all tools", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetInstallCommand("APT", tool)
 			if cmd == "" {
@@ -29,7 +29,7 @@ func TestGetInstallCommand_ValidReturnsCommand(t *testing.T) {
 	})
 
 	t.Run("YUM returns valid commands for all tools", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetInstallCommand("YUM", tool)
 			if cmd == "" {
@@ -39,7 +39,7 @@ func TestGetInstallCommand_ValidReturnsCommand(t *testing.T) {
 	})
 
 	t.Run("Curl returns valid commands for all tools", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetInstallCommand("Curl", tool)
 			if cmd == "" {
@@ -49,7 +49,7 @@ func TestGetInstallCommand_ValidReturnsCommand(t *testing.T) {
 	})
 
 	t.Run("Scoop returns valid commands for all tools", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetInstallCommand("Scoop", tool)
 			if cmd == "" {
@@ -59,7 +59,7 @@ func TestGetInstallCommand_ValidReturnsCommand(t *testing.T) {
 	})
 
 	t.Run("Chocolatey returns valid commands for all tools", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetInstallCommand("Chocolatey", tool)
 			if cmd == "" {
@@ -107,7 +107,7 @@ func TestGetInstallCommand_InvalidReturnsEmpty(t *testing.T) {
 // Tests Homebrew, APT, and YUM package managers with all supported tools.
 func TestGetUpdateCommand_ValidReturnsCommand(t *testing.T) {
 	t.Run("Homebrew returns valid update commands", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetUpdateCommand("Homebrew", tool)
 			if cmd == "" {
@@ -117,7 +117,7 @@ func TestGetUpdateCommand_ValidReturnsCommand(t *testing.T) {
 	})
 
 	t.Run("APT returns valid update commands", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetUpdateCommand("APT", tool)
 			if cmd == "" {
@@ -127,7 +127,7 @@ func TestGetUpdateCommand_ValidReturnsCommand(t *testing.T) {
 	})
 
 	t.Run("YUM returns valid update commands", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetUpdateCommand("YUM", tool)
 			if cmd == "" {
@@ -161,7 +161,7 @@ func TestGetUpdateCommand_InvalidReturnsEmpty(t *testing.T) {
 // Tests Homebrew, APT, and YUM package managers with all supported tools.
 func TestGetUninstallCommand_ValidReturnsCommand(t *testing.T) {
 	t.Run("Homebrew returns valid uninstall commands", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetUninstallCommand("Homebrew", tool)
 			if cmd == "" {
@@ -171,7 +171,7 @@ func TestGetUninstallCommand_ValidReturnsCommand(t *testing.T) {
 	})
 
 	t.Run("APT returns valid uninstall commands", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetUninstallCommand("APT", tool)
 			if cmd == "" {
@@ -181,7 +181,7 @@ func TestGetUninstallCommand_ValidReturnsCommand(t *testing.T) {
 	})
 
 	t.Run("YUM returns valid uninstall commands", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetUninstallCommand("YUM", tool)
 			if cmd == "" {
@@ -237,7 +237,7 @@ func TestGetCheckCommand_ReturnsCorrectCommand(t *testing.T) {
 // Tests all supported tools and verifies invalid tools return empty.
 func TestGetToolCheckCommand_ReturnsCorrectCommand(t *testing.T) {
 	t.Run("returns check commands for all tools", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq"}
 		for _, tool := range tools {
 			cmd := GetToolCheckCommand(tool)
 			if cmd == "" {

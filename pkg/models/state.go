@@ -67,17 +67,18 @@ type State struct {
 	SelectedAction ActionType // Currently selected action (Install, Update, Delete)
 	ActionIndex    int        // Currently selected action index in action panel
 
-	Tools            []string         // Available tools to install
-	SelectedTools    map[string]bool  // Tools user selected for installation
-	ToolsIndex       int              // Current tool index in selection list
-	InstallResults   []InstallResult  // Results of completed installations
-	InstallOutput    string           // Accumulated output from installation commands
-	CurrentTool      string           // Tool currently being installed
-	InstallingIndex  int              // Number of tools completed installing
-	InstallationDone bool             // Whether all installations are finished
-	SpinnerFrame     int              // Current animation frame (0-9) for spinner
-	InstallStartTime int64            // Unix timestamp when installation started
-	ToolStartTimes   map[string]int64 // Start time for each tool installation
+	Tools             []string         // Available tools to install
+	SelectedTools     map[string]bool  // Tools user selected for installation
+	ToolsIndex        int              // Current tool index in selection list
+	ToolsScrollOffset int              // Scroll offset for tools panel (first visible tool)
+	InstallResults    []InstallResult  // Results of completed installations
+	InstallOutput     string           // Accumulated output from installation commands
+	CurrentTool       string           // Tool currently being installed
+	InstallingIndex   int              // Number of tools completed installing
+	InstallationDone  bool             // Whether all installations are finished
+	SpinnerFrame      int              // Current animation frame (0-9) for spinner
+	InstallStartTime  int64            // Unix timestamp when installation started
+	ToolStartTimes    map[string]int64 // Start time for each tool installation
 
 	LastEscapeTime    int64              // Unix timestamp of last Esc key press (for double-escape detection)
 	AbortInstallation bool               // Flag to signal running installations to abort
@@ -105,20 +106,21 @@ type State struct {
 func NewState() *State {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &State{
-		InstallMethods: config.InstallMethods,
-		SelectedIndex:  0,
-		SelectedMethod: config.InstallMethods[0],
-		CurrentPage:    PageMultiPanel,
-		ActivePanel:    PanelPackageManager,
-		SelectedAction: ActionCheck,
-		ActionIndex:    0,
-		SelectedTools:  make(map[string]bool),
-		ToolsIndex:     0,
-		InstallResults: []InstallResult{},
-		ToolStartTimes: make(map[string]int64),
-		Tools:          tools.Tools,
-		CancelCtx:      ctx,
-		CancelFunc:     cancel,
+		InstallMethods:    config.InstallMethods,
+		SelectedIndex:     0,
+		SelectedMethod:    config.InstallMethods[0],
+		CurrentPage:       PageMultiPanel,
+		ActivePanel:       PanelPackageManager,
+		SelectedAction:    ActionCheck,
+		ActionIndex:       0,
+		SelectedTools:     make(map[string]bool),
+		ToolsIndex:        0,
+		ToolsScrollOffset: 0,
+		InstallResults:    []InstallResult{},
+		ToolStartTimes:    make(map[string]int64),
+		Tools:             tools.Tools,
+		CancelCtx:         ctx,
+		CancelFunc:        cancel,
 	}
 }
 

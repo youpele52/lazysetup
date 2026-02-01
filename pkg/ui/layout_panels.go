@@ -167,7 +167,46 @@ func renderToolsPanel(params ToolsPanelParams) error {
 			v.FgColor = colors.TextPrimary
 		}
 		v.Clear()
-		for i, tool := range state.Tools {
+
+		// Calculate visible tool count based on panel height (accounting for borders)
+		visibleCount := panelHeight - toolsStartY - 1
+		if visibleCount < 1 {
+			visibleCount = 1
+		}
+
+		// Ensure scroll offset stays within valid bounds and cursor is always visible
+		if state.ToolsScrollOffset < 0 {
+			state.ToolsScrollOffset = 0
+		}
+		maxScroll := len(state.Tools) - visibleCount
+		if maxScroll < 0 {
+			maxScroll = 0
+		}
+		if state.ToolsScrollOffset > maxScroll {
+			state.ToolsScrollOffset = maxScroll
+		}
+
+		// Adjust scroll offset to ensure cursor is always visible
+		if state.ToolsIndex < state.ToolsScrollOffset {
+			// Cursor moved above visible area - scroll up
+			state.ToolsScrollOffset = state.ToolsIndex
+		} else if state.ToolsIndex >= state.ToolsScrollOffset+visibleCount {
+			// Cursor moved below visible area - scroll down
+			state.ToolsScrollOffset = state.ToolsIndex - visibleCount + 1
+		}
+
+		// Set scroll origin
+		v.SetOrigin(0, state.ToolsScrollOffset)
+
+		// Only render visible tools
+		startIdx := state.ToolsScrollOffset
+		endIdx := startIdx + visibleCount
+		if endIdx > len(state.Tools) {
+			endIdx = len(state.Tools)
+		}
+
+		for i := startIdx; i < endIdx; i++ {
+			tool := state.Tools[i]
 			marker := constants.CheckboxUnselected
 			if state.SelectedTools[tool] {
 				marker = constants.CheckboxSelected

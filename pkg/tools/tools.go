@@ -6,4 +6,12 @@ var Tools = []string{
 	"lazygit",
 	"lazydocker",
 	"htop",
+	"nvim",
+	"zsh",
+	"tmux",
+	"fzf",
+	"ripgrep",
+	"fd",
+	"bat",
+	"jq",
 }

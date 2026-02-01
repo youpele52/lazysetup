@@ -21,6 +21,14 @@ func TestTools_NotEmpty(t *testing.T) {
 			"lazygit":    true,
 			"lazydocker": true,
 			"htop":       true,
+			"nvim":       true,
+			"zsh":        true,
+			"tmux":       true,
+			"fzf":        true,
+			"ripgrep":    true,
+			"fd":         true,
+			"bat":        true,
+			"jq":         true,
 		}
 		for _, tool := range Tools {
 			if !expectedTools[tool] {
