@@ -36,17 +36,19 @@ func BuildInstallationProgressMessage(params ProgressMessageParams) string {
 	if params.InstallationDone {
 		mb.AddLine(fmt.Sprintf("%sInstallation completed!%s", colors.ANSIGreen, colors.ANSIReset))
 	} else {
+		// Progress line with spinner and action
 		progressLine := fmt.Sprintf(
-			"%s%s %s %d/%d %s%s",
+			"%s%s %s...%s",
 			spinnerColor,
 			spinnerFrame,
 			actionVerb,
-			params.InstallingIndex+1,
-			params.TotalTools,
-			params.CurrentTool,
 			colors.ANSIReset,
 		)
 		mb.AddLine(progressLine)
+
+		// Tool name on next line
+		toolLine := fmt.Sprintf("%s✓ %s%s", colors.ANSIGreen, params.CurrentTool, colors.ANSIReset)
+		mb.AddLine(toolLine)
 
 		// Show install output if available
 		if params.InstallOutput != "" {
