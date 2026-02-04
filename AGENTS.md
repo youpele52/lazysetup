@@ -77,7 +77,7 @@ go vet -shadow ./...
 - Update application with `u` key
 
 **Tool & Package Manager Support:**
-- 27 CLI tools (added nvim, zsh, tmux, fzf, ripgrep, fd, bat, jq, node, gh, eza, zoxide, starship, python3, delta, btop, httpie, lazysql, tree, make, wget, tldr)
+- 32 CLI tools (added nvim, zsh, tmux, fzf, ripgrep, fd, bat, jq, node, gh, eza, zoxide, starship, python3, delta, btop, httpie, lazysql, tree, make, wget, tldr, bun, uv, just)
 - 9 package managers (added Pacman, DNF, Nix)
 - Command auto-generation for 8/9 package managers
 
@@ -91,7 +91,7 @@ go vet -shadow ./...
   - `state_installation.go` - Installation state methods
   - `scroll.go` - Unified scroll state for all panels
 - `pkg/ui/` - UI rendering and layouts (dynamic panel dimensions, keybindings)
-- `pkg/tools/` - Tool definitions (27 tools)
+- `pkg/tools/` - Tool definitions (32 tools)
 - `pkg/config/` - Configuration and installation methods (9 package managers)
 - `pkg/commands/` - Command definitions and auto-generation
   - `utils.go` - Command generation helpers
@@ -186,7 +186,7 @@ testing.WaitForCondition(t, func() bool { ... }, timeout, message)
 ```
 
 ### Before Adding New Code
-1. Check `pkg/tools/tools.go` for existing tools (currently 27 tools)
+1. Check `pkg/tools/tools.go` for existing tools (currently 30 tools)
 2. Check `pkg/config/methods.go` for installation methods (9 package managers)
 3. Check `pkg/constants/` for existing constants
 4. Check `pkg/models/state.go` for state patterns
@@ -277,11 +277,12 @@ Every new function or feature must be graded against TEST_PLAN.md to determine i
 
 ## Existing Documentation
 - See `CLAUDE.md` for Claude Code-specific guidance (architecture, threading model, command patterns)
-- See `TESTING.md` for detailed test documentation
-- See `TEST_PLAN.md` for test priorities
+- See `docs/TESTING.md` for detailed test documentation
+- See `docs/TEST_PLAN.md` for test priorities
 - See `README.md` for project overview and user documentation
-- See `PUBLISHING.md` for release procedures
-- See `PLAN.md` for roadmap and planned features
+- See `docs/PUBLISHING.md` for release procedures
+- See `docs/PLAN.md` for roadmap and planned features
+- See `docs/CHANGE_LOG.md` for version history and changes
 
 ## Dependencies
 - Go 1.25.0+

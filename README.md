@@ -7,7 +7,7 @@ A modern, interactive terminal UI for installing development tools across multip
 - **Multi-Panel Interface**: Intuitive side-by-side layout for installation method selection, tool selection, and status monitoring
 - **Dynamic Panel Sizing**: Responsive panel dimensions that adapt to content
 - **Multiple Package Managers**: Support for Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, and Curl
-- **Tool Selection**: Multi-select interface for choosing from 29 development tools
+- **Tool Selection**: Multi-select interface for choosing from 32 development tools
 - **Vim-Style Navigation**: Jump to first (g/w), last (G/s), and scroll through lists efficiently
 - **Real-Time Status**: Live installation status with spinner animation and output display
 - **Parallel Installation**: Install multiple tools simultaneously for faster setup
@@ -132,10 +132,10 @@ rm ./lazysetup
 
 1. **Panel 1 (Package Manager)**: Select your package manager (Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, Curl)
 2. **Panel 2 (Action)**: Choose action - Check, Install, Update, or Uninstall
-3. **Panel 3 (Tools)**: Select which tools to install/update/uninstall (29 tools available)
+3. **Panel 3 (Tools)**: Select which tools to install/update/uninstall (32 tools available)
 4. **Panel 0 (Status)**: Watch real-time progress with spinner animation and results
 
-## Supported Tools (29 Total)
+## Supported Tools (32 Total)
 
 ### Version Control & Development
 - **git**: Version control system
@@ -171,6 +171,7 @@ rm ./lazysetup
 - **python3**: Python interpreter and pip
 - **bun**: Fast JavaScript/TypeScript runtime and package manager
 - **uv**: Ultra-fast Python package manager and environment manager
+- **just**: Modern command runner (alternative to make)
 - **make**: Build automation tool
 - **jq**: JSON processor for APIs
 - **wget**: File downloader
@@ -264,7 +265,7 @@ CGO_ENABLED=0 go build -o lazysetup
 go test ./...
 ```
 
-For detailed testing documentation including test structure, race detection, and test priorities, see [TESTING.md](TESTING.md).
+For detailed testing documentation including test structure, race detection, and test priorities, see [docs/TESTING.md](docs/TESTING.md).
 
 ### Code Structure
 
@@ -300,6 +301,10 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 - Ensure you press Esc twice within 500ms to cancel and return to main menu
 - Single Esc press marks the time; second press within 500ms triggers abort
 
+## Changelog
+
+For a detailed history of changes and version updates, see [docs/CHANGE_LOG.md](docs/CHANGE_LOG.md).
+
 ## Roadmap
 
-For planned features, enhancements, and development roadmap, see [PLAN.md](PLAN.md).
+For planned features, enhancements, and development roadmap, see [docs/PLAN.md](docs/PLAN.md).

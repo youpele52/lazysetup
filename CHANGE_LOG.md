@@ -2,7 +2,7 @@
 
 ## v0.3.1 (4th February 2026)
 
-**Tool Expansion** (29 → 30 tools):
+**Tool Expansion** (29 → 32 tools):
 - **JavaScript Runtime**: bun - Fast JavaScript runtime and package manager
 - **Python Package Manager**: uv - Extremely fast Python package installer and resolver
 - **Command Runner**: just - Modern command runner (alternative to make)

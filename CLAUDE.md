@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-lazysetup is an interactive TUI for installing development tools across multiple platforms. It abstracts away package manager differences (Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, Curl) to provide a unified interface for installing 27+ CLI tools.
+lazysetup is an interactive TUI for installing development tools across multiple platforms. It abstracts away package manager differences (Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, Curl) to provide a unified interface for installing 32+ CLI tools.
 
 **Key Use Case:** Fresh Linux server setup where developers repeatedly install the same tools on VPS instances (Hetzner, DigitalOcean, etc.).
 
@@ -104,7 +104,7 @@ PageMultiPanel (main interface)
   ├─ Panel 0: Status (installation progress)
   ├─ Panel 1: Package Manager (Homebrew, APT, etc.)
   ├─ Panel 2: Action (Install, Update, Uninstall)
-  └─ Panel 3: Tools (27 tools, multi-select)
+  └─ Panel 3: Tools (32 tools, multi-select)
 
 User workflow:
 1. Select package manager (Panel 1)
@@ -212,7 +212,7 @@ Current: Check `git describe --tags --abbrev=0` and sync with version.go constan
 
 **Why Curl Fallback?** Many tools aren't in default repos (especially modern CLI tools like `eza`, `zoxide`, `delta`). Curl provides universal installation.
 
-**Why Auto-Generation?** Maintaining 27 tools × 9 package managers = 243 commands is unsustainable. Auto-generate 8/9, manually maintain Curl only.
+**Why Auto-Generation?** Maintaining 32 tools × 9 package managers = 288 commands is unsustainable. Auto-generate 8/9, manually maintain Curl only.
 
 **Why Thread-Safe State?** UI thread reads state for rendering while goroutines write installation results. Mutex prevents races.
 
