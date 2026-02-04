@@ -8,7 +8,7 @@ import (
 // Priority: P1 - Incorrect commands cause all installations to fail.
 // Tests all 7 package managers (Homebrew, APT, YUM, Curl, Scoop, Chocolatey, Pacman) with all 29 supported tools.
 func TestGetInstallCommand_ValidReturnsCommand(t *testing.T) {
-	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "delta", "tree", "make", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
+	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "bun", "uv", "delta", "tree", "make", "just", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
 
 	t.Run("Homebrew returns valid commands for all tools", func(t *testing.T) {
 		for _, tool := range tools {
@@ -111,7 +111,7 @@ func TestGetInstallCommand_InvalidReturnsEmpty(t *testing.T) {
 // Priority: P1 - Update functionality is critical for security patches.
 // Tests all 7 package managers (Homebrew, APT, YUM, Curl, Scoop, Chocolatey, Pacman) with all 29 supported tools.
 func TestGetUpdateCommand_ValidReturnsCommand(t *testing.T) {
-	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "delta", "tree", "make", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
+	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "bun", "uv", "delta", "tree", "make", "just", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
 
 	t.Run("Homebrew returns valid update commands", func(t *testing.T) {
 		for _, tool := range tools {
@@ -200,7 +200,7 @@ func TestGetUpdateCommand_InvalidReturnsEmpty(t *testing.T) {
 // Priority: P1 - Users need to cleanly remove tools.
 // Tests all 7 package managers (Homebrew, APT, YUM, Curl, Scoop, Chocolatey, Pacman) with all 29 supported tools.
 func TestGetUninstallCommand_ValidReturnsCommand(t *testing.T) {
-	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "delta", "tree", "make", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
+	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "bun", "uv", "delta", "tree", "make", "just", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
 
 	t.Run("Homebrew returns valid uninstall commands", func(t *testing.T) {
 		for _, tool := range tools {
@@ -312,7 +312,7 @@ func TestGetCheckCommand_ReturnsCorrectCommand(t *testing.T) {
 // Tests all 29 supported tools and verifies invalid tools return empty.
 func TestGetToolCheckCommand_ReturnsCorrectCommand(t *testing.T) {
 	t.Run("returns check commands for all tools", func(t *testing.T) {
-		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "delta", "tree", "make", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
+		tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "bun", "uv", "delta", "tree", "make", "just", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
 		for _, tool := range tools {
 			cmd := GetToolCheckCommand(tool)
 			if cmd == "" {
@@ -417,7 +417,7 @@ func TestMergeMaps_MergesCorrectly(t *testing.T) {
 // Priority: P1 - Every Homebrew command combination must work for users.
 // Tests that install, update, and uninstall commands start with 'brew'.
 func TestCommandCorrectness_Homebrew(t *testing.T) {
-	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "delta", "tree", "make", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
+	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "bun", "uv", "delta", "tree", "make", "just", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
 
 	t.Run("Homebrew install commands use brew install", func(t *testing.T) {
 		for _, tool := range tools {
@@ -463,7 +463,7 @@ func TestCommandCorrectness_Homebrew(t *testing.T) {
 // Priority: P1 - Every APT command combination must work for users.
 // Tests that install commands start with 'apt-get'.
 func TestCommandCorrectness_APT(t *testing.T) {
-	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "delta", "tree", "make", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
+	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "bun", "uv", "delta", "tree", "make", "just", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
 
 	t.Run("APT install commands use apt-get install", func(t *testing.T) {
 		for _, tool := range tools {
@@ -483,7 +483,7 @@ func TestCommandCorrectness_APT(t *testing.T) {
 // Priority: P1 - Every YUM command combination must work for users.
 // Tests that install commands start with 'yum'.
 func TestCommandCorrectness_YUM(t *testing.T) {
-	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "delta", "tree", "make", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
+	tools := []string{"git", "docker", "lazygit", "lazydocker", "htop", "nvim", "zsh", "tmux", "fzf", "ripgrep", "fd", "bat", "jq", "node", "gh", "eza", "zoxide", "starship", "python3", "bun", "uv", "delta", "tree", "make", "just", "btop", "wget", "httpie", "tldr", "lazysql", "claude-code", "opencode"}
 
 	t.Run("YUM install commands use yum install", func(t *testing.T) {
 		for _, tool := range tools {

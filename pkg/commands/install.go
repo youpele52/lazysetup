@@ -44,10 +44,13 @@ var PackageManagerInstallCommands = LifecycleCommandsType{
 		"lazysql":     "curl -fsSL https://github.com/jorgerojas26/lazysql/releases/latest/download/lazysql_$(uname -s)_$(uname -m).tar.gz -o /tmp/lazysql.tar.gz && cd /tmp && tar -xzf lazysql.tar.gz && sudo cp lazysql /usr/local/bin/",
 		"tree":        "curl -fsSL http://mama.indstate.edu/users/ice/tree/src/tree-2.1.3.tgz -o /tmp/tree.tgz && cd /tmp && tar -xzf tree.tgz && cd tree-* && make && sudo make install",
 		"make":        "curl -fsSL https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz -o /tmp/make.tar.gz && cd /tmp && tar -xzf make.tar.gz && cd make-* && ./configure && make && sudo make install",
+		"just":        "curl -fsSL https://github.com/casey/just/releases/latest/download/just-$(uname -m)-unknown-linux-musl.tar.gz -o /tmp/just.tar.gz && cd /tmp && tar -xzf just.tar.gz && sudo cp just /usr/local/bin/",
 		"wget":        "curl -fsSL https://ftp.gnu.org/gnu/wget/wget-latest.tar.gz -o /tmp/wget.tar.gz && cd /tmp && tar -xzf wget.tar.gz && cd wget-* && ./configure && make && sudo make install",
 		"tldr":        "curl -fsSL https://github.com/tldr-pages/tlrc/releases/latest/download/tlrc-$(uname -m)-unknown-linux-musl -o /tmp/tldr && chmod +x /tmp/tldr && sudo mv /tmp/tldr /usr/local/bin/",
 		"claude-code": "curl -fsSL https://claude.ai/install.sh | bash",
 		"opencode":    "curl -fsSL https://opencode.ai/install | bash",
+		"bun":         "curl -fsSL https://bun.sh/install | bash",
+		"uv":          "curl -LsSf https://astral.sh/uv/install.sh | sh",
 	},
 }
 

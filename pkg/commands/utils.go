@@ -96,6 +96,9 @@ var PackageNameMappings = map[string]map[string]string{
 	"opencode": {
 		"Homebrew": "opencode",
 	},
+	"bun": {
+		"Homebrew": "oven-sh/bun/bun",
+	},
 }
 
 // GetPackageName returns the package name for a tool on a specific package manager
