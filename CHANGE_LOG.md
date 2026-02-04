@@ -1,5 +1,20 @@
 # Change log
 
+## v0.3.1 (4th February 2026)
+
+**Tool Expansion** (29 → 30 tools):
+- **JavaScript Runtime**: bun - Fast JavaScript runtime and package manager
+- **Python Package Manager**: uv - Extremely fast Python package installer and resolver
+- **Command Runner**: just - Modern command runner (alternative to make)
+
+**Package Manager Support**:
+- bun: Homebrew (oven-sh/bun/bun tap) and Curl
+- uv: Homebrew (main repo) and Curl  
+- just: Homebrew, APT (Ubuntu 24.04+), Pacman, DNF, Scoop, Nix, Chocolatey, and Curl
+
+**Installation Methods**:
+All three tools support both standard package managers and direct curl installation for maximum compatibility across platforms.
+
 ## v0.3.0 (1st February 2026)
 
 **CRITICAL FIX - GLIBC Compatibility**: All builds now use `CGO_ENABLED=0` for static linking. Single binary works on ALL Linux distributions (Ubuntu 18.04+, CentOS 7+, Debian 9+, Alpine Linux) without GLIBC version conflicts.
