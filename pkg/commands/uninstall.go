@@ -56,6 +56,10 @@ func buildCurlUninstallMap() map[string]string {
 			uninstallMap[tool] = "rm -f /usr/local/bin/claude"
 		case "opencode":
 			uninstallMap[tool] = "rm -f /usr/local/bin/opencode"
+		case "bun":
+			uninstallMap[tool] = "rm -rf ~/.bun"
+		case "uv":
+			uninstallMap[tool] = "rm ~/.local/bin/uv ~/.local/bin/uvx"
 		default:
 			uninstallMap[tool] = fmt.Sprintf("rm -f /usr/local/bin/%s", tool)
 		}

@@ -23,6 +23,7 @@ func TestTools_NotEmpty(t *testing.T) {
 			"lazydocker": true,
 			"gh":         true,
 			"make":       true,
+			"just":       true,
 			// Shell & Terminal
 			"zsh":  true,
 			"tmux": true,
@@ -30,6 +31,8 @@ func TestTools_NotEmpty(t *testing.T) {
 			"nvim":    true,
 			"node":    true,
 			"python3": true,
+			"bun":     true,
+			"uv":      true,
 			// AI Assistants
 			"claude-code": true,
 			"opencode":    true,

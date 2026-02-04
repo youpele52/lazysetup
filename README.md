@@ -7,7 +7,7 @@ A modern, interactive terminal UI for installing development tools across multip
 - **Multi-Panel Interface**: Intuitive side-by-side layout for installation method selection, tool selection, and status monitoring
 - **Dynamic Panel Sizing**: Responsive panel dimensions that adapt to content
 - **Multiple Package Managers**: Support for Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, and Curl
-- **Tool Selection**: Multi-select interface for choosing from 27 development tools
+- **Tool Selection**: Multi-select interface for choosing from 29 development tools
 - **Vim-Style Navigation**: Jump to first (g/w), last (G/s), and scroll through lists efficiently
 - **Real-Time Status**: Live installation status with spinner animation and output display
 - **Parallel Installation**: Install multiple tools simultaneously for faster setup
@@ -132,10 +132,10 @@ rm ./lazysetup
 
 1. **Panel 1 (Package Manager)**: Select your package manager (Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, Curl)
 2. **Panel 2 (Action)**: Choose action - Check, Install, Update, or Uninstall
-3. **Panel 3 (Tools)**: Select which tools to install/update/uninstall (27 tools available)
+3. **Panel 3 (Tools)**: Select which tools to install/update/uninstall (29 tools available)
 4. **Panel 0 (Status)**: Watch real-time progress with spinner animation and results
 
-## Supported Tools (27 Total)
+## Supported Tools (29 Total)
 
 ### Version Control & Development
 - **git**: Version control system
@@ -169,6 +169,8 @@ rm ./lazysetup
 ### Development Tools
 - **node**: JavaScript runtime
 - **python3**: Python interpreter and pip
+- **bun**: Fast JavaScript/TypeScript runtime and package manager
+- **uv**: Ultra-fast Python package manager and environment manager
 - **make**: Build automation tool
 - **jq**: JSON processor for APIs
 - **wget**: File downloader

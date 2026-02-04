@@ -8,6 +8,7 @@ var Tools = []string{
 	"lazydocker",
 	"gh",
 	"make",
+	"just",
 
 	// Shell & Terminal
 	"zsh",
@@ -17,6 +18,8 @@ var Tools = []string{
 	"nvim",
 	"node",
 	"python3",
+	"bun",
+	"uv",
 
 	// AI Assistants
 	"claude-code",
