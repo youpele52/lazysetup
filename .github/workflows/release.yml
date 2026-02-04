@@ -61,6 +61,8 @@ jobs:
       
       - name: Organize artifacts
         run: |
+          echo "=== Cleaning old binaries ==="
+          rm -f lazysetup-* SHA256SUMS
           echo "=== Binaries directory structure ==="
           ls -laR binaries/
           echo "=== Moving files ==="
