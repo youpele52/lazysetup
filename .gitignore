@@ -1,1 +1,23 @@
 .DS_Store
+
+# Build artifacts
+lazysetup
+lazysetup-*
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test coverage
+*.out
+coverage.txt
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
