@@ -1,5 +1,3 @@
-github.com/integrii/flaggy v1.8.0 h1:tC1qWwg4fhF2Qdaj+MpPK04cxlOSq0+HoMZqAW6Arao=
-github.com/integrii/flaggy v1.8.0/go.mod h1:QS4c80m87SXG0pmVUT/Lx2RY5EbkLvLp7IKBD2jwcFA=
 github.com/jesseduffield/gocui v0.3.0 h1:l7wH8MKR2p+ozuZdtdhQiX7szILbv50vkMk1tg2+xow=
 github.com/jesseduffield/gocui v0.3.0/go.mod h1:2RtZznzYKt8RLRwvFiSkXjU0Ei8WwHdubgnlaYH47dw=
 github.com/mattn/go-runewidth v0.0.9 h1:Lm995f3rfxdpd6TSmuVCHVb/QhupuXlYr8sCI/QdE+0=

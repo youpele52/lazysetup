@@ -296,10 +296,23 @@ func layoutMultiPanel(g *gocui.Gui, state *models.State, maxX, maxY int) error {
 
 	if v, err := g.View("status_bar"); err == nil {
 		v.Clear()
-		if state.UpdateAvailable {
-			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | g/w: First | G/s: Last | Space: Toggle | ⏎: Confirm | C: Clear | U: Update | Ctrl+C: Quit")
+		if state.GetIsSearchMode() {
+			// Search mode status
+			fmt.Fprintf(v, "Type to filter | ↑↓: Nav | Space: Toggle | /: Exit | Esc: Exit | ⏎: Confirm")
+		} else if state.GetActivePanel() == models.PanelTools {
+			// Normal tools panel status
+			if state.UpdateAvailable {
+				fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | g/w: First | G/s: Last | /: Search | Space: Toggle | ⏎: Confirm | C: Clear | U: Update | Ctrl+C: Quit")
+			} else {
+				fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | g/w: First | G/s: Last | /: Search | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
+			}
 		} else {
-			fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | g/w: First | G/s: Last | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
+			// Other panels status
+			if state.UpdateAvailable {
+				fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | g/w: First | G/s: Last | Space: Toggle | ⏎: Confirm | C: Clear | U: Update | Ctrl+C: Quit")
+			} else {
+				fmt.Fprintf(v, "Tab/0-3: Panels | ↑↓: Nav | g/w: First | G/s: Last | Space: Toggle | ⏎: Confirm | C: Clear | Esc: Back | Ctrl+C: Quit")
+			}
 		}
 	}
 

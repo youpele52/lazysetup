@@ -201,3 +201,67 @@ func (s *State) SetToolsScroll(scroll PanelScrollState) {
 	defer s.mu.Unlock()
 	s.ToolsScroll = scroll
 }
+
+// Search query accessors
+
+// GetSearchQuery safely gets the current search query
+func (s *State) GetSearchQuery() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.SearchQuery
+}
+
+// SetSearchQuery safely sets the search query
+func (s *State) SetSearchQuery(query string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.SearchQuery = query
+}
+
+// AppendSearchQuery safely appends a character to the search query
+func (s *State) AppendSearchQuery(char rune) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.SearchQuery += string(char)
+}
+
+// BackspaceSearchQuery safely removes the last character from search query
+func (s *State) BackspaceSearchQuery() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if len(s.SearchQuery) > 0 {
+		s.SearchQuery = s.SearchQuery[:len(s.SearchQuery)-1]
+	}
+}
+
+// Filtered tools accessors
+
+// GetFilteredTools safely gets the filtered tools list
+func (s *State) GetFilteredTools() []string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.FilteredTools
+}
+
+// SetFilteredTools safely sets the filtered tools list
+func (s *State) SetFilteredTools(tools []string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.FilteredTools = tools
+}
+
+// Search mode accessors
+
+// GetIsSearchMode safely gets whether in search mode
+func (s *State) GetIsSearchMode() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.IsSearchMode
+}
+
+// SetIsSearchMode safely sets search mode state
+func (s *State) SetIsSearchMode(mode bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.IsSearchMode = mode
+}

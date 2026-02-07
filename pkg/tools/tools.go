@@ -19,6 +19,7 @@ var Tools = []string{
 	"node",
 	"python3",
 	"bun",
+	"pnpm",
 	"uv",
 
 	// AI Assistants
@@ -26,7 +27,6 @@ var Tools = []string{
 	"opencode",
 
 	// System Monitoring
-	"htop",
 	"btop",
 
 	// Core Utilities (modern replacements)
@@ -37,6 +37,7 @@ var Tools = []string{
 	"eza",
 	"zoxide",
 	"tree",
+	"rsync",
 
 	// Shell Enhancement
 	"starship",
@@ -44,6 +45,12 @@ var Tools = []string{
 
 	// Data Processing
 	"jq",
+
+	// Cloud-Native & DevOps
+	"kubectl",
+	"k9s",
+	"terraform",
+	"helm",
 
 	// Network & Web Tools
 	"httpie",

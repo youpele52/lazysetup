@@ -1,5 +1,45 @@
 # Change log
 
+## v0.3.2 (6th February 2026)
+
+**UX Enhancement - Tools Search/Filter**:
+- Added real-time search/filter to Tools panel (37 tools)
+- Press `/` in Tools panel to activate search mode
+- Type to filter tools by name (case-insensitive)
+- Live match counter shows filtered results (e.g., "Matches: 2/37")
+- Press `/` again to exit search and return to full list
+- Supports numbers (0-3) in search queries without switching panels
+- Search query highlighted in cyan, matches in green
+
+**Tool Optimization & Cloud-Native Expansion** (32 → 37 tools):
+
+**Removed**:
+- **htop**: Removed in favor of btop (redundant, btop provides superior features)
+
+**Added - Cloud-Native & DevOps** (4 tools):
+- **kubectl**: Kubernetes command-line tool for cluster management
+- **k9s**: Terminal UI for Kubernetes with real-time cluster monitoring
+- **terraform**: Infrastructure as Code tool for cloud resource management
+- **helm**: Kubernetes package manager for deploying applications
+
+**Added - Essential Utilities** (2 tools):
+- **rsync**: Fast, versatile file synchronization and transfer utility (essential for servers)
+- **pnpm**: Fast, disk space efficient Node.js package manager (alternative to npm/yarn)
+
+**Package Manager Support**:
+All new tools support Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, and Curl fallback for maximum platform compatibility.
+
+**Curl Commands**:
+- kubectl: Uses dl.k8s.io with stable version detection and architecture mapping (x86_64→amd64, aarch64→arm64)
+- k9s: Uses GitHub `/releases/latest/` pattern with platform detection
+- terraform: Uses HashiCorp releases API for latest version detection
+- helm: Uses official Helm v3 installation script
+- pnpm: Uses official pnpm installation script
+- rsync: Source build from latest release
+
+**Documentation**:
+Updated all references from 32 to 37 tools across README.md, CLAUDE.md, and AGENTS.md.
+
 ## v0.3.1 (4th February 2026)
 
 **Tool Expansion** (29 → 32 tools):
@@ -113,6 +153,7 @@ yum install lazysetup  # Linux (YUM)
 - **↑↓**: Navigate items
 - **g** or **w**: Jump to first item (vim-style gg)
 - **G** or **s**: Jump to last item (vim-style G)
+- **/**: Search/filter tools (toggle on/off in Tools panel)
 - **Space**: Toggle tool
 - **⏎**: Confirm/Execute
 - **c**: Clear status screen

@@ -70,6 +70,12 @@ type State struct {
 	ActionScroll         PanelScrollState // Scroll state for action panel
 	ToolsScroll          PanelScrollState // Scroll state for tools panel
 
+	// Search/filter fields
+	SearchQuery       string           // Current search text for filtering tools
+	FilteredTools     []string         // Filtered tool list based on search query
+	IsSearchMode      bool             // Whether in search/filter mode
+	ToolsSearchScroll PanelScrollState // Scroll state for filtered results
+
 	Tools            []string         // Available tools to install
 	SelectedTools    map[string]bool  // Tools user selected for installation
 	InstallResults   []InstallResult  // Results of completed installations

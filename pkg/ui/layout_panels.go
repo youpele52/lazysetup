@@ -277,7 +277,9 @@ func renderToolsPanel(params ToolsPanelParams) error {
 	}
 
 	if v, err := g.View(constants.PanelTools); err == nil {
+		// Keep title unchanged regardless of search mode
 		v.Title = "[3]-" + constants.TitleTools
+
 		if activePanel == models.PanelTools {
 			v.FgColor = colors.ActiveBorderColor
 		} else {
@@ -285,59 +287,89 @@ func renderToolsPanel(params ToolsPanelParams) error {
 		}
 		v.Clear()
 
+		// Determine which tool list and scroll state to use
+		var displayToolList []string
+		var scrollState *models.PanelScrollState
+
+		if state.GetIsSearchMode() {
+			displayToolList = state.GetFilteredTools()
+			scrollState = &state.ToolsSearchScroll
+		} else {
+			displayToolList = state.Tools
+			scrollState = &state.ToolsScroll
+		}
+
 		// Get actual rendered dimensions from the view (excludes borders automatically)
 		_, visibleCount := v.Size()
 		if visibleCount < 1 {
 			visibleCount = 1
 		}
 
-		// Update scroll state - set visible count but don't adjust offset
-		// Offset is managed by navigation functions (ScrollUp/Down, JumpToFirst/Last)
-		state.ToolsScroll.VisibleCount = visibleCount
-		state.ToolsScroll.ItemCount = len(state.Tools)
+		// Reserve space for search bar if in search mode (2 lines)
+		if state.GetIsSearchMode() {
+			if visibleCount > 2 {
+				visibleCount -= 2 // Account for search query line + matches line
+			}
+		}
+
+		// Update scroll state
+		scrollState.VisibleCount = visibleCount
+		scrollState.ItemCount = len(displayToolList)
 
 		// Safety check: ensure cursor is visible
-		if state.ToolsScroll.Cursor >= state.ToolsScroll.ItemCount {
-			state.ToolsScroll.Cursor = state.ToolsScroll.ItemCount - 1
+		if scrollState.Cursor >= scrollState.ItemCount && scrollState.ItemCount > 0 {
+			scrollState.Cursor = scrollState.ItemCount - 1
 		}
-		if state.ToolsScroll.Cursor < 0 {
-			state.ToolsScroll.Cursor = 0
+		if scrollState.Cursor < 0 {
+			scrollState.Cursor = 0
 		}
 		// Ensure offset shows the cursor
-		if state.ToolsScroll.Cursor < state.ToolsScroll.Offset {
-			state.ToolsScroll.Offset = state.ToolsScroll.Cursor
-		} else if state.ToolsScroll.Cursor >= state.ToolsScroll.Offset+visibleCount {
-			state.ToolsScroll.Offset = state.ToolsScroll.Cursor - visibleCount + 1
+		if scrollState.ItemCount > 0 {
+			if scrollState.Cursor < scrollState.Offset {
+				scrollState.Offset = scrollState.Cursor
+			} else if scrollState.Cursor >= scrollState.Offset+visibleCount {
+				scrollState.Offset = scrollState.Cursor - visibleCount + 1
+			}
 		}
 
 		// Calculate scroll offset to keep cursor visible
-		offset := state.ToolsScroll.Offset
-		cursor := state.ToolsScroll.Cursor
+		offset := scrollState.Offset
+		cursor := scrollState.Cursor
 
 		// Ensure cursor is within bounds
-		if cursor >= len(state.Tools) {
-			cursor = len(state.Tools) - 1
-			state.ToolsScroll.Cursor = cursor
+		if cursor >= len(displayToolList) && len(displayToolList) > 0 {
+			cursor = len(displayToolList) - 1
+			scrollState.Cursor = cursor
 		}
 		if cursor < 0 {
 			cursor = 0
-			state.ToolsScroll.Cursor = cursor
+			scrollState.Cursor = cursor
 		}
 
 		// Adjust offset to keep cursor visible
-		if cursor < offset {
-			offset = cursor
-		} else if cursor >= offset+visibleCount {
-			offset = cursor - visibleCount + 1
+		if len(displayToolList) > 0 {
+			if cursor < offset {
+				offset = cursor
+			} else if cursor >= offset+visibleCount {
+				offset = cursor - visibleCount + 1
+			}
 		}
-		state.ToolsScroll.Offset = offset
+		scrollState.Offset = offset
+
+		// Render search bar if in search mode
+		if state.GetIsSearchMode() {
+			// "Search:" in white (same as title), query in cyan/blue
+			fmt.Fprintf(v, "%sSearch:%s %s%s%s\n", colors.ANSIWhite, colors.ANSIReset, colors.ANSICyan, state.GetSearchQuery(), colors.ANSIReset)
+			// "Matches:" in green
+			fmt.Fprintf(v, "%sMatches: %d/%d%s\n", colors.ANSIGreen, len(displayToolList), len(state.Tools), colors.ANSIReset)
+		}
 
 		// Set scroll position
 		v.SetOrigin(0, offset)
 
-		// Render ALL tools (gocui's SetOrigin will handle which ones are visible)
-		for i := 0; i < len(state.Tools); i++ {
-			tool := state.Tools[i]
+		// Render ALL tools from display list (gocui's SetOrigin will handle which ones are visible)
+		for i := 0; i < len(displayToolList); i++ {
+			tool := displayToolList[i]
 			marker := constants.CheckboxUnselected
 			if state.SelectedTools[tool] {
 				marker = constants.CheckboxSelected
@@ -359,7 +391,12 @@ func renderToolsPanel(params ToolsPanelParams) error {
 		}
 		if activePanel == models.PanelTools {
 			// Set cursor position RELATIVE to visible area
-			v.SetCursor(0, cursor-offset)
+			// Account for search bar lines if in search mode
+			cursorOffset := cursor - offset
+			if state.GetIsSearchMode() {
+				cursorOffset += 2 // Add 2 lines for search bar
+			}
+			v.SetCursor(0, cursorOffset)
 		}
 	}
 	return nil

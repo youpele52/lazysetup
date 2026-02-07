@@ -80,7 +80,12 @@ func MultiPanelCursorUp(state *models.State) func(*gocui.Gui, *gocui.View) error
 				state.ActionScroll.ScrollUp()
 				state.SelectedAction = models.ActionType(state.ActionScroll.Cursor)
 			case models.PanelTools:
-				state.ToolsScroll.ScrollUp()
+				// Use search scroll if in search mode
+				if state.GetIsSearchMode() {
+					state.ToolsSearchScroll.ScrollUp()
+				} else {
+					state.ToolsScroll.ScrollUp()
+				}
 			}
 		}
 		return nil
@@ -100,7 +105,12 @@ func MultiPanelCursorDown(state *models.State) func(*gocui.Gui, *gocui.View) err
 				state.ActionScroll.ScrollDown()
 				state.SelectedAction = models.ActionType(state.ActionScroll.Cursor)
 			case models.PanelTools:
-				state.ToolsScroll.ScrollDown()
+				// Use search scroll if in search mode
+				if state.GetIsSearchMode() {
+					state.ToolsSearchScroll.ScrollDown()
+				} else {
+					state.ToolsScroll.ScrollDown()
+				}
 			}
 		}
 		return nil
@@ -110,10 +120,34 @@ func MultiPanelCursorDown(state *models.State) func(*gocui.Gui, *gocui.View) err
 // MultiPanelToggleTool toggles tool selection in the Tools panel
 func MultiPanelToggleTool(state *models.State) func(*gocui.Gui, *gocui.View) error {
 	return func(g *gocui.Gui, v *gocui.View) error {
-		if state.GetCurrentPage() == models.PageMultiPanel && state.GetActivePanel() == models.PanelTools {
-			tool := state.Tools[state.ToolsScroll.Cursor]
-			state.SelectedTools[tool] = !state.SelectedTools[tool]
+		if state.GetCurrentPage() != models.PageMultiPanel {
+			return nil
 		}
+		if state.GetActivePanel() != models.PanelTools {
+			return nil
+		}
+
+		// Determine which tool list to use
+		var toolList []string
+		var cursorPos int
+
+		if state.GetIsSearchMode() {
+			toolList = state.GetFilteredTools()
+			cursorPos = state.ToolsSearchScroll.Cursor
+		} else {
+			toolList = state.Tools
+			cursorPos = state.ToolsScroll.Cursor
+		}
+
+		// Validate cursor position
+		if cursorPos >= len(toolList) || cursorPos < 0 {
+			return nil
+		}
+
+		// Toggle the tool at cursor position
+		tool := toolList[cursorPos]
+		state.SelectedTools[tool] = !state.SelectedTools[tool]
+
 		return nil
 	}
 }
@@ -178,7 +212,11 @@ func JumpToFirst(state *models.State) func(*gocui.Gui, *gocui.View) error {
 				state.ActionScroll.JumpToFirst()
 				state.SelectedAction = models.ActionType(0)
 			case models.PanelTools:
-				state.ToolsScroll.JumpToFirst()
+				if state.GetIsSearchMode() {
+					state.ToolsSearchScroll.JumpToFirst()
+				} else {
+					state.ToolsScroll.JumpToFirst()
+				}
 			}
 		}
 		return nil
@@ -204,7 +242,11 @@ func JumpToLast(state *models.State) func(*gocui.Gui, *gocui.View) error {
 				state.ActionScroll.JumpToLast()
 				state.SelectedAction = models.ActionType(len(config.Actions) - 1)
 			case models.PanelTools:
-				state.ToolsScroll.JumpToLast()
+				if state.GetIsSearchMode() {
+					state.ToolsSearchScroll.JumpToLast()
+				} else {
+					state.ToolsScroll.JumpToLast()
+				}
 			}
 		}
 		return nil

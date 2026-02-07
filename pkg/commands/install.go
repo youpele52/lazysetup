@@ -23,7 +23,6 @@ var PackageManagerInstallCommands = LifecycleCommandsType{
 		"docker":      "curl -fsSL https://get.docker.com -o /tmp/get-docker.sh && chmod +x /tmp/get-docker.sh && sh /tmp/get-docker.sh",
 		"lazygit":     "curl -fsSL https://raw.githubusercontent.com/jesseduffield/lazygit/master/pkg/installer/install.sh -o /tmp/lazygit-install.sh && chmod +x /tmp/lazygit-install.sh && /tmp/lazygit-install.sh",
 		"lazydocker":  "curl -fsSL https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install.sh -o /tmp/lazydocker-install.sh && chmod +x /tmp/lazydocker-install.sh && /tmp/lazydocker-install.sh",
-		"htop":        "curl -fsSL https://github.com/htop-dev/htop/releases/latest/download/htop.tar.xz -o /tmp/htop.tar.xz && cd /tmp && tar -xf htop.tar.xz && cd htop-* && ./autogen.sh && ./configure && make && sudo make install",
 		"nvim":        "curl -fsSL https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz -o /tmp/nvim.tar.gz && cd /tmp && tar -xzf nvim.tar.gz && sudo cp -r nvim-linux64/* /usr/local/",
 		"zsh":         "curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o /tmp/zsh-install.sh && chmod +x /tmp/zsh-install.sh && sh /tmp/zsh-install.sh",
 		"tmux":        "curl -fsSL https://github.com/tmux/tmux/releases/latest/download/tmux.tar.gz -o /tmp/tmux.tar.gz && cd /tmp && tar -xzf tmux.tar.gz && cd tmux-* && ./configure && make && sudo make install",
@@ -51,6 +50,12 @@ var PackageManagerInstallCommands = LifecycleCommandsType{
 		"opencode":    "curl -fsSL https://opencode.ai/install | bash",
 		"bun":         "curl -fsSL https://bun.sh/install | bash",
 		"uv":          "curl -LsSf https://astral.sh/uv/install.sh | sh",
+		"rsync":       "curl -fsSL https://github.com/RsyncProject/rsync/archive/refs/tags/latest.tar.gz -o /tmp/rsync.tar.gz && cd /tmp && tar -xzf rsync.tar.gz && cd rsync-* && ./configure && make && sudo make install",
+		"kubectl":     "curl -fsSL \"https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')/kubectl\" -o /tmp/kubectl && chmod +x /tmp/kubectl && sudo mv /tmp/kubectl /usr/local/bin/",
+		"k9s":         "curl -fsSL https://github.com/derailed/k9s/releases/latest/download/k9s_$(uname -s)_$(uname -m).tar.gz -o /tmp/k9s.tar.gz && cd /tmp && tar -xzf k9s.tar.gz && sudo cp k9s /usr/local/bin/",
+		"terraform":   "curl -fsSL https://releases.hashicorp.com/terraform/$(curl -fsSL https://checkpoint-api.hashicorp.com/v1/check/terraform | grep -oP '\"current_version\":\"\\K[^\"]+').zip -o /tmp/terraform.zip && cd /tmp && unzip -o terraform.zip && sudo mv terraform /usr/local/bin/",
+		"helm":        "curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash",
+		"pnpm":        "curl -fsSL https://get.pnpm.io/install.sh | sh -",
 	},
 }
 

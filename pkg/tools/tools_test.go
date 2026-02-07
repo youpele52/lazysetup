@@ -32,12 +32,12 @@ func TestTools_NotEmpty(t *testing.T) {
 			"node":    true,
 			"python3": true,
 			"bun":     true,
+			"pnpm":    true,
 			"uv":      true,
 			// AI Assistants
 			"claude-code": true,
 			"opencode":    true,
 			// System Monitoring
-			"htop": true,
 			"btop": true,
 			// Core Utilities
 			"fzf":     true,
@@ -47,11 +47,17 @@ func TestTools_NotEmpty(t *testing.T) {
 			"eza":     true,
 			"zoxide":  true,
 			"tree":    true,
+			"rsync":   true,
 			// Shell Enhancement
 			"starship": true,
 			"delta":    true,
 			// Data Processing
 			"jq": true,
+			// Cloud-Native & DevOps
+			"kubectl":   true,
+			"k9s":       true,
+			"terraform": true,
+			"helm":      true,
 			// Network & Web
 			"httpie": true,
 			"wget":   true,

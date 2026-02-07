@@ -99,6 +99,12 @@ var PackageNameMappings = map[string]map[string]string{
 	"bun": {
 		"Homebrew": "oven-sh/bun/bun",
 	},
+	"kubectl": {
+		"Chocolatey": "kubernetes-cli",
+	},
+	"helm": {
+		"Chocolatey": "kubernetes-helm",
+	},
 }
 
 // GetPackageName returns the package name for a tool on a specific package manager

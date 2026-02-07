@@ -60,6 +60,18 @@ func buildCurlUninstallMap() map[string]string {
 			uninstallMap[tool] = "rm -rf ~/.bun"
 		case "uv":
 			uninstallMap[tool] = "rm ~/.local/bin/uv ~/.local/bin/uvx"
+		case "rsync":
+			uninstallMap[tool] = "rm -f /usr/local/bin/rsync"
+		case "kubectl":
+			uninstallMap[tool] = "rm -f /usr/local/bin/kubectl ~/.kube/config"
+		case "k9s":
+			uninstallMap[tool] = "rm -rf /usr/local/bin/k9s ~/.config/k9s ~/.k9s"
+		case "terraform":
+			uninstallMap[tool] = "rm -f /usr/local/bin/terraform"
+		case "helm":
+			uninstallMap[tool] = "rm -f /usr/local/bin/helm ~/.config/helm"
+		case "pnpm":
+			uninstallMap[tool] = "rm -rf ~/.local/share/pnpm ~/.pnpm-store"
 		default:
 			uninstallMap[tool] = fmt.Sprintf("rm -f /usr/local/bin/%s", tool)
 		}

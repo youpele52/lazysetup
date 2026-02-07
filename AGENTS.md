@@ -77,7 +77,7 @@ go vet -shadow ./...
 - Update application with `u` key
 
 **Tool & Package Manager Support:**
-- 32 CLI tools (added nvim, zsh, tmux, fzf, ripgrep, fd, bat, jq, node, gh, eza, zoxide, starship, python3, delta, btop, httpie, lazysql, tree, make, wget, tldr, bun, uv, just)
+- 37 CLI tools (added nvim, zsh, tmux, fzf, ripgrep, fd, bat, jq, node, gh, eza, zoxide, starship, python3, delta, btop, httpie, lazysql, tree, make, wget, tldr, bun, uv, just, pnpm, rsync, kubectl, k9s, terraform, helm; removed htop)
 - 9 package managers (added Pacman, DNF, Nix)
 - Command auto-generation for 8/9 package managers
 
@@ -91,7 +91,7 @@ go vet -shadow ./...
   - `state_installation.go` - Installation state methods
   - `scroll.go` - Unified scroll state for all panels
 - `pkg/ui/` - UI rendering and layouts (dynamic panel dimensions, keybindings)
-- `pkg/tools/` - Tool definitions (32 tools)
+- `pkg/tools/` - Tool definitions (37 tools)
 - `pkg/config/` - Configuration and installation methods (9 package managers)
 - `pkg/commands/` - Command definitions and auto-generation
   - `utils.go` - Command generation helpers

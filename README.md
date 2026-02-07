@@ -7,7 +7,7 @@ A modern, interactive terminal UI for installing development tools across multip
 - **Multi-Panel Interface**: Intuitive side-by-side layout for installation method selection, tool selection, and status monitoring
 - **Dynamic Panel Sizing**: Responsive panel dimensions that adapt to content
 - **Multiple Package Managers**: Support for Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, and Curl
-- **Tool Selection**: Multi-select interface for choosing from 32 development tools
+- **Tool Selection**: Multi-select interface for choosing from 37 development tools
 - **Vim-Style Navigation**: Jump to first (g/w), last (G/s), and scroll through lists efficiently
 - **Real-Time Status**: Live installation status with spinner animation and output display
 - **Parallel Installation**: Install multiple tools simultaneously for faster setup
@@ -121,6 +121,7 @@ rm ./lazysetup
 | `↑` `↓` | Navigate within active panel |
 | `g` or `w` | Jump to first item (vim-style) |
 | `G` or `s` | Jump to last item (vim-style) |
+| `/` | Search/filter tools (toggle on/off in Tools panel) |
 | `Space` | Toggle tool selection |
 | `Enter` | Confirm selection or proceed to next panel |
 | `c` | Clear status screen and reset state |
@@ -132,10 +133,10 @@ rm ./lazysetup
 
 1. **Panel 1 (Package Manager)**: Select your package manager (Homebrew, APT, YUM, DNF, Pacman, Nix, Scoop, Chocolatey, Curl)
 2. **Panel 2 (Action)**: Choose action - Check, Install, Update, or Uninstall
-3. **Panel 3 (Tools)**: Select which tools to install/update/uninstall (32 tools available)
+3. **Panel 3 (Tools)**: Select which tools to install/update/uninstall (37 tools available)
 4. **Panel 0 (Status)**: Watch real-time progress with spinner animation and results
 
-## Supported Tools (32 Total)
+## Supported Tools (37 Total)
 
 ### Version Control & Development
 - **git**: Version control system
@@ -162,14 +163,15 @@ rm ./lazysetup
 ### Terminal Utilities
 - **tmux**: Terminal multiplexer for persistent sessions
 - **starship**: Beautiful, fast cross-shell prompt
-- **htop**: Interactive process viewer
 - **btop**: Modern htop with more features
 - **tree**: Directory structure visualizer
+- **rsync**: Fast file synchronization and transfer utility
 
 ### Development Tools
 - **node**: JavaScript runtime
 - **python3**: Python interpreter and pip
 - **bun**: Fast JavaScript/TypeScript runtime and package manager
+- **pnpm**: Fast, disk space efficient Node.js package manager
 - **uv**: Ultra-fast Python package manager and environment manager
 - **just**: Modern command runner (alternative to make)
 - **make**: Build automation tool
@@ -178,6 +180,12 @@ rm ./lazysetup
 - **httpie**: User-friendly HTTP client
 - **tldr**: Simplified man pages
 - **lazysql**: Terminal UI for databases
+
+### Cloud-Native & DevOps
+- **kubectl**: Kubernetes command-line tool
+- **k9s**: Terminal UI for Kubernetes clusters
+- **terraform**: Infrastructure as Code tool
+- **helm**: Kubernetes package manager
 
 ## Supported Package Managers (9 Total)
 
