@@ -61,12 +61,23 @@ jobs:
       
       - name: Organize artifacts
         run: |
-          echo "=== Cleaning old binaries ==="
+          VERSION=${{ github.ref_name }}
+          echo "=== Cleaning old binaries (before) ==="
           rm -f lazysetup-* SHA256SUMS
+
           echo "=== Binaries directory structure ==="
           ls -laR binaries/
+
           echo "=== Moving files ==="
           mv binaries/* . 2>/dev/null || true
+
+          echo "=== Cleaning old binaries (after move) ==="
+          # Remove any binaries that don't match current version
+          ls -la lazysetup-* 2>/dev/null || echo "No binaries found"
+          # Keep only binaries matching current version tag
+          find . -maxdepth 1 -name "lazysetup-*" ! -name "lazysetup-${VERSION}-*" -type f -delete
+
+          echo "=== Final binaries (version ${VERSION} only) ==="
           ls -la lazysetup-* 2>/dev/null || echo "No binaries in root"
       
       - name: Generate checksums
