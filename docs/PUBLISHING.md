@@ -156,43 +156,70 @@ Location: `.github/workflows/release.yml`
 
 ### Release Contains Wrong/Duplicate Binaries
 
-**Issue:** Release contains binaries from previous versions (e.g., both `lazysetup-0.1.2-*` and `lazysetup-v0.3.1-*`)
+**Issue:** Release contains binaries from previous versions (e.g., both `lazysetup-0.1.2-*` and `lazysetup-v0.3.2-*`)
 
 **Symptoms:**
 - Auto-update installs wrong version (downgrades to old version)
-- Users see only 5 tools instead of 30+
+- Users see only 5 tools instead of 37
 - Binary names inconsistent (some with "v" prefix, some without)
 
-**Root Cause:** 
-Workflow doesn't clean old binaries before organizing artifacts, causing artifacts from previous workflow runs to be included.
+**Root Cause:**
+Workflow didn't clean old binaries before organizing artifacts, causing artifacts from previous workflow runs to be included.
 
-**Solution:**
-1. **Immediate Fix** - Delete old binaries from release:
-```bash
-# List current release assets
-gh release view v0.3.1 --json assets
+**Status:** ✅ **FIXED** as of commit 935c796 (v0.3.2)
 
-# Delete old binaries (replace v0.3.1 with your version)
-gh release delete-asset v0.3.1 lazysetup-0.1.2-darwin-amd64 --yes
-gh release delete-asset v0.3.1 lazysetup-0.1.2-darwin-arm64 --yes
-gh release delete-asset v0.3.1 lazysetup-0.1.2-linux-amd64 --yes
-gh release delete-asset v0.3.1 lazysetup-0.1.2-linux-arm64 --yes
-```
+The workflow now automatically cleans old binaries using version-based filtering. This ensures only binaries matching the current version tag are included in releases.
 
-2. **Permanent Fix** - Update workflow to clean before building:
-Add to `.github/workflows/release.yml` in the "Organize artifacts" step:
+**Current Workflow Behavior:**
+The `.github/workflows/release.yml` "Organize artifacts" step now includes:
+
 ```yaml
 - name: Organize artifacts
   run: |
-    echo "=== Cleaning old binaries ==="
+    VERSION=${{ github.ref_name }}
+    echo "=== Cleaning old binaries (before) ==="
     rm -f lazysetup-* SHA256SUMS
-    # ... rest of script
+
+    echo "=== Binaries directory structure ==="
+    ls -laR binaries/
+
+    echo "=== Moving files ==="
+    mv binaries/* . 2>/dev/null || true
+
+    echo "=== Cleaning old binaries (after move) ==="
+    # Remove any binaries that don't match current version
+    ls -la lazysetup-* 2>/dev/null || echo "No binaries found"
+    # Keep only binaries matching current version tag
+    find . -maxdepth 1 -name "lazysetup-*" ! -name "lazysetup-${VERSION}-*" -type f -delete
+
+    echo "=== Final binaries (version ${VERSION} only) ==="
+    ls -la lazysetup-* 2>/dev/null || echo "No binaries in root"
 ```
 
-3. **Verify Fix:**
+**How It Works:**
+1. Cleans all old binaries before organizing
+2. Moves new binaries from artifacts directory
+3. Uses `find` with version filtering to remove any binaries not matching current tag
+4. Ensures only `lazysetup-${VERSION}-*` files remain
+
+**If Issue Persists:**
+1. **Manual cleanup** - Delete old binaries from release:
 ```bash
-# Check only v0.3.1 binaries remain
-gh release view v0.3.1 --json assets | grep '"name":'
+# List current release assets
+gh release view v0.3.2 --json assets
+
+# Delete old binaries (replace version numbers as needed)
+gh release delete-asset v0.3.2 lazysetup-0.1.2-darwin-amd64 --yes
+gh release delete-asset v0.3.2 lazysetup-0.1.2-darwin-arm64 --yes
+gh release delete-asset v0.3.2 lazysetup-0.1.2-linux-amd64 --yes
+gh release delete-asset v0.3.2 lazysetup-0.1.2-linux-arm64 --yes
+```
+
+2. **Verify Fix:**
+```bash
+# Check only current version binaries remain
+gh release view v0.3.2 --json assets | grep '"name":'
+# Should only show: lazysetup-v0.3.2-* files
 ```
 
 ## Manual Release (If Needed)
