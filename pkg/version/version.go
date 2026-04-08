@@ -3,7 +3,7 @@ package version
 const (
 	// Version is the current version of lazysetup
 	// This should match the latest GitHub release tag
-	Version = "0.3.2"
+	Version = "0.3.3"
 
 	// GitHubOwner is the GitHub repository owner
 	GitHubOwner = "youpele52"
