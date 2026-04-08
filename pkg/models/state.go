@@ -2,10 +2,11 @@ package models
 
 import (
 	"context"
+	"sort"
 	"sync"
 
+	"github.com/youpele52/lazysetup/pkg/commands"
 	"github.com/youpele52/lazysetup/pkg/config"
-	"github.com/youpele52/lazysetup/pkg/tools"
 )
 
 // Page represents the current UI page being displayed
@@ -112,6 +113,8 @@ type State struct {
 
 func NewState() *State {
 	ctx, cancel := context.WithCancel(context.Background())
+	defaultTools := commands.GetSupportedToolsForMethod(config.InstallMethods[0])
+	sort.Strings(defaultTools)
 	return &State{
 		InstallMethods:       config.InstallMethods,
 		SelectedMethod:       config.InstallMethods[0],
@@ -120,11 +123,11 @@ func NewState() *State {
 		SelectedAction:       ActionCheck,
 		PackageManagerScroll: PanelScrollState{ItemCount: len(config.InstallMethods)},
 		ActionScroll:         PanelScrollState{ItemCount: len(config.Actions)},
-		ToolsScroll:          PanelScrollState{ItemCount: len(tools.Tools)},
+		ToolsScroll:          PanelScrollState{ItemCount: len(defaultTools)},
 		SelectedTools:        make(map[string]bool),
 		InstallResults:       []InstallResult{},
 		ToolStartTimes:       make(map[string]int64),
-		Tools:                tools.Tools,
+		Tools:                defaultTools,
 		CancelCtx:            ctx,
 		CancelFunc:           cancel,
 	}
@@ -140,7 +143,15 @@ func (s *State) Reset() {
 	s.Error = ""
 	s.CurrentPage = PageMultiPanel
 	s.SelectedTools = make(map[string]bool)
+	s.Tools = commands.GetSupportedToolsForMethod(config.InstallMethods[0])
+	sort.Strings(s.Tools)
 	s.ToolsScroll.JumpToFirst()
+	s.ToolsScroll.ItemCount = len(s.Tools)
+	s.FilteredTools = []string{}
+	s.IsSearchMode = false
+	s.SearchQuery = ""
+	s.ToolsSearchScroll.JumpToFirst()
+	s.ToolsSearchScroll.ItemCount = 0
 	s.ActionScroll.JumpToFirst()
 	s.SelectedAction = ActionCheck
 	s.InstallResults = []InstallResult{}
@@ -160,7 +171,15 @@ func (s *State) ResetActionState() {
 	s.InstallStartTime = 0
 	s.ToolStartTimes = make(map[string]int64)
 	s.SelectedTools = make(map[string]bool)
+	s.Tools = commands.GetSupportedToolsForMethod(s.SelectedMethod)
+	sort.Strings(s.Tools)
 	s.ToolsScroll.JumpToFirst()
+	s.ToolsScroll.ItemCount = len(s.Tools)
+	s.FilteredTools = []string{}
+	s.IsSearchMode = false
+	s.SearchQuery = ""
+	s.ToolsSearchScroll.JumpToFirst()
+	s.ToolsSearchScroll.ItemCount = 0
 	s.ActionScroll.JumpToFirst()
 	s.SelectedAction = ActionCheck
 }

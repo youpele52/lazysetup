@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	"github.com/jesseduffield/gocui"
@@ -9,7 +10,6 @@ import (
 	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/executor"
 	"github.com/youpele52/lazysetup/pkg/models"
-	"github.com/youpele52/lazysetup/pkg/tools"
 )
 
 func SelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) error {
@@ -17,9 +17,16 @@ func SelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) error {
 		state.SelectedMethod = state.InstallMethods[state.PackageManagerScroll.Cursor]
 		state.CheckStatus, state.Error = checkInstallation(state.SelectedMethod)
 		if state.Error == "" && state.CheckStatus == constants.StatusAlreadyInstalled {
-			state.Tools = tools.Tools
+			state.Tools = commands.GetSupportedToolsForMethod(state.SelectedMethod)
+			sort.Strings(state.Tools)
 			state.SelectedTools = make(map[string]bool)
+			state.SetIsSearchMode(false)
+			state.SetSearchQuery("")
+			state.SetFilteredTools([]string{})
 			state.ToolsScroll.JumpToFirst()
+			state.ToolsScroll.ItemCount = len(state.Tools)
+			state.ToolsSearchScroll.JumpToFirst()
+			state.ToolsSearchScroll.ItemCount = 0
 			state.CurrentPage = models.PageTools
 		} else {
 			state.CurrentPage = models.PageSelection
@@ -69,9 +76,12 @@ func installToolWithOutput(state *models.State, method, tool string) (string, st
 	ctx := state.GetCancelContext()
 	var result *executor.CommandResult
 
-	// Use sudo password only for APT and Curl methods
+	// Use sudo password only for package managers that typically require elevated install access.
 	password := state.GetSudoPassword()
-	needsSudo := method == "APT" || method == "Curl" || method == "YUM"
+	needsSudo := method == "APT" || method == "Curl" || method == "YUM" || method == "DNF"
+	if tool == "openclaw" {
+		needsSudo = false
+	}
 	if password != "" && needsSudo {
 		result = executor.ExecuteWithSudo(ctx, cmd, password, 15*time.Minute)
 	} else {

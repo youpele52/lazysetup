@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"sort"
 	"time"
 
 	"github.com/jesseduffield/gocui"
+	"github.com/youpele52/lazysetup/pkg/commands"
 	"github.com/youpele52/lazysetup/pkg/constants"
 	"github.com/youpele52/lazysetup/pkg/models"
-	"github.com/youpele52/lazysetup/pkg/tools"
 )
 
 // MultiPanelSelectMethod selects installation method in the Package Manager panel
@@ -17,9 +18,16 @@ func MultiPanelSelectMethod(state *models.State) func(*gocui.Gui, *gocui.View) e
 			state.CheckStatus, state.Error = checkInstallation(state.SelectedMethod)
 
 			if state.Error == "" {
-				state.Tools = tools.Tools
+				state.Tools = commands.GetSupportedToolsForMethod(state.SelectedMethod)
+				sort.Strings(state.Tools)
 				state.SelectedTools = make(map[string]bool)
+				state.SetIsSearchMode(false)
+				state.SetSearchQuery("")
+				state.SetFilteredTools([]string{})
 				state.ToolsScroll.JumpToFirst()
+				state.ToolsScroll.ItemCount = len(state.Tools)
+				state.ToolsSearchScroll.JumpToFirst()
+				state.ToolsSearchScroll.ItemCount = 0
 				state.SetActivePanel(models.PanelAction)
 			}
 		}
@@ -73,9 +81,12 @@ func MultiPanelExecuteAction(state *models.State) func(*gocui.Gui, *gocui.View) 
 			}
 		}
 
-		// Only show sudo popup for package managers that need it (APT, YUM)
+		// Only show sudo popup for package managers that need it (APT, YUM, DNF)
 		// Curl and Homebrew don't require sudo
-		needsSudo := method == "APT" || method == "YUM"
+		needsSudo := method == "APT" || method == "YUM" || method == "DNF"
+		if selectedTools["openclaw"] {
+			needsSudo = false
+		}
 
 		if needsSudo {
 			// Show sudo confirmation popup

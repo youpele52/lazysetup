@@ -138,9 +138,12 @@ func updateToolWithOutput(params ToolActionParams) (string, string, string) {
 	ctx := params.State.GetCancelContext()
 	var result *executor.CommandResult
 
-	// Use sudo password only for APT and Curl methods
+	// Use sudo password only for package managers that typically require elevated update access.
 	password := params.State.GetSudoPassword()
-	needsSudo := params.Method == "APT" || params.Method == "Curl" || params.Method == "YUM"
+	needsSudo := params.Method == "APT" || params.Method == "Curl" || params.Method == "YUM" || params.Method == "DNF"
+	if params.Tool == "openclaw" {
+		needsSudo = false
+	}
 	if password != "" && needsSudo {
 		result = executor.ExecuteWithSudo(ctx, cmd, password, 15*time.Minute)
 	} else {
@@ -178,9 +181,12 @@ func uninstallToolWithOutput(params ToolActionParams) (string, string, string) {
 	ctx := params.State.GetCancelContext()
 	var result *executor.CommandResult
 
-	// Use sudo password only for APT and Curl methods
+	// Use sudo password only for package managers that typically require elevated uninstall access.
 	password := params.State.GetSudoPassword()
-	needsSudo := params.Method == "APT" || params.Method == "Curl" || params.Method == "YUM"
+	needsSudo := params.Method == "APT" || params.Method == "Curl" || params.Method == "YUM" || params.Method == "DNF"
+	if params.Tool == "openclaw" {
+		needsSudo = false
+	}
 	if password != "" && needsSudo {
 		result = executor.ExecuteWithSudo(ctx, cmd, password, 15*time.Minute)
 	} else {

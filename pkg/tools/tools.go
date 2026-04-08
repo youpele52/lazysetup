@@ -25,6 +25,9 @@ var Tools = []string{
 	// AI Assistants
 	"claude-code",
 	"opencode",
+	"codex",
+	"openclaw",
+	"ollama",
 
 	// System Monitoring
 	"btop",
@@ -45,12 +48,14 @@ var Tools = []string{
 
 	// Data Processing
 	"jq",
+	"yq",
 
 	// Cloud-Native & DevOps
 	"kubectl",
 	"k9s",
 	"terraform",
 	"helm",
+	"podman",
 
 	// Network & Web Tools
 	"httpie",
@@ -59,4 +64,8 @@ var Tools = []string{
 	// Documentation & Reference
 	"tldr",
 	"lazysql",
+	"direnv",
+	"mise",
+	"shellcheck",
+	"pre-commit",
 }
