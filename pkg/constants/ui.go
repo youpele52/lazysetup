@@ -59,6 +59,15 @@ Copyright 2026 P.E.L.E. - https://youpele.com/
 var ToolDisplayNames = map[string]string{
 	"claude-code": "claude code",
 	"opencode":    "opencode",
+	"codex":       "codex",
+	"openclaw":    "openclaw",
+	"ollama":      "ollama",
+	"yq":          "yq",
+	"direnv":      "direnv",
+	"mise":        "mise",
+	"shellcheck":  "shellcheck",
+	"pre-commit":  "pre-commit",
+	"podman":      "podman",
 }
 
 // GetToolDisplayName returns the display name for a tool

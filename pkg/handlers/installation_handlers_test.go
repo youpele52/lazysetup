@@ -1,12 +1,25 @@
 package handlers
 
 import (
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/jesseduffield/gocui"
 	"github.com/youpele52/lazysetup/pkg/models"
 )
+
+func newTestGUI(t *testing.T) *gocui.Gui {
+	t.Helper()
+	gui := gocui.NewGui()
+	if err := gui.Init(); err != nil {
+		if strings.Contains(err.Error(), "/dev/tty") {
+			t.Skip("gocui requires a tty in this environment")
+		}
+		t.Fatal(err)
+	}
+	return gui
+}
 
 // TestMultiPanelStartInstallation_NoToolsError tests error handling when no tools are selected.
 // Priority: P2 - Validation before execution prevents confusing empty execution.
@@ -20,10 +33,7 @@ func TestMultiPanelStartInstallation_NoToolsError(t *testing.T) {
 
 		handler := MultiPanelStartInstallation(state)
 
-		gui := gocui.NewGui()
-		if err := gui.Init(); err != nil {
-			t.Fatal(err)
-		}
+		gui := newTestGUI(t)
 		defer gui.Close()
 
 		_ = handler(gui, nil)
@@ -42,7 +52,7 @@ func TestMultiPanelStartInstallation_StateInitialization(t *testing.T) {
 		state := models.NewState()
 		state.SetCurrentPage(models.PageMultiPanel)
 		state.SetActivePanel(models.PanelTools)
-		state.SetSelectedTools(map[string]bool{"htop": true})
+		state.SetSelectedTools(map[string]bool{"git": true})
 		state.SetSelectedMethod("APT")
 
 		state.AddInstallResult(models.InstallResult{Tool: "old"})
@@ -53,10 +63,7 @@ func TestMultiPanelStartInstallation_StateInitialization(t *testing.T) {
 
 		handler := MultiPanelStartInstallation(state)
 
-		gui := gocui.NewGui()
-		if err := gui.Init(); err != nil {
-			t.Fatal(err)
-		}
+		gui := newTestGUI(t)
 		defer gui.Close()
 
 		_ = handler(gui, nil)
@@ -90,22 +97,18 @@ func TestMultiPanelStartInstallation_ParallelGoroutines(t *testing.T) {
 		state := models.NewState()
 		state.SetCurrentPage(models.PageMultiPanel)
 		state.SetActivePanel(models.PanelTools)
+		state.Tools = []string{"git", "tmux", "docker", "node"}
 		state.SetSelectedTools(map[string]bool{
-			"htop":   true,
-			"curl":   true,
-			"vim":    true,
 			"git":    true,
 			"tmux":   true,
 			"docker": true,
+			"node":   true,
 		})
 		state.SetSelectedMethod("APT")
 
 		handler := MultiPanelStartInstallation(state)
 
-		gui := gocui.NewGui()
-		if err := gui.Init(); err != nil {
-			t.Fatal(err)
-		}
+		gui := newTestGUI(t)
 		defer gui.Close()
 
 		_ = handler(gui, nil)
@@ -139,18 +142,16 @@ func TestMultiPanelStartInstallation_FullIntegrationFlow(t *testing.T) {
 		state := models.NewState()
 		state.SetCurrentPage(models.PageMultiPanel)
 		state.SetActivePanel(models.PanelTools)
+		state.Tools = []string{"git", "tmux"}
 		state.SetSelectedTools(map[string]bool{
-			"htop": true,
-			"curl": true,
+			"git":  true,
+			"tmux": true,
 		})
 		state.SetSelectedMethod("APT")
 
 		handler := MultiPanelStartInstallation(state)
 
-		gui := gocui.NewGui()
-		if err := gui.Init(); err != nil {
-			t.Fatal(err)
-		}
+		gui := newTestGUI(t)
 		defer gui.Close()
 
 		startTime := time.Now()

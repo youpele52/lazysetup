@@ -9,14 +9,26 @@ import (
 // PackageManagerUninstallCommands maps package managers to tools and their uninstall commands
 // Standard package manager commands are auto-generated using helper functions.
 // Curl commands use direct binary removal since Curl-based installs don't track packages.
+var curlUninstallCommands = buildCurlUninstallMap()
+
 var PackageManagerUninstallCommands = LifecycleCommandsType{
 	"Homebrew":   buildToolMap("Homebrew", "uninstall"),
 	"APT":        buildToolMap("APT", "uninstall"),
 	"YUM":        buildToolMap("YUM", "uninstall"),
+	"DNF":        buildToolMap("DNF", "uninstall"),
+	"Nix":        buildToolMap("Nix", "uninstall"),
 	"Scoop":      buildToolMap("Scoop", "uninstall"),
 	"Chocolatey": buildToolMap("Chocolatey", "uninstall"),
 	"Pacman":     buildToolMap("Pacman", "uninstall"),
-	"Curl":       buildCurlUninstallMap(),
+	"Curl":       curlUninstallCommands,
+}
+
+func getCurlUninstallCommand(tool string) string {
+	if cmd, ok := curlUninstallCommands[tool]; ok {
+		return cmd
+	}
+
+	return fmt.Sprintf("rm -f /usr/local/bin/%s", tool)
 }
 
 // buildCurlUninstallMap creates uninstall commands for Curl-based installs
@@ -56,6 +68,12 @@ func buildCurlUninstallMap() map[string]string {
 			uninstallMap[tool] = "rm -f /usr/local/bin/claude"
 		case "opencode":
 			uninstallMap[tool] = "rm -f /usr/local/bin/opencode"
+		case "codex":
+			uninstallMap[tool] = "rm -f /usr/local/bin/codex"
+		case "openclaw":
+			uninstallMap[tool] = "rm -f /usr/local/bin/openclaw ~/.local/bin/openclaw"
+		case "ollama":
+			uninstallMap[tool] = "systemctl stop ollama 2>/dev/null; systemctl disable ollama 2>/dev/null; rm -f /etc/systemd/system/ollama.service; rm -f $(which ollama 2>/dev/null); rm -rf /usr/share/ollama /usr/lib/ollama /usr/local/lib/ollama"
 		case "bun":
 			uninstallMap[tool] = "rm -rf ~/.bun"
 		case "uv":

@@ -15,7 +15,8 @@ func TestRunToolAction_SingleToolExecution(t *testing.T) {
 	t.Run("executes action on single tool", func(t *testing.T) {
 		state := models.NewState()
 		state.SetSelectedMethod("APT")
-		state.SetSelectedTools(map[string]bool{"htop": true})
+		state.Tools = []string{"git"}
+		state.SetSelectedTools(map[string]bool{"git": true})
 		state.ClearInstallResults()
 		state.SetInstallationDone(false)
 		state.SetInstallStartTime(time.Now().Unix())
@@ -33,8 +34,8 @@ func TestRunToolAction_SingleToolExecution(t *testing.T) {
 				t.Errorf("Expected 1 result for single tool, got %d", len(results))
 			}
 			if len(results) > 0 {
-				if results[0].Tool != "htop" {
-					t.Errorf("Expected tool 'htop', got '%s'", results[0].Tool)
+				if results[0].Tool != "git" {
+					t.Errorf("Expected tool 'git', got '%s'", results[0].Tool)
 				}
 			}
 			if !state.GetInstallationDone() {
@@ -53,13 +54,14 @@ func TestRunToolAction_SingleToolExecution(t *testing.T) {
 func TestRunToolAction_ConcurrentExecution(t *testing.T) {
 	t.Run("multiple tools execute concurrently without race conditions", func(t *testing.T) {
 		state := models.NewState()
-		tools := []string{"htop", "curl", "vim", "git"}
+		tools := []string{"git", "tmux", "docker", "node"}
 		selectedTools := make(map[string]bool)
 		for _, tool := range tools {
 			selectedTools[tool] = true
 		}
 
 		state.SetSelectedMethod("APT")
+		state.Tools = tools
 		state.SetSelectedTools(selectedTools)
 		state.ClearInstallResults()
 		state.SetInstallationDone(false)
@@ -90,13 +92,14 @@ func TestRunToolAction_ConcurrentExecution(t *testing.T) {
 func TestRunToolAction_AbortFlagStopsExecution(t *testing.T) {
 	t.Run("abort flag stops concurrent tool execution", func(t *testing.T) {
 		state := models.NewState()
-		tools := []string{"htop", "curl", "vim", "git"}
+		tools := []string{"git", "tmux", "docker", "node"}
 		selectedTools := make(map[string]bool)
 		for _, tool := range tools {
 			selectedTools[tool] = true
 		}
 
 		state.SetSelectedMethod("APT")
+		state.Tools = tools
 		state.SetSelectedTools(selectedTools)
 		state.ClearInstallResults()
 		state.SetInstallationDone(false)
@@ -137,13 +140,14 @@ func TestRunToolAction_AbortFlagStopsExecution(t *testing.T) {
 func TestRunToolAction_ResultsCollectedCorrectly(t *testing.T) {
 	t.Run("results are collected correctly from all tools", func(t *testing.T) {
 		state := models.NewState()
-		tools := []string{"htop", "curl"}
+		tools := []string{"git", "tmux"}
 		selectedTools := make(map[string]bool)
 		for _, tool := range tools {
 			selectedTools[tool] = true
 		}
 
 		state.SetSelectedMethod("APT")
+		state.Tools = tools
 		state.SetSelectedTools(selectedTools)
 		state.ClearInstallResults()
 		state.SetInstallationDone(false)
@@ -181,7 +185,8 @@ func TestRunToolAction_SpinnerFrameIncrements(t *testing.T) {
 	t.Run("spinner frame increments during execution", func(t *testing.T) {
 		state := models.NewState()
 		state.SetSelectedMethod("APT")
-		state.SetSelectedTools(map[string]bool{"htop": true})
+		state.Tools = []string{"git"}
+		state.SetSelectedTools(map[string]bool{"git": true})
 		state.ClearInstallResults()
 		state.SetInstallationDone(false)
 		state.SetInstallStartTime(time.Now().Unix())
@@ -225,7 +230,7 @@ func TestCheckToolWithOutput_TimeoutHandling(t *testing.T) {
 		params := ToolActionParams{
 			State:  state,
 			Method: "APT",
-			Tool:   "htop",
+			Tool:   "git",
 		}
 
 		status, errMsg, output := checkToolWithOutput(params)

@@ -37,6 +37,9 @@ func TestTools_NotEmpty(t *testing.T) {
 			// AI Assistants
 			"claude-code": true,
 			"opencode":    true,
+			"codex":       true,
+			"openclaw":    true,
+			"ollama":      true,
 			// System Monitoring
 			"btop": true,
 			// Core Utilities
@@ -53,17 +56,23 @@ func TestTools_NotEmpty(t *testing.T) {
 			"delta":    true,
 			// Data Processing
 			"jq": true,
+			"yq": true,
 			// Cloud-Native & DevOps
 			"kubectl":   true,
 			"k9s":       true,
 			"terraform": true,
 			"helm":      true,
+			"podman":    true,
 			// Network & Web
 			"httpie": true,
 			"wget":   true,
 			// Documentation
-			"tldr":    true,
-			"lazysql": true,
+			"tldr":       true,
+			"lazysql":    true,
+			"direnv":     true,
+			"mise":       true,
+			"shellcheck": true,
+			"pre-commit": true,
 		}
 		for _, tool := range Tools {
 			if !expectedTools[tool] {
